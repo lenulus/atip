@@ -1,0 +1,1476 @@
+# RFC: Agent Tool Introspection Protocol (ATIP)
+
+**RFC Number**: ATIP-0001  
+**Status**: Draft  
+**Authors**: [Community Proposal]  
+**Created**: January 2026  
+**Version**: 0.4.0
+
+---
+
+## Abstract
+
+This document specifies a lightweight protocol for AI agents to discover and understand local command-line tools. The Agent Tool Introspection Protocol (ATIP) defines a `--agent` flag convention that outputs structured JSON metadata to stdout, canonical file locations for tool registries following XDG conventions, and a minimal schema for describing tool capabilities, side effects, and safety properties.
+
+ATIP enables agents to discover tools and execute them directly via subprocess invocation—no server infrastructure required. The protocol includes:
+
+- **Partial discovery** for tools with large command surfaces (avoiding context bloat)
+- **Interactive tool handling** for commands requiring stdin or TTY
+- **Translation rules** for compiling ATIP metadata into native function calling formats (OpenAI, Gemini, Anthropic)
+
+---
+
+## Table of Contents
+
+1. [Motivation](#1-motivation)
+2. [Design Goals](#2-design-goals)
+3. [Specification](#3-specification)
+4. [File Locations](#4-file-locations)
+5. [Discovery Mechanism](#5-discovery-mechanism)
+6. [Execution Model](#6-execution-model)
+7. [Function Calling Lifecycle](#7-function-calling-lifecycle)
+8. [Provider Translation Rules](#8-provider-translation-rules)
+9. [Comparison to MCP](#9-comparison-to-mcp)
+10. [Subagent Considerations](#10-subagent-considerations)
+11. [Security Considerations](#11-security-considerations)
+12. [Governance and Extensibility](#12-governance-and-extensibility)
+13. [Adoption Path](#13-adoption-path)
+14. [Examples](#14-examples)
+15. [References](#15-references)
+
+---
+
+## 1. Motivation
+
+### 1.1 The problem: no standard for tool introspection
+
+AI coding assistants like Claude Code and Gemini CLI need to understand what tools are available and how to use them. Currently, agents rely on:
+
+- **Parsing `--help` output** — Inconsistent formatting, unreliable extraction
+- **Hardcoded knowledge** — Doesn't scale, can't handle custom tools
+- **MCP servers** — Requires running server processes for simple CLI tools
+
+None of these answer the questions agents actually need:
+- What are the side effects? (destructive? network? filesystem?)
+- What's the expected runtime/cost?
+- Is this operation idempotent? Reversible?
+- What are canonical usage patterns for this tool?
+
+### 1.2 The insight: introspection ≠ execution
+
+MCP conflates two concerns:
+1. **Introspection** — What can this tool do?
+2. **Execution** — Run the tool and get results
+
+For local CLI tools, execution is trivial—run the binary, capture stdout/stderr, check exit code. Subprocess invocation has worked for decades.
+
+What's missing is introspection. ATIP addresses this directly:
+
+```bash
+# Introspection (ATIP)
+$ gh --agent
+{ "atip": "0.1", "name": "gh", "commands": {...}, "effects": {...} }
+
+# Execution (direct invocation)
+$ gh pr list --json number,title
+[{"number": 42, "title": "Fix bug"}]
+```
+
+No servers. No JSON-RPC. No handshakes.
+
+### 1.3 Why not extend MCP?
+
+MCP is well-designed for its purpose: exposing capabilities from servers (local or remote) to AI models. Its architecture assumes:
+
+- A running server process
+- Bidirectional communication
+- Session lifecycle management
+- Potential for streaming responses
+
+For tools like Playwright (browser automation) or database explorers, this makes sense. For `gh`, `kubectl`, `terraform`, `git`, `npm`—tools that execute and exit—MCP is pure overhead.
+
+ATIP doesn't compete with MCP. It fills a different gap:
+
+| Concern | Solution |
+|---------|----------|
+| Tool discovery/metadata | ATIP (`--agent` flag) |
+| Tool execution (CLI tools) | Direct subprocess invocation |
+| Tool execution (stateful tools) | MCP (when genuinely needed) |
+
+---
+
+## 2. Design Goals
+
+### 2.1 Zero infrastructure
+
+No servers, no daemons, no sockets, no ports. Tool introspection should work on a fresh system with only the tool binary installed.
+
+### 2.2 Simplicity
+
+A tool author can add ATIP support in 30 minutes. The `--agent` flag outputs JSON to stdout. No new dependencies required.
+
+### 2.3 Incremental adoption
+
+Tools can adopt ATIP without breaking existing behavior. The `--agent` flag is purely additive. Partial implementations are valid.
+
+### 2.4 Composability
+
+ATIP metadata can be layered with organizational patterns and institutional knowledge stored in separate files.
+
+### 2.5 Direct execution
+
+ATIP assumes agents will execute tools directly via subprocess. The protocol provides metadata to make execution decisions but does not prescribe an execution mechanism.
+
+### 2.6 Universal translation
+
+ATIP metadata must compile to the native function calling formats of major AI providers without loss of critical safety information.
+
+---
+
+## 3. Specification
+
+### 3.1 The `--agent` flag convention
+
+Tools supporting ATIP MUST respond to the `--agent` flag by outputting valid JSON to stdout and exiting with code 0 on success.
+
+```bash
+$ mytool --agent
+{
+  "atip": "0.1",
+  "name": "mytool",
+  "version": "2.3.1",
+  ...
+}
+```
+
+**Behavioral requirements:**
+
+1. `--agent` MUST NOT perform any side effects
+2. Output MUST be valid JSON (UTF-8 encoded)
+3. Exit code MUST be 0 on success, non-zero on failure
+4. Output MUST go to stdout; diagnostics MAY go to stderr
+
+### 3.1.1 Partial discovery (context optimization)
+
+Tools with large command surfaces (e.g., `kubectl`, `aws`, `gcloud`) SHOULD support filtered discovery to avoid context bloat:
+
+```bash
+# Full metadata (may be very large)
+$ kubectl --agent
+
+# Filtered to specific subcommand tree
+$ kubectl --agent --commands=pods,deployments
+
+# Top-level only (commands without full subcommand expansion)
+$ kubectl --agent --depth=1
+```
+
+**Optional flags:**
+
+| Flag | Description |
+|------|-------------|
+| `--commands=a,b,c` | Return only specified command subtrees |
+| `--depth=N` | Limit subcommand nesting depth (1 = top-level only) |
+
+When partial discovery is used, the root object SHOULD include:
+
+```json
+{
+  "atip": {"version": "0.4"},
+  "partial": true,
+  "filter": {"commands": ["pods", "deployments"], "depth": null},
+  "totalCommands": 347,
+  "includedCommands": 24,
+  "omitted": {
+    "reason": "filtered",
+    "safetyAssumption": "unknown"
+  },
+  ...
+}
+```
+
+**Omitted commands semantics:**
+
+The `omitted` field clarifies what absence means for safety decisions:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `reason` | enum | Why commands were omitted |
+| `safetyAssumption` | enum | How to treat omitted commands |
+
+**Reason values:**
+
+| Value | Description |
+|-------|-------------|
+| `filtered` | User requested subset via `--commands` |
+| `depth-limited` | Truncated by `--depth` flag |
+| `size-limited` | Too large, automatically truncated |
+| `deprecated` | Omitted commands are deprecated |
+
+**Safety assumption values:**
+
+| Value | Agent behavior |
+|-------|----------------|
+| `unknown` | Treat omitted commands as potentially unsafe; require confirmation |
+| `known-safe` | Omitted commands have no destructive effects |
+| `known-unsafe` | Omitted commands include destructive operations |
+| `same-as-included` | Omitted commands have similar safety profile |
+
+**Agent handling:**
+
+```python
+def can_execute_omitted_command(metadata, command_name):
+    omitted = metadata.get("omitted", {})
+    assumption = omitted.get("safetyAssumption", "unknown")
+    
+    if assumption == "unknown":
+        # Require explicit confirmation for unknown commands
+        return RequiresConfirmation(
+            f"Command '{command_name}' not in loaded metadata. "
+            "Safety properties unknown."
+        )
+    elif assumption == "known-unsafe":
+        return RequiresConfirmation(
+            f"Command '{command_name}' may be destructive."
+        )
+    elif assumption == "known-safe":
+        return Allowed()  # But still validate at execution
+```
+
+**Agent strategy:**
+
+1. First call: `tool --agent --depth=1` to get overview
+2. Based on task, call: `tool --agent --commands=relevant_subset`
+3. Cache full metadata only for frequently-used tools
+
+### 3.2 Root schema
+
+```json
+{
+  "atip": {
+    "version": "0.4",
+    "features": ["partial-discovery", "interactive-effects"],
+    "minAgentVersion": "0.3"
+  },
+  "name": "gh",
+  "version": "2.45.0",
+  "description": "Work seamlessly with GitHub from the command line",
+  "homepage": "https://cli.github.com",
+  "trust": {
+    "source": "native",
+    "verified": false
+  },
+  "commands": { ... },
+  "globalOptions": [ ... ],
+  "authentication": { ... },
+  "effects": { ... },
+  "patterns": [ ... ]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `atip` | object | YES | Protocol version and features (see §3.2.1) |
+| `name` | string | YES | Command name (matches executable) |
+| `version` | string | YES | Tool version |
+| `description` | string | YES | One-line description (≤200 chars recommended) |
+| `homepage` | string | NO | URL for documentation |
+| `trust` | object | NO | Provenance and verification (see §3.2.2) |
+| `commands` | object | NO | Subcommand definitions |
+| `globalOptions` | array | NO | Options available to all commands |
+| `authentication` | object | NO | Authentication requirements |
+| `effects` | object | NO | Global side-effect declarations |
+| `patterns` | array | NO | Common usage patterns |
+
+### 3.2.1 Protocol versioning
+
+The `atip` field supports version negotiation and feature detection:
+
+```json
+{
+  "atip": {
+    "version": "0.4",
+    "features": ["partial-discovery", "interactive-effects", "trust-v1"],
+    "minAgentVersion": "0.3"
+  }
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `version` | string | YES | Protocol version (semver major.minor) |
+| `features` | array | NO | Optional features this metadata uses |
+| `minAgentVersion` | string | NO | Minimum agent version required |
+
+**Backwards compatibility:**
+
+For backwards compatibility with v0.1-0.3, agents MUST accept both:
+```json
+"atip": "0.3"                      // Legacy format
+"atip": {"version": "0.4", ...}    // New format
+```
+
+**Feature registry:**
+
+| Feature ID | Since | Description |
+|------------|-------|-------------|
+| `partial-discovery` | 0.3 | Supports `--commands` and `--depth` flags |
+| `interactive-effects` | 0.3 | Includes `effects.interactive` field |
+| `trust-v1` | 0.4 | Includes `trust` provenance field |
+| `patterns-v1` | 0.4 | Includes executable patterns schema |
+
+### 3.2.2 Trust and provenance
+
+The `trust` field declares metadata provenance to inform agent trust decisions:
+
+```json
+{
+  "trust": {
+    "source": "native",
+    "verified": false,
+    "checksum": "sha256:abc123...",
+    "signedBy": "github.com",
+    "attestation": "https://example.com/.well-known/atip-attestation.json"
+  }
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `source` | enum | Origin of metadata (see below) |
+| `verified` | boolean | Whether metadata has been verified against tool behavior |
+| `checksum` | string | Hash of tool binary (format: `algo:hex`) |
+| `signedBy` | string | Entity that signed this metadata |
+| `attestation` | string | URL to verification attestation |
+
+**Source values:**
+
+| Source | Description | Default trust |
+|--------|-------------|---------------|
+| `native` | Tool implements `--agent` directly | HIGH |
+| `vendor` | Official shim from tool vendor | HIGH |
+| `org` | Organization-maintained shim | MEDIUM |
+| `community` | Community-contributed shim | LOW |
+| `user` | User-created local shim | LOW |
+| `inferred` | Auto-generated from `--help` parsing | VERY LOW |
+
+**Agent trust policy example:**
+
+```python
+def get_trust_level(metadata):
+    trust = metadata.get("trust", {"source": "unknown"})
+    source = trust.get("source", "unknown")
+    verified = trust.get("verified", False)
+    
+    if source == "native" and verified:
+        return TrustLevel.FULL
+    elif source in ("native", "vendor"):
+        return TrustLevel.HIGH
+    elif source == "org" and verified:
+        return TrustLevel.MEDIUM
+    else:
+        return TrustLevel.LOW
+
+def should_require_confirmation(command, trust_level):
+    effects = command.get("effects", {})
+    if effects.get("destructive"):
+        return True  # Always confirm destructive
+    if trust_level < TrustLevel.MEDIUM and effects.get("network"):
+        return True  # Confirm network for untrusted
+    return False
+```
+
+### 3.3 Command schema
+
+```json
+{
+  "commands": {
+    "pr": {
+      "description": "Manage pull requests",
+      "commands": {
+        "create": {
+          "description": "Create a pull request",
+          "arguments": [...],
+          "options": [...],
+          "effects": {
+            "network": true,
+            "idempotent": false,
+            "reversible": true,
+            "destructive": false,
+            "creates": ["pull_request"]
+          },
+          "examples": [
+            "gh pr create --title \"Fix bug\" --body \"Description\""
+          ]
+        }
+      }
+    }
+  }
+}
+```
+
+### 3.4 Argument schema
+
+```json
+{
+  "arguments": [
+    {
+      "name": "file",
+      "type": "file",
+      "required": true,
+      "description": "File to process",
+      "variadic": false
+    }
+  ]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | YES | Argument name |
+| `type` | string | YES | See Type System (§3.7) |
+| `description` | string | YES | What this argument represents |
+| `required` | boolean | NO | Default: true |
+| `default` | any | NO | Default value |
+| `variadic` | boolean | NO | Accepts multiple values |
+| `enum` | array | NO | Allowed values |
+
+### 3.5 Option schema
+
+```json
+{
+  "options": [
+    {
+      "name": "output",
+      "flags": ["-o", "--output"],
+      "type": "enum",
+      "enum": ["json", "yaml", "text"],
+      "default": "text",
+      "description": "Output format",
+      "envVar": "GH_OUTPUT_FORMAT"
+    }
+  ]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | YES | Option name |
+| `flags` | array | YES | CLI flags ["-x", "--extended"] |
+| `type` | string | YES | See Type System (§3.7) |
+| `description` | string | YES | What this option controls |
+| `required` | boolean | NO | Default: false |
+| `default` | any | NO | Default value |
+| `enum` | array | NO | Allowed values |
+| `envVar` | string | NO | Environment variable override |
+
+### 3.6 Effects schema
+
+The effects object enables agents to make informed safety decisions:
+
+```json
+{
+  "effects": {
+    "filesystem": {
+      "read": true,
+      "write": true,
+      "delete": false,
+      "paths": ["./", "~/.config/mytool/"]
+    },
+    "network": true,
+    "subprocess": false,
+    "idempotent": true,
+    "reversible": false,
+    "destructive": false,
+    "creates": ["resource_type"],
+    "modifies": ["resource_type"],
+    "deletes": ["resource_type"],
+    "interactive": {
+      "stdin": "none",
+      "prompts": false,
+      "tty": false
+    },
+    "cost": {
+      "estimate": "low",
+      "billable": false
+    },
+    "duration": {
+      "typical": "1-5s",
+      "timeout": "60s"
+    }
+  }
+}
+```
+
+| Field | Type | Description | Translation Priority |
+|-------|------|-------------|---------------------|
+| `idempotent` | boolean | Safe to retry | HIGH - embed in description |
+| `reversible` | boolean | Can be undone | HIGH - embed in description |
+| `destructive` | boolean | Permanently destroys data | CRITICAL - embed in description |
+| `network` | boolean | Makes network requests | MEDIUM - embed if space |
+| `filesystem.write` | boolean | Writes files | MEDIUM |
+| `filesystem.delete` | boolean | Deletes files | HIGH |
+| `cost.billable` | boolean | May incur cost | HIGH - embed in description |
+| `interactive.stdin` | enum | Stdin requirements (see below) | HIGH - affects execution |
+| `interactive.prompts` | boolean | May prompt for confirmation | HIGH - affects execution |
+| `interactive.tty` | boolean | Requires TTY/PTY | HIGH - affects execution |
+
+**Interactive stdin values:**
+
+| Value | Description | Agent behavior |
+|-------|-------------|----------------|
+| `"none"` | No stdin expected | Normal subprocess |
+| `"optional"` | Accepts stdin but works without | Normal subprocess |
+| `"required"` | Blocks waiting for stdin | Use PTY, pipe input, or skip |
+| `"password"` | Prompts for sensitive input | Use credential helper or skip |
+
+**Agent handling of interactive tools:**
+
+```python
+def execute_tool(command, effects):
+    interactive = effects.get("interactive", {})
+    
+    if interactive.get("stdin") == "required":
+        # Option 1: Skip with explanation
+        return Error("Tool requires interactive input")
+        
+        # Option 2: Auto-confirm if available
+        command = add_flag(command, "--yes")  # or -y, --force, etc.
+        
+        # Option 3: Use PTY for real interaction
+        return run_in_pty(command)
+    
+    if interactive.get("tty"):
+        return run_in_pty(command)
+    
+    return subprocess.run(command, capture_output=True)
+```
+
+**Translation Priority** indicates which fields MUST be preserved when compiling to provider formats (see §8).
+
+### 3.7 Type system
+
+| Type | Description | JSON Schema |
+|------|-------------|-------------|
+| `string` | Text value | `{"type": "string"}` |
+| `integer` | Whole number | `{"type": "integer"}` |
+| `number` | Floating point | `{"type": "number"}` |
+| `boolean` | True/false flag | `{"type": "boolean"}` |
+| `file` | File path | `{"type": "string", "format": "file-path"}` |
+| `directory` | Directory path | `{"type": "string", "format": "directory-path"}` |
+| `url` | URL | `{"type": "string", "format": "uri"}` |
+| `enum` | One of allowed values | `{"type": "string", "enum": [...]}` |
+| `array` | List of values | `{"type": "array", "items": {...}}` |
+
+### 3.8 Authentication schema
+
+```json
+{
+  "authentication": {
+    "required": true,
+    "methods": [
+      {
+        "type": "token",
+        "envVar": "GITHUB_TOKEN",
+        "description": "Personal access token"
+      },
+      {
+        "type": "oauth",
+        "setupCommand": "gh auth login"
+      }
+    ],
+    "checkCommand": "gh auth status"
+  }
+}
+```
+
+### 3.9 Patterns schema
+
+```json
+{
+  "patterns": [
+    {
+      "name": "feature-branch-workflow",
+      "description": "Create feature branch, make changes, open PR",
+      "steps": [
+        {"command": "git checkout -b {branch}", "description": "Create branch"},
+        {"command": "gh pr create --fill", "description": "Open PR"}
+      ],
+      "variables": {
+        "branch": {"type": "string", "description": "Branch name"}
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 4. File Locations
+
+Following the XDG Base Directory Specification:
+
+```
+$XDG_DATA_HOME/agent-tools/          # ~/.local/share/agent-tools/
+├── registry.json                    # Index of discovered tools
+├── tools/                           # Cached tool metadata
+│   ├── gh.json
+│   └── kubectl.json
+├── patterns/                        # Workflow patterns
+│   └── org-deploy.json
+└── shims/                           # Metadata for legacy tools
+    └── curl.json
+
+$XDG_CONFIG_HOME/agent-tools/        # ~/.config/agent-tools/
+├── config.json                      # User preferences
+└── overrides/                       # User customizations
+    └── gh.json
+
+/usr/share/agent-tools/              # System-wide definitions
+/usr/local/share/agent-tools/        # Local system tools
+```
+
+---
+
+## 5. Discovery Mechanism
+
+### 5.1 Discovery algorithm
+
+1. **Registry check**: Load known tools from `registry.json`
+2. **Canonical directories**: Scan XDG locations
+3. **PATH scanning**: Probe executables with `--agent` (cached)
+4. **Shim fallback**: Load shim files for legacy tools
+
+### 5.2 PATH scanning
+
+```bash
+for executable in $PATH/*:
+    if not in skip_list:
+        result = run(executable --agent, timeout=2s)
+        if result.exit_code == 0 and is_valid_atip(result.stdout):
+            add_to_registry(executable, source="native")
+```
+
+---
+
+## 6. Execution Model
+
+### 6.1 Direct invocation (default)
+
+ATIP provides metadata. Agents execute tools directly:
+
+```python
+# Discovery
+metadata = get_atip_metadata("gh")
+
+# Decision making
+if metadata["commands"]["pr"]["merge"]["effects"]["destructive"]:
+    confirm_with_user()
+
+# Execution (direct subprocess)
+result = subprocess.run(["gh", "pr", "merge", "42"], capture_output=True)
+```
+
+No intermediate layer. The tool's native interface is the execution interface.
+
+### 6.2 When MCP is appropriate
+
+MCP adds value for a small subset of tools:
+
+| Tool type | Why MCP helps |
+|-----------|---------------|
+| Browser automation | Persistent session, page state |
+| Database clients | Connection pooling, transactions |
+| Remote APIs | No local binary, auth handling |
+| Streaming tools | Real-time output |
+
+For these cases, tools may support both ATIP (discovery) and MCP (execution).
+
+### 6.3 Hybrid architecture
+
+```
+Agent discovers tools:
+  → All tools: check --agent flag or shims (ATIP)
+
+Agent executes tools:
+  → CLI tools (95%): direct subprocess invocation
+  → Stateful tools (5%): MCP if available
+```
+
+---
+
+## 7. Function Calling Lifecycle
+
+When an agent uses ATIP metadata with an LLM, it must translate the metadata into the LLM's native function calling format and manage the execution lifecycle.
+
+### 7.1 Universal lifecycle
+
+All major providers follow a similar pattern:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  1. REGISTRATION                                                │
+│     Agent loads ATIP metadata → Compiles to provider format     │
+│     → Sends tool definitions with request                       │
+├─────────────────────────────────────────────────────────────────┤
+│  2. SELECTION                                                   │
+│     LLM analyzes user request → Decides to call tool            │
+│     → Returns structured tool call with arguments               │
+├─────────────────────────────────────────────────────────────────┤
+│  3. VALIDATION (Agent responsibility)                           │
+│     Agent receives tool call → Checks effects metadata          │
+│     → Applies safety policies → Requests confirmation if needed │
+├─────────────────────────────────────────────────────────────────┤
+│  4. EXECUTION                                                   │
+│     Agent invokes tool directly (subprocess)                    │
+│     → Captures stdout/stderr/exit code                          │
+├─────────────────────────────────────────────────────────────────┤
+│  5. RESULT                                                      │
+│     Agent formats result → Returns to LLM                       │
+│     → LLM synthesizes response (may chain more calls)           │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 7.2 Provider-specific message formats
+
+#### OpenAI
+
+```python
+# Registration
+tools = [compile_to_openai(atip_tool) for atip_tool in tools]
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=messages,
+    tools=tools,
+    tool_choice="auto"
+)
+
+# Tool call extraction
+tool_calls = response.choices[0].message.tool_calls
+for call in tool_calls:
+    # call.id, call.function.name, call.function.arguments
+    
+# Result return (role="tool")
+messages.append({
+    "role": "tool",
+    "tool_call_id": call.id,
+    "content": result_string
+})
+```
+
+#### Gemini
+
+```python
+# Registration
+tools = [{"function_declarations": [compile_to_gemini(t) for t in tools]}]
+response = model.generate_content(
+    contents=contents,
+    tools=tools,
+    tool_config={"function_calling_config": {"mode": "AUTO"}}
+)
+
+# Tool call extraction
+for part in response.candidates[0].content.parts:
+    if part.function_call:
+        # part.function_call.name, part.function_call.args
+
+# Result return (in user message)
+contents.append({
+    "role": "user",
+    "parts": [{"function_response": {"name": name, "response": result}}]
+})
+```
+
+#### Anthropic
+
+```python
+# Registration
+tools = [compile_to_anthropic(atip_tool) for atip_tool in tools]
+response = client.messages.create(
+    model="claude-sonnet-4-20250514",
+    messages=messages,
+    tools=tools,
+    tool_choice={"type": "auto"}
+)
+
+# Tool call extraction (content blocks)
+for block in response.content:
+    if block.type == "tool_use":
+        # block.id, block.name, block.input
+
+# Result return (in user message)
+messages.append({
+    "role": "user",
+    "content": [{
+        "type": "tool_result",
+        "tool_use_id": block.id,
+        "content": result_string
+    }]
+})
+```
+
+### 7.3 Parallel tool calling
+
+All three providers support multiple tool calls in a single response:
+
+| Provider | Mechanism | Correlation |
+|----------|-----------|-------------|
+| OpenAI | Multiple `tool_calls` array entries | `tool_call_id` |
+| Gemini | Multiple `function_call` parts | Positional order |
+| Anthropic | Multiple `tool_use` blocks | `tool_use_id` |
+
+Agents SHOULD execute parallel calls concurrently when effects metadata indicates no conflicts.
+
+---
+
+## 8. Provider Translation Rules
+
+### 8.1 Schema compilation
+
+ATIP metadata must compile to each provider's native format:
+
+#### OpenAI format
+
+```json
+{
+  "type": "function",
+  "function": {
+    "name": "gh_pr_create",
+    "description": "Create a pull request. [⚠️ NOT IDEMPOTENT | CREATES: pull_request]",
+    "strict": true,
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "title": {"type": ["string", "null"], "description": "PR title"},
+        "draft": {"type": "boolean", "description": "Mark as draft"}
+      },
+      "required": ["title", "draft"],
+      "additionalProperties": false
+    }
+  }
+}
+```
+
+#### Gemini format
+
+```json
+{
+  "name": "gh_pr_create",
+  "description": "Create a pull request. [⚠️ NOT IDEMPOTENT | CREATES: pull_request]",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "title": {"type": "string", "description": "PR title"},
+      "draft": {"type": "boolean", "description": "Mark as draft"}
+    },
+    "required": ["title"]
+  }
+}
+```
+
+#### Anthropic format
+
+```json
+{
+  "name": "gh_pr_create",
+  "description": "Create a pull request. [⚠️ NOT IDEMPOTENT | CREATES: pull_request]",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "title": {"type": "string", "description": "PR title"},
+      "draft": {"type": "boolean", "description": "Mark as draft"}
+    },
+    "required": ["title"]
+  }
+}
+```
+
+### 8.2 Critical translation rules
+
+#### Rule 1: Safety metadata tunneling
+
+No provider natively supports effects metadata. Safety information MUST be embedded in descriptions:
+
+```
+Format: "{description} [{SAFETY_FLAGS}]"
+
+SAFETY_FLAGS (space-separated):
+  ⚠️ DESTRUCTIVE     - destructive: true
+  ⚠️ NOT REVERSIBLE  - reversible: false  
+  ⚠️ NOT IDEMPOTENT  - idempotent: false
+  💰 BILLABLE        - cost.billable: true
+  🔒 READ-ONLY       - filesystem.write: false, network: false
+  
+Example:
+  "Delete a repository permanently. [⚠️ DESTRUCTIVE | ⚠️ NOT REVERSIBLE]"
+```
+
+**Description length limits:**
+- OpenAI: 1024 characters (enforced)
+- Gemini: No explicit limit
+- Anthropic: No explicit limit
+
+Safety flags MUST fit within OpenAI's limit.
+
+#### Rule 2: Optional parameters in strict mode
+
+OpenAI strict mode requires all properties in `required` array. Transform optional parameters to nullable:
+
+```python
+def transform_optional_to_nullable(param):
+    if not param.get("required", True):
+        return {
+            **param,
+            "type": [param["type"], "null"]
+        }
+    return param
+```
+
+#### Rule 3: Subcommand flattening
+
+CLI tools with nested subcommands must be flattened. Two strategies:
+
+**Strategy A: Discrete tools (recommended)**
+```
+gh pr create  →  gh_pr_create
+gh pr list    →  gh_pr_list
+gh pr merge   →  gh_pr_merge
+```
+
+**Strategy B: Action discriminator**
+```json
+{
+  "name": "gh_pr",
+  "parameters": {
+    "action": {"type": "string", "enum": ["create", "list", "merge"]},
+    "title": {"type": ["string", "null"]},
+    "number": {"type": ["integer", "null"]}
+  }
+}
+```
+
+Strategy A preferred when subcommands have distinct parameter schemas.
+
+#### Rule 4: Type coercion
+
+| ATIP Type | OpenAI | Gemini | Anthropic |
+|-----------|--------|--------|-----------|
+| `file` | `string` | `string` | `string` |
+| `directory` | `string` | `string` | `string` |
+| `url` | `string` | `string` | `string` |
+| `enum` | `string` + `enum` | `string` + `enum` | `string` + `enum` |
+
+The `format` field is not reliably supported; use description to clarify expected format.
+
+### 8.3 Translation matrix
+
+| ATIP Field | OpenAI | Gemini | Anthropic | Preservation |
+|------------|--------|--------|-----------|--------------|
+| `name` | `function.name` | `name` | `name` | Full |
+| `description` | `function.description` | `description` | `description` | Full |
+| `arguments` | `parameters.properties` | `parameters.properties` | `input_schema.properties` | Full |
+| `options` | `parameters.properties` | `parameters.properties` | `input_schema.properties` | Full |
+| `effects.destructive` | Description suffix | Description suffix | Description suffix | Partial (lossy) |
+| `effects.idempotent` | Description suffix | Description suffix | Description suffix | Partial (lossy) |
+| `effects.reversible` | Description suffix | Description suffix | Description suffix | Partial (lossy) |
+| `effects.interactive` | Not translated | Not translated | Not translated | Agent-only |
+| `patterns` | System prompt | System prompt | System prompt | External |
+| `authentication` | Out-of-band | Out-of-band | Out-of-band | External |
+| `examples` | Description or system prompt | Description | Description | Partial |
+
+**Agent-only fields** (`interactive`, `duration`, `authentication`) are not sent to the LLM. They inform agent-side execution decisions.
+
+### 8.4 Reference implementation
+
+```python
+def compile_to_provider(atip_tool: dict, provider: str, strict: bool = False) -> dict:
+    """Compile ATIP metadata to provider-specific format."""
+    
+    # Flatten subcommands to discrete tools
+    tools = flatten_subcommands(atip_tool)
+    
+    compiled = []
+    for tool in tools:
+        # Build safety suffix
+        safety = build_safety_suffix(tool.get("effects", {}))
+        description = f"{tool['description']} {safety}".strip()
+        
+        # Truncate for OpenAI
+        if provider == "openai" and len(description) > 1024:
+            description = description[:1021] + "..."
+        
+        # Transform parameters
+        params = transform_parameters(
+            tool.get("arguments", []) + tool.get("options", []),
+            provider=provider,
+            strict=strict
+        )
+        
+        if provider == "openai":
+            compiled.append({
+                "type": "function",
+                "function": {
+                    "name": tool["name"],
+                    "description": description,
+                    "strict": strict,
+                    "parameters": params
+                }
+            })
+        elif provider == "gemini":
+            compiled.append({
+                "name": tool["name"],
+                "description": description,
+                "parameters": params
+            })
+        elif provider == "anthropic":
+            compiled.append({
+                "name": tool["name"],
+                "description": description,
+                "input_schema": params
+            })
+    
+    return compiled
+
+def build_safety_suffix(effects: dict) -> str:
+    """Build safety flag suffix for description."""
+    flags = []
+    if effects.get("destructive"):
+        flags.append("⚠️ DESTRUCTIVE")
+    if effects.get("reversible") == False:
+        flags.append("⚠️ NOT REVERSIBLE")
+    if effects.get("idempotent") == False:
+        flags.append("⚠️ NOT IDEMPOTENT")
+    if effects.get("cost", {}).get("billable"):
+        flags.append("💰 BILLABLE")
+    
+    return f"[{' | '.join(flags)}]" if flags else ""
+```
+
+---
+
+## 9. Comparison to MCP
+
+### 9.1 Different problems, different solutions
+
+| Aspect | ATIP | MCP |
+|--------|------|-----|
+| **Purpose** | Tool introspection | Stateful tool execution |
+| **Infrastructure** | None | Server process |
+| **Typical tools** | gh, kubectl, terraform | Playwright, databases |
+| **When needed** | Always (for discovery) | Rarely |
+
+### 9.2 Why not MCP for everything?
+
+For `gh pr list`:
+
+| Step | MCP approach | ATIP + direct |
+|------|--------------|---------------|
+| 1 | Start server | — |
+| 2 | Connect client | — |
+| 3 | Negotiate capabilities | Read cached metadata |
+| 4 | JSON-RPC call | Run subprocess |
+| 5 | Parse response | Parse stdout |
+| 6 | Manage session | — |
+
+### 9.3 Complementary use
+
+For stateful tools, both protocols work together:
+- ATIP provides discovery
+- MCP provides execution
+
+---
+
+## 10. Subagent Considerations
+
+### 10.1 Shared tool knowledge
+
+Multiple agents read from the same registry:
+
+```
+$XDG_DATA_HOME/agent-tools/registry.json
+```
+
+Lock-free reads. Atomic writes via temp-file-rename.
+
+### 10.2 Capability delegation
+
+Lead agents can restrict subagent tool access:
+
+```json
+{
+  "delegation": {
+    "allowedTools": ["gh", "git"],
+    "deniedCommands": ["gh repo delete"],
+    "effectRestrictions": {
+      "destructive": false
+    }
+  }
+}
+```
+
+### 10.3 Context sharing
+
+Agents may share tool state:
+
+```json
+{
+  "toolContext": {
+    "availableTools": ["gh", "kubectl"],
+    "authenticatedTools": ["gh"],
+    "recentCommands": [
+      {"tool": "gh", "command": "pr list", "exitCode": 0}
+    ]
+  }
+}
+```
+
+---
+
+## 11. Security Considerations
+
+### 11.1 Trust boundaries
+
+ATIP metadata is **descriptive, not prescriptive**. A malicious tool could lie about effects. Agents SHOULD:
+
+- Confirm destructive operations regardless of metadata
+- Use sandboxing for untrusted tools
+- Verify tool binaries via checksums/signatures
+
+### 11.2 Pre-execution validation
+
+Agents MUST validate tool calls before execution:
+
+```python
+def validate_tool_call(tool_call, atip_metadata, policy):
+    effects = atip_metadata["effects"]
+    
+    # Block destructive operations without confirmation
+    if effects.get("destructive") and not policy.allow_destructive:
+        raise RequiresConfirmation("Destructive operation")
+    
+    # Block billable operations without budget
+    if effects.get("cost", {}).get("billable") and not policy.has_budget:
+        raise BudgetExceeded("Operation may incur costs")
+    
+    # Sanitize arguments
+    sanitize_paths(tool_call.arguments)
+    check_injection(tool_call.arguments)
+```
+
+### 11.3 Post-execution filtering
+
+Filter sensitive data from results before returning to LLM:
+
+```python
+def filter_result(result, tool_metadata):
+    # Remove secrets, tokens, keys
+    result = redact_patterns(result, SENSITIVE_PATTERNS)
+    
+    # Truncate large outputs
+    if len(result) > MAX_RESULT_SIZE:
+        result = result[:MAX_RESULT_SIZE] + "\n[truncated]"
+    
+    return result
+```
+
+---
+
+## 12. Governance and Extensibility
+
+### 12.1 Schema ownership
+
+The ATIP schema is maintained as an open standard. The canonical schema is hosted at:
+
+```
+https://atip.dev/schema/{version}.json
+```
+
+**Governance structure:**
+
+| Role | Responsibility |
+|------|----------------|
+| Maintainers | Schema changes, version releases |
+| Contributors | Proposals, implementations, shims |
+| Adopters | Feedback, compatibility reports |
+
+### 12.2 Extension mechanism
+
+Vendors and organizations MAY add custom fields using the `x-` prefix:
+
+```json
+{
+  "atip": {"version": "0.4"},
+  "name": "internal-tool",
+  "x-acme-corp": {
+    "owner": "platform-team",
+    "costCenter": "eng-123",
+    "approvalRequired": true
+  },
+  "commands": {...}
+}
+```
+
+**Extension rules:**
+
+1. Custom fields MUST use `x-{vendor}` prefix
+2. Agents MUST ignore unrecognized `x-` fields
+3. Extensions MUST NOT override standard fields
+4. Extensions SHOULD be documented in tool's own docs
+
+**Reserved prefixes:**
+
+| Prefix | Reserved for |
+|--------|--------------|
+| `x-` | Vendor extensions |
+| `_` | Internal/debugging use |
+| `$` | Schema references |
+
+### 12.3 Proposing changes
+
+Changes to the ATIP specification follow this process:
+
+1. **Discussion**: Open issue describing the gap or improvement
+2. **Proposal**: Submit RFC-style proposal with rationale
+3. **Review**: Community and maintainer feedback
+4. **Implementation**: Reference implementation required
+5. **Release**: Included in next minor/major version
+
+**Versioning policy:**
+
+| Change type | Version bump | Compatibility |
+|-------------|--------------|---------------|
+| New optional field | Minor (0.x) | Backwards compatible |
+| New required field | Major (x.0) | Breaking |
+| Field deprecation | Minor (0.x) | With warning |
+| Field removal | Major (x.0) | Breaking |
+
+### 12.4 Shim registry
+
+A community-maintained registry of shims for popular tools:
+
+```
+https://atip.dev/shims/
+├── curl.json
+├── rsync.json
+├── ffmpeg.json
+└── ...
+```
+
+**Shim contribution requirements:**
+
+1. Must specify `trust.source: "community"`
+2. Must include `trust.verified: false` unless tested
+3. Must follow standard schema
+4. Should include common usage patterns
+
+---
+
+## 13. Adoption Path
+
+### 12.1 For tool authors
+
+Minimal implementation:
+
+```python
+import json, sys
+
+ATIP_METADATA = {
+    "atip": "0.1",
+    "name": "mytool",
+    "version": "1.0.0",
+    "description": "Does something useful",
+    "commands": {
+        "run": {
+            "description": "Execute main function",
+            "options": [
+                {"name": "verbose", "flags": ["-v"], "type": "boolean", 
+                 "description": "Verbose output"}
+            ],
+            "effects": {"idempotent": True, "network": False}
+        }
+    }
+}
+
+if "--agent" in sys.argv:
+    print(json.dumps(ATIP_METADATA, indent=2))
+    sys.exit(0)
+```
+
+### 12.2 For legacy tools
+
+Create shim files:
+
+```json
+// ~/.local/share/agent-tools/shims/curl.json
+{
+  "atip": "0.1",
+  "name": "curl",
+  "version": "8.4.0",
+  "description": "Transfer data from or to a server",
+  "commands": {
+    "": {
+      "description": "Make HTTP request",
+      "options": [
+        {"name": "request", "flags": ["-X"], "type": "enum",
+         "enum": ["GET", "POST", "PUT", "DELETE"]}
+      ],
+      "effects": {"network": true, "idempotent": false}
+    }
+  }
+}
+```
+
+### 12.3 For AI platforms
+
+1. Scan for ATIP tools on startup
+2. Compile metadata to provider format
+3. Execute tools directly via subprocess
+4. Apply safety policies from effects metadata
+5. Fall back to MCP only for stateful tools
+
+---
+
+## 14. Examples
+
+### 14.1 GitHub CLI (gh)
+
+```json
+{
+  "atip": {"version": "0.4", "features": ["trust-v1"]},
+  "name": "gh",
+  "version": "2.45.0",
+  "description": "GitHub CLI",
+  "trust": {"source": "native", "verified": true},
+  "authentication": {
+    "required": true,
+    "methods": [{"type": "oauth", "setupCommand": "gh auth login"}],
+    "checkCommand": "gh auth status"
+  },
+  "commands": {
+    "pr": {
+      "description": "Manage pull requests",
+      "commands": {
+        "list": {
+          "description": "List pull requests",
+          "options": [
+            {"name": "state", "flags": ["-s", "--state"], "type": "enum",
+             "enum": ["open", "closed", "merged", "all"], "default": "open"}
+          ],
+          "effects": {"network": true, "idempotent": true}
+        },
+        "create": {
+          "description": "Create a pull request",
+          "options": [
+            {"name": "title", "flags": ["-t", "--title"], "type": "string"},
+            {"name": "draft", "flags": ["-d", "--draft"], "type": "boolean"}
+          ],
+          "effects": {"network": true, "idempotent": false, "creates": ["pull_request"]}
+        },
+        "merge": {
+          "description": "Merge a pull request",
+          "arguments": [{"name": "number", "type": "integer", "required": false}],
+          "effects": {"network": true, "idempotent": false, "reversible": false}
+        }
+      }
+    },
+    "repo": {
+      "description": "Manage repositories",
+      "commands": {
+        "delete": {
+          "description": "Delete a repository",
+          "arguments": [{"name": "repo", "type": "string", "required": true}],
+          "effects": {"network": true, "destructive": true, "reversible": false}
+        }
+      }
+    }
+  }
+}
+```
+
+### 14.2 Compiled to OpenAI (strict mode)
+
+```json
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "gh_pr_list",
+      "description": "List pull requests",
+      "strict": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": ["open", "closed", "merged", "all"],
+            "description": "Filter by state"
+          }
+        },
+        "required": ["state"],
+        "additionalProperties": false
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "gh_repo_delete",
+      "description": "Delete a repository. [⚠️ DESTRUCTIVE | ⚠️ NOT REVERSIBLE]",
+      "strict": true,
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "repo": {"type": "string", "description": "Repository to delete"}
+        },
+        "required": ["repo"],
+        "additionalProperties": false
+      }
+    }
+  }
+]
+```
+
+---
+
+## 15. References
+
+1. XDG Base Directory Specification — https://specifications.freedesktop.org/basedir-spec/
+2. JSON Schema — https://json-schema.org
+3. Model Context Protocol — https://modelcontextprotocol.io
+4. OpenAI Function Calling — https://platform.openai.com/docs/guides/function-calling
+5. Gemini Function Calling — https://ai.google.dev/docs/function_calling
+6. Anthropic Tool Use — https://docs.anthropic.com/claude/docs/tool-use
+7. Command Line Interface Guidelines — https://clig.dev
+
+---
+
+## Appendix A: atip-bridge Library Interface
+
+```typescript
+// Core transformers
+export function toOpenAI(tool: AtipTool, options?: {strict?: boolean}): OpenAITool;
+export function toGemini(tool: AtipTool): GeminiFunctionDeclaration;
+export function toAnthropic(tool: AtipTool): AnthropicTool;
+
+// Batch operations
+export function compileTools(tools: AtipTool[], provider: Provider): ProviderTools;
+
+// Safety utilities
+export function generateSafetyPrompt(tools: AtipTool[]): string;
+export function createValidator(tools: AtipTool[], policy: Policy): Validator;
+export function createResultFilter(tools: AtipTool[]): ResultFilter;
+
+// Lifecycle helpers
+export function handleToolResult(provider: Provider, id: string, result: any): Message;
+export function parseToolCall(provider: Provider, response: any): ToolCall[];
+```
+
+---
+
+## Appendix B: Full JSON Schema
+
+Available at: `https://atip.dev/schema/0.2.json`
+
+---
+
+*This RFC is released for public comment.*
