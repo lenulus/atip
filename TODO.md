@@ -66,18 +66,18 @@
 10. ✅ examples/gh.json - Full-featured reference (generated via atip-gen)
 11. ✅ reference/atip-gen/ - --help to --agent metadata generator
 
-### Phase 3.6: Shims & Partial Discovery (Next)
-12. examples/kubectl-partial.json - Partial discovery example
-13. shims/README.md - Shim contribution guide
-14. shims/curl.json, jq.json, etc. - Example shims
+### Phase 4: Reference Implementation (Next)
+12. reference/atip-bridge/ - TypeScript/Python compiler library
+13. reference/atip-discover/ - CLI tool for discovery
 
-### Phase 4: Full Reference Implementation (Future)
-15. reference/atip-bridge/ - TypeScript/Python compiler library
-16. reference/atip-discover/ - CLI tool for discovery
+### Phase 5: Shims & Partial Discovery (Future)
+14. examples/kubectl-partial.json - Partial discovery example
+15. shims/README.md - Shim contribution guide
+16. shims/curl.json, jq.json, etc. - Example shims
 
-### Phase 5: Extended (Future)
+### Phase 6: Extended (Future)
 17. More shim examples (rsync, ffmpeg, etc.)
-18. Historical spec versions (0.1.0, 0.2.0, 0.3.0)
+18. ✅ Historical spec versions (0.1.0, 0.2.0, 0.3.0)
 19. schema/atip.schema.json - Symlink to latest
 
 ## Notes
