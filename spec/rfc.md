@@ -586,6 +586,8 @@ def execute_tool(command, effects):
 
 ### 3.9 Patterns schema
 
+Patterns encode institutional knowledge about how tools are commonly used:
+
 ```json
 {
   "patterns": [
@@ -598,11 +600,33 @@ def execute_tool(command, effects):
       ],
       "variables": {
         "branch": {"type": "string", "description": "Branch name"}
-      }
+      },
+      "executable": false
     }
   ]
 }
 ```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | YES | Pattern identifier |
+| `description` | string | YES | What this pattern accomplishes |
+| `steps` | array | YES | Ordered list of commands |
+| `variables` | object | NO | Template variables |
+| `tags` | array | NO | Categorization tags |
+| `executable` | boolean | NO | Whether agent may auto-execute (default: `false`) |
+
+**Executability semantics:**
+
+| Value | Agent behavior |
+|-------|----------------|
+| `false` (default) | Advisory only; show to user, do not auto-execute |
+| `true` | Agent MAY execute after variable substitution and safety checks |
+
+When `executable: false`, patterns are suggestions for the user or LLM context. When `executable: true`, agents may run the pattern directly, but MUST still:
+- Validate all variables are user-supplied or safe
+- Apply normal effects-based safety checks to each step
+- Respect trust levels
 
 ---
 
@@ -649,6 +673,30 @@ for executable in $PATH/*:
         result = run(executable --agent, timeout=2s)
         if result.exit_code == 0 and is_valid_atip(result.stdout):
             add_to_registry(executable, source="native")
+```
+
+**Security note (non-normative):**
+
+PATH scanning can be dangerous in untrusted environments. Agents SHOULD:
+
+- Prefer explicit allowlists over full PATH scanning
+- Skip world-writable directories
+- Skip directories owned by other users
+- Never scan PATH entries from untrusted sources (e.g., `.` in PATH)
+- Use cached results rather than re-scanning frequently
+
+Recommended safe defaults:
+
+```python
+SAFE_PATH_PREFIXES = [
+    "/usr/bin",
+    "/usr/local/bin", 
+    "/opt/homebrew/bin",
+    os.path.expanduser("~/.local/bin"),
+]
+
+def is_safe_path(path):
+    return any(path.startswith(prefix) for prefix in SAFE_PATH_PREFIXES)
 ```
 
 ---
@@ -1469,7 +1517,7 @@ export function parseToolCall(provider: Provider, response: any): ToolCall[];
 
 ## Appendix B: Full JSON Schema
 
-Available at: `https://atip.dev/schema/0.2.json`
+Available at: `https://atip.dev/schema/0.4.json`
 
 ---
 
