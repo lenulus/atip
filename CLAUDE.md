@@ -24,14 +24,23 @@ Instead of running MCP servers for every CLI tool, ATIP separates concerns:
 
 ```
 atip/
-├── spec/rfc.md              # THE SOURCE OF TRUTH - Full specification
+├── spec/rfc.md              # THE SOURCE OF TRUTH - Protocol specification
 ├── schema/0.4.json          # JSON Schema derived from spec
 ├── examples/                # Reference ATIP metadata (must validate)
 ├── shims/                   # Community shims for legacy tools
 ├── reference/               # Reference implementations
 │   ├── atip-validate/       # Schema validator
+│   │   ├── blue/            # Design docs for this implementation
+│   │   └── src/
 │   ├── atip-gen/            # --help parser/generator
-│   └── atip-bridge/         # Compiler library (OpenAI/Gemini/Anthropic)
+│   │   ├── blue/            # Design docs for this implementation
+│   │   └── src/
+│   ├── atip-bridge/         # Compiler library (OpenAI/Gemini/Anthropic)
+│   │   ├── blue/            # Design docs for this implementation
+│   │   └── src/
+│   └── atip-discover/       # Discovery tool
+│       ├── blue/            # Design docs for this implementation
+│       └── src/
 └── docs/                    # Additional documentation
 ```
 
@@ -207,9 +216,22 @@ Agents use this to decide whether to run in PTY, auto-confirm, or skip.
 **Always follow BRGR (Blue, Red, Green, Refactor) for all implementations:**
 
 1. **Blue (Spec)** - Write or update the specification first
-   - Define the interface, behavior, and contracts in [spec/rfc.md](spec/rfc.md)
-   - Update schema if needed
+   - For protocol changes: Update [spec/rfc.md](spec/rfc.md)
+   - For reference implementations: Create/update docs in `reference/{tool}/blue/`
+   - Define the interface, behavior, and contracts
    - Document expected behavior
+
+   **Blue directory structure:**
+   Each NEW reference implementation has a `blue/` directory containing:
+   - `api.md` - Public API contracts and signatures
+   - `design.md` - Architecture decisions and design rationale
+   - `examples.md` - Usage examples and expected behaviors
+   - Any other design documents specific to that implementation
+
+   **IMPORTANT:** Only create `blue/` directories for NEW implementations going forward.
+   Do NOT create retroactive design docs for existing tools (atip-validate, atip-gen).
+   The presence of a `blue/` directory signifies: "This design drove the implementation."
+   For existing tools, use their README or `docs/` subfolder for documentation.
 
 2. **Red (Failing Tests)** - Write tests that fail
    - Create test cases based on the spec
@@ -244,6 +266,23 @@ npm run validate            # All examples validate
 - No untested code
 - Minimal implementation complexity
 - Safe refactoring with test coverage
+
+### Phase Transitions
+
+**CRITICAL: 100% of tests must pass before moving to the next phase.**
+
+Before marking a phase complete and moving to the next:
+
+1. **All tests pass** - Run `npm test` and verify 0 failures
+2. **All examples validate** - Run `npm run validate` successfully
+3. **Documentation updated** - README, CHANGELOG, etc. reflect changes
+4. **TODO.md updated** - Mark phase items as complete
+5. **No known bugs** - All issues for the phase resolved or deferred
+
+**Never proceed to the next phase with failing tests or validation errors.** This ensures:
+- Each phase builds on a solid foundation
+- Regressions are caught immediately
+- The project remains releasable at all times
 
 ### Code Style
 

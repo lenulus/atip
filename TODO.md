@@ -66,9 +66,51 @@
 10. ✅ examples/gh.json - Full-featured reference (generated via atip-gen)
 11. ✅ reference/atip-gen/ - --help to --agent metadata generator
 
-### Phase 4: Reference Implementation (Next)
-12. reference/atip-bridge/ - TypeScript/Python compiler library
+### Phase 4.1: atip-bridge Library (Next)
+12. reference/atip-bridge/ - TypeScript compiler library
+    - [ ] 4.1.1: Project setup and structure
+      - [ ] Create blue/ directory with api.md, design.md, examples.md
+      - [ ] Initialize npm package with TypeScript
+      - [ ] Configure build tooling (tsup/esbuild)
+      - [ ] Set up test framework (vitest/jest)
+      - [ ] Create initial README with API reference
+    - [ ] 4.1.2: Core transformers (BRGR cycle)
+      - [ ] Blue: Document API contracts for toOpenAI/toGemini/toAnthropic
+      - [ ] Red: Write failing tests for core transformers
+      - [ ] Green: Implement toOpenAI, toGemini, toAnthropic
+      - [ ] Refactor: Optimize and extract common patterns
+    - [ ] 4.1.3: Safety utilities (BRGR cycle)
+      - [ ] Blue: Document API contracts for safety utilities
+      - [ ] Red: Write failing tests for generateSafetyPrompt, createValidator
+      - [ ] Green: Implement safety utilities
+      - [ ] Refactor: Clean up and document
+    - [ ] 4.1.4: Lifecycle helpers (BRGR cycle)
+      - [ ] Blue: Document API contracts for lifecycle helpers
+      - [ ] Red: Write failing tests for handleToolResult, parseToolCall
+      - [ ] Green: Implement lifecycle helpers
+      - [ ] Refactor: Optimize provider-specific handling
+    - [ ] 4.1.5: Integration and packaging
+      - [ ] Integration tests with real ATIP examples
+      - [ ] Package for npm distribution
+      - [ ] Complete API documentation
+      - [ ] Usage examples and cookbook
+
+### Phase 4.2: atip-discover Tool
 13. reference/atip-discover/ - CLI tool for discovery
+    - [ ] 4.2.1: Project setup and structure
+      - [ ] Create blue/ directory with design docs
+      - [ ] Initialize project structure
+      - [ ] Set up test framework
+    - [ ] 4.2.2: Discovery implementation (BRGR cycle)
+      - [ ] Blue: Document discovery algorithm and security model
+      - [ ] Red: Write failing tests
+      - [ ] Green: Implement discovery and PATH scanning
+      - [ ] Refactor: Optimize and secure
+    - [ ] 4.2.3: Registry and caching (BRGR cycle)
+      - [ ] Blue: Document registry format and caching strategy
+      - [ ] Red: Write failing tests
+      - [ ] Green: Implement registry management and caching
+      - [ ] Refactor: Optimize performance
 
 ### Phase 5: Shims & Partial Discovery (Future)
 14. examples/kubectl-partial.json - Partial discovery example
@@ -86,3 +128,5 @@
 - JSON Schema should validate all examples
 - Reference implementation should match Appendix A
 - All files should reference canonical schema at https://atip.dev/schema/0.4.json
+- **100% of tests must pass before marking a phase complete** (see CLAUDE.md § Phase Transitions)
+- Follow BRGR methodology for all implementation phases (see CLAUDE.md § BRGR Methodology)
