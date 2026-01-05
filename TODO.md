@@ -6,7 +6,7 @@
 - [x] README.md - Overview, quick start, links to spec
 - [x] LICENSE - MIT or Apache 2.0
 - [x] CONTRIBUTING.md - How to propose changes, submit shims
-- [ ] CHANGELOG.md - Version history
+- [x] CHANGELOG.md - Version history
 
 ### Specification
 - [x] spec/rfc.md - Main specification (v0.4.0)
@@ -76,8 +76,7 @@
 ### Phase 5: Extended (Future)
 17. More shim examples (rsync, ffmpeg, etc.)
 18. Historical spec versions (0.1.0, 0.2.0, 0.3.0)
-19. CHANGELOG.md - Version history
-20. schema/atip.schema.json - Symlink to latest
+19. schema/atip.schema.json - Symlink to latest
 
 ## Notes
 
