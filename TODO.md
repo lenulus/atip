@@ -52,21 +52,26 @@
 3. ✅ CONTRIBUTING.md - Contribution guidelines
 4. ✅ schema/0.4.json - Validation schema
 
-### Phase 2: Examples & Documentation (Next)
-5. examples/minimal.json - Simple reference
-6. examples/gh.json - Full-featured reference
-7. docs/adoption-guide.md - Help tool authors adopt
-8. shims/README.md - Shim contribution guide
+### Phase 2: Validation Tooling (Next - REVISED)
+5. reference/atip-validate/ - Schema validation CLI tool
+6. reference/atip-gen/ - --help to --agent metadata generator
+7. Basic test suite for validation
+8. Validate schema against examples
 
-### Phase 3: Reference Implementation (Later)
-9. reference/atip-bridge/ - Core library
-10. reference/atip-discover/ - Discovery tool
-11. reference/atip-gen/ - Shim generator
+### Phase 3: Examples & Documentation (Later)
+9. examples/minimal.json - Simple reference
+10. examples/gh.json - Full-featured reference
+11. docs/adoption-guide.md - Help tool authors adopt
+12. shims/README.md - Shim contribution guide
 
-### Phase 4: Extended Examples (Future)
-12. More shim examples
-13. Historical spec versions
-14. Additional documentation
+### Phase 4: Full Reference Implementation (Future)
+13. reference/atip-bridge/ - TypeScript/Python compiler library
+14. reference/atip-discover/ - CLI tool for discovery
+
+### Phase 5: Extended Examples (Future)
+15. More shim examples
+16. Historical spec versions
+17. Additional documentation
 
 ## Notes
 
