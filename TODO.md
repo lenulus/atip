@@ -66,7 +66,13 @@
 10. ✅ examples/gh.json - Full-featured reference (generated via atip-gen)
 11. ✅ reference/atip-gen/ - --help to --agent metadata generator
 
-### Phase 4.1: atip-bridge Library (Next)
+### Phase 4: Reference Implementations
+
+**Language Choices:**
+| Implementation | Language | Tooling | Rationale |
+|---------------|----------|---------|-----------|
+| atip-bridge | TypeScript | npm, tsup, vitest | Library for JS/TS agents; matches spec Appendix A |
+| atip-discover | TypeScript | npm, tsup, vitest | CLI tool; consistency with atip-bridge |
 
 **BRGR Agent Workflow:**
 Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`):
@@ -74,6 +80,10 @@ Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`
 - **Red** → `brgr-red-test-writer` (creates failing tests based on design)
 - **Green** → `brgr-green-implementer` (implements minimal code to pass tests)
 - **Refactor** → `brgr-refactor` (improves code while keeping tests green)
+
+---
+
+### Phase 4.1: atip-bridge Library (TypeScript)
 
 12. reference/atip-bridge/ - TypeScript compiler library
     - [ ] 4.1.1: Project setup and Blue phase
@@ -106,11 +116,9 @@ Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`
       - [ ] Complete API documentation
       - [ ] Usage examples and cookbook
 
-### Phase 4.2: atip-discover Tool
+### Phase 4.2: atip-discover Tool (TypeScript)
 
-**Uses same BRGR Agent Workflow as Phase 4.1 (see above).**
-
-13. reference/atip-discover/ - CLI tool for discovery
+13. reference/atip-discover/ - TypeScript CLI tool for discovery
     - [ ] 4.2.1: Project setup and Blue phase
       - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
       - [ ] Initialize project structure
