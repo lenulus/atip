@@ -67,28 +67,39 @@
 11. ✅ reference/atip-gen/ - --help to --agent metadata generator
 
 ### Phase 4.1: atip-bridge Library (Next)
+
+**BRGR Agent Workflow:**
+Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`):
+- **Blue** → `brgr-blue-spec-writer` (creates design docs in `blue/`)
+- **Red** → `brgr-red-test-writer` (creates failing tests based on design)
+- **Green** → `brgr-green-implementer` (implements minimal code to pass tests)
+- **Refactor** → `brgr-refactor` (improves code while keeping tests green)
+
 12. reference/atip-bridge/ - TypeScript compiler library
-    - [ ] 4.1.1: Project setup and structure
-      - [ ] Create blue/ directory with api.md, design.md, examples.md
+    - [ ] 4.1.1: Project setup and Blue phase
+      - [ ] **Use `brgr-blue-spec-writer` agent** to create:
+        - [ ] `blue/api.md` - Public API contracts and signatures
+        - [ ] `blue/design.md` - Architecture decisions and rationale
+        - [ ] `blue/examples.md` - Usage examples and expected behaviors
       - [ ] Initialize npm package with TypeScript
       - [ ] Configure build tooling (tsup/esbuild)
-      - [ ] Set up test framework (vitest/jest)
+      - [ ] Set up test framework (vitest)
       - [ ] Create initial README with API reference
     - [ ] 4.1.2: Core transformers (BRGR cycle)
       - [ ] Blue: Document API contracts for toOpenAI/toGemini/toAnthropic
-      - [ ] Red: Write failing tests for core transformers
-      - [ ] Green: Implement toOpenAI, toGemini, toAnthropic
-      - [ ] Refactor: Optimize and extract common patterns
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for core transformer tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement transformers
+      - [ ] Refactor: **Use `brgr-refactor` agent** to optimize and extract patterns
     - [ ] 4.1.3: Safety utilities (BRGR cycle)
       - [ ] Blue: Document API contracts for safety utilities
-      - [ ] Red: Write failing tests for generateSafetyPrompt, createValidator
-      - [ ] Green: Implement safety utilities
-      - [ ] Refactor: Clean up and document
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for safety utility tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement utilities
+      - [ ] Refactor: **Use `brgr-refactor` agent** to clean up and document
     - [ ] 4.1.4: Lifecycle helpers (BRGR cycle)
       - [ ] Blue: Document API contracts for lifecycle helpers
-      - [ ] Red: Write failing tests for handleToolResult, parseToolCall
-      - [ ] Green: Implement lifecycle helpers
-      - [ ] Refactor: Optimize provider-specific handling
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for lifecycle helper tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement helpers
+      - [ ] Refactor: **Use `brgr-refactor` agent** to optimize provider handling
     - [ ] 4.1.5: Integration and packaging
       - [ ] Integration tests with real ATIP examples
       - [ ] Package for npm distribution
@@ -96,21 +107,24 @@
       - [ ] Usage examples and cookbook
 
 ### Phase 4.2: atip-discover Tool
+
+**Uses same BRGR Agent Workflow as Phase 4.1 (see above).**
+
 13. reference/atip-discover/ - CLI tool for discovery
-    - [ ] 4.2.1: Project setup and structure
-      - [ ] Create blue/ directory with design docs
+    - [ ] 4.2.1: Project setup and Blue phase
+      - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
       - [ ] Initialize project structure
-      - [ ] Set up test framework
+      - [ ] Set up test framework (vitest)
     - [ ] 4.2.2: Discovery implementation (BRGR cycle)
       - [ ] Blue: Document discovery algorithm and security model
-      - [ ] Red: Write failing tests
-      - [ ] Green: Implement discovery and PATH scanning
-      - [ ] Refactor: Optimize and secure
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for discovery tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement discovery
+      - [ ] Refactor: **Use `brgr-refactor` agent** to optimize and secure
     - [ ] 4.2.3: Registry and caching (BRGR cycle)
       - [ ] Blue: Document registry format and caching strategy
-      - [ ] Red: Write failing tests
-      - [ ] Green: Implement registry management and caching
-      - [ ] Refactor: Optimize performance
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for registry tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement registry
+      - [ ] Refactor: **Use `brgr-refactor` agent** to optimize performance
 
 ### Phase 5: Shims & Partial Discovery (Future)
 14. examples/kubectl-partial.json - Partial discovery example
