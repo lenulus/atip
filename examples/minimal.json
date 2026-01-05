@@ -1,0 +1,25 @@
+{
+  "atip": {
+    "version": "0.4"
+  },
+  "name": "hello",
+  "version": "1.0.0",
+  "description": "Print a greeting",
+  "commands": {
+    "": {
+      "description": "Say hello",
+      "arguments": [
+        {
+          "name": "name",
+          "type": "string",
+          "description": "Name to greet",
+          "required": true
+        }
+      ],
+      "effects": {
+        "filesystem": {},
+        "network": false
+      }
+    }
+  }
+}
