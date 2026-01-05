@@ -13,8 +13,8 @@
     "auth": {
       "description": "Authenticate gh and git with GitHub",
       "effects": {
-        "network": false,
-        "idempotent": true,
+        "network": true,
+        "idempotent": false,
         "reversible": true,
         "destructive": false
       },
@@ -23,8 +23,8 @@
         "login": {
           "description": "Log in to a GitHub account",
           "effects": {
-            "network": false,
-            "idempotent": true,
+            "network": true,
+            "idempotent": false,
             "reversible": false,
             "destructive": false
           }
@@ -32,7 +32,7 @@
         "logout": {
           "description": "Log out of a GitHub account",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -41,7 +41,7 @@
         "refresh": {
           "description": "Refresh stored authentication credentials",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -50,7 +50,7 @@
         "setup-git": {
           "description": "Setup git with GitHub CLI",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -59,7 +59,7 @@
         "status": {
           "description": "Display active account and authentication state on each known GitHub host",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -68,7 +68,7 @@
         "switch": {
           "description": "Switch active GitHub account",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -77,7 +77,7 @@
         "token": {
           "description": "Print the authentication token gh uses for a hostname and account",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -179,7 +179,7 @@
     "codespace": {
       "description": "Connect to and manage codespaces",
       "effects": {
-        "network": false,
+        "network": true,
         "idempotent": true,
         "reversible": true,
         "destructive": true
@@ -189,7 +189,7 @@
         "code": {
           "description": "Open a codespace in Visual Studio Code",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -198,7 +198,7 @@
         "cp": {
           "description": "Copy files between local and remote file systems",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -207,7 +207,7 @@
         "create": {
           "description": "Create a codespace",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -216,7 +216,7 @@
         "delete": {
           "description": "Delete codespaces",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -225,7 +225,7 @@
         "edit": {
           "description": "Edit a codespace",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -234,7 +234,7 @@
         "jupyter": {
           "description": "Open a codespace in JupyterLab",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -243,7 +243,7 @@
         "list": {
           "description": "List codespaces",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -252,7 +252,7 @@
         "logs": {
           "description": "Access codespace logs",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -261,7 +261,7 @@
         "ports": {
           "description": "List ports in a codespace",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -270,7 +270,7 @@
         "rebuild": {
           "description": "Rebuild a codespace",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -279,7 +279,7 @@
         "ssh": {
           "description": "SSH into a codespace",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -288,7 +288,7 @@
         "stop": {
           "description": "Stop a running codespace",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -297,7 +297,7 @@
         "view": {
           "description": "View details about a codespace",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -327,7 +327,7 @@
         "create": {
           "description": "Create a new gist",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -336,7 +336,7 @@
         "delete": {
           "description": "Delete a gist",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -345,7 +345,7 @@
         "edit": {
           "description": "Edit one of your gists",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -354,7 +354,7 @@
         "list": {
           "description": "List your gists",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -363,7 +363,7 @@
         "rename": {
           "description": "Rename a file in a gist",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -372,7 +372,7 @@
         "view": {
           "description": "View a gist",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -383,7 +383,7 @@
     "issue": {
       "description": "Work with GitHub issues.",
       "effects": {
-        "network": false,
+        "network": true,
         "idempotent": true,
         "reversible": true,
         "destructive": true
@@ -404,7 +404,7 @@
         "create": {
           "description": "Create a new issue",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -413,7 +413,7 @@
         "list": {
           "description": "List issues in a repository",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -422,7 +422,7 @@
         "status": {
           "description": "Show status of relevant issues",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -431,7 +431,7 @@
         "close": {
           "description": "Close issue",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -440,7 +440,7 @@
         "comment": {
           "description": "Add a comment to an issue",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -449,7 +449,7 @@
         "delete": {
           "description": "Delete issue",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -458,7 +458,7 @@
         "develop": {
           "description": "Manage linked branches for an issue",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -467,7 +467,7 @@
         "edit": {
           "description": "Edit issues",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -476,7 +476,7 @@
         "lock": {
           "description": "Lock issue conversation",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -485,7 +485,7 @@
         "pin": {
           "description": "Pin a issue",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -494,7 +494,7 @@
         "reopen": {
           "description": "Reopen issue",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -503,7 +503,7 @@
         "transfer": {
           "description": "Transfer issue to another repository",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -512,7 +512,7 @@
         "unlock": {
           "description": "Unlock issue conversation",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -521,7 +521,7 @@
         "unpin": {
           "description": "Unpin a issue",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -530,7 +530,7 @@
         "view": {
           "description": "View an issue",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -541,7 +541,7 @@
     "org": {
       "description": "Work with GitHub organizations.",
       "effects": {
-        "network": false,
+        "network": true,
         "idempotent": true,
         "reversible": true,
         "destructive": false
@@ -551,7 +551,7 @@
         "list": {
           "description": "List organizations for the authenticated user.",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -674,7 +674,7 @@
           "description": "Merge a pull request",
           "effects": {
             "network": true,
-            "idempotent": true,
+            "idempotent": false,
             "reversible": false,
             "destructive": false
           }
@@ -739,16 +739,16 @@
       "description": "Work with GitHub Projects.",
       "effects": {
         "network": true,
-        "idempotent": true,
+        "idempotent": false,
         "reversible": true,
-        "destructive": true
+        "destructive": false
       },
       "options": [],
       "commands": {
         "close": {
           "description": "Close a project",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -757,7 +757,7 @@
         "copy": {
           "description": "Copy a project",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -766,7 +766,7 @@
         "create": {
           "description": "Create a project",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -775,7 +775,7 @@
         "delete": {
           "description": "Delete a project",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -784,7 +784,7 @@
         "edit": {
           "description": "Edit a project",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -793,7 +793,7 @@
         "field-create": {
           "description": "Create a field in a project",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -802,7 +802,7 @@
         "field-delete": {
           "description": "Delete a field in a project",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -811,7 +811,7 @@
         "field-list": {
           "description": "List the fields in a project",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -829,7 +829,7 @@
         "item-archive": {
           "description": "Archive an item in a project",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -838,7 +838,7 @@
         "item-create": {
           "description": "Create a draft issue item in a project",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -847,7 +847,7 @@
         "item-delete": {
           "description": "Delete an item from a project by ID",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -856,7 +856,7 @@
         "item-edit": {
           "description": "Edit an item in a project",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -865,7 +865,7 @@
         "item-list": {
           "description": "List the items in a project",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -874,7 +874,7 @@
         "link": {
           "description": "Link a project to a repository or a team",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -883,7 +883,7 @@
         "list": {
           "description": "List the projects for an owner",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -892,7 +892,7 @@
         "mark-template": {
           "description": "Mark a project as a template",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -901,7 +901,7 @@
         "unlink": {
           "description": "Unlink a project from a repository or a team",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -910,7 +910,7 @@
         "view": {
           "description": "View a project",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -942,7 +942,7 @@
         "create": {
           "description": "Create a new release",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -951,7 +951,7 @@
         "list": {
           "description": "List releases in a repository",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -960,7 +960,7 @@
         "delete": {
           "description": "Delete a release",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -969,7 +969,7 @@
         "delete-asset": {
           "description": "Delete an asset from a release",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -987,7 +987,7 @@
         "edit": {
           "description": "Edit a release",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -1005,7 +1005,7 @@
         "view": {
           "description": "View information about a release",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1026,7 +1026,7 @@
         "create": {
           "description": "Create a new repository",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -1035,7 +1035,7 @@
         "list": {
           "description": "List repositories owned by user or organization",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1044,7 +1044,7 @@
         "archive": {
           "description": "Archive a repository",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1053,7 +1053,7 @@
         "autolink": {
           "description": "Manage autolink references",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1071,7 +1071,7 @@
         "delete": {
           "description": "Delete a repository",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -1080,7 +1080,7 @@
         "deploy-key": {
           "description": "Manage deploy keys in a repository",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1089,7 +1089,7 @@
         "edit": {
           "description": "Edit repository settings",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -1098,7 +1098,7 @@
         "fork": {
           "description": "Create a fork of a repository",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -1107,7 +1107,7 @@
         "gitignore": {
           "description": "List and view available repository gitignore templates",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1116,7 +1116,7 @@
         "license": {
           "description": "Explore repository licenses",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1125,7 +1125,7 @@
         "rename": {
           "description": "Rename a repository",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1134,7 +1134,7 @@
         "set-default": {
           "description": "Configure default repository for this directory",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -1152,7 +1152,7 @@
         "unarchive": {
           "description": "Unarchive a repository",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1161,7 +1161,7 @@
         "view": {
           "description": "View a repository",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1172,7 +1172,7 @@
     "cache": {
       "description": "Work with GitHub Actions caches.",
       "effects": {
-        "network": false,
+        "network": true,
         "idempotent": true,
         "reversible": true,
         "destructive": true
@@ -1193,7 +1193,7 @@
         "delete": {
           "description": "Delete GitHub Actions caches",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -1202,7 +1202,7 @@
         "list": {
           "description": "List GitHub Actions caches",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1234,7 +1234,7 @@
         "cancel": {
           "description": "Cancel a workflow run",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1243,7 +1243,7 @@
         "delete": {
           "description": "Delete a workflow run",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -1261,7 +1261,7 @@
         "list": {
           "description": "List recent workflow runs",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1270,7 +1270,7 @@
         "rerun": {
           "description": "Rerun a run",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1279,7 +1279,7 @@
         "view": {
           "description": "View a summary of a workflow run",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1288,9 +1288,9 @@
         "watch": {
           "description": "Watch a run until it completes, showing its progress",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
-            "reversible": false,
+            "reversible": true,
             "destructive": false
           }
         }
@@ -1299,7 +1299,7 @@
     "workflow": {
       "description": "List, view, and run workflows in GitHub Actions.",
       "effects": {
-        "network": false,
+        "network": true,
         "idempotent": true,
         "reversible": true,
         "destructive": false
@@ -1320,7 +1320,7 @@
         "disable": {
           "description": "Disable a workflow",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1329,7 +1329,7 @@
         "enable": {
           "description": "Enable a workflow",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1338,7 +1338,7 @@
         "list": {
           "description": "List workflows",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1347,7 +1347,7 @@
         "run": {
           "description": "Run a workflow by creating a workflow_dispatch event",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1356,7 +1356,7 @@
         "view": {
           "description": "View the summary of a workflow",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1367,7 +1367,7 @@
     "alias": {
       "description": "Aliases can be used to make shortcuts for gh commands or to compose multiple commands.",
       "effects": {
-        "network": false,
+        "network": true,
         "idempotent": true,
         "reversible": true,
         "destructive": true
@@ -1377,7 +1377,7 @@
         "delete": {
           "description": "Delete set aliases",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -1386,7 +1386,7 @@
         "import": {
           "description": "Import aliases from a YAML file",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1395,7 +1395,7 @@
         "list": {
           "description": "List your aliases",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1404,7 +1404,7 @@
         "set": {
           "description": "Create a shortcut for a gh command",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -1588,7 +1588,7 @@
         "trusted-root": {
           "description": "Output trusted_root.jsonl contents, likely for offline verification",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1597,7 +1597,7 @@
         "verify": {
           "description": "Verify an artifact's integrity using attestations",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1608,7 +1608,7 @@
     "completion": {
       "description": "Generate shell completion scripts for GitHub CLI commands.",
       "effects": {
-        "network": false,
+        "network": true,
         "idempotent": true,
         "reversible": true,
         "destructive": false
@@ -1639,7 +1639,7 @@
         "clear-cache": {
           "description": "Clear the cli cache",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1648,7 +1648,7 @@
         "get": {
           "description": "Print the value of a given configuration key",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1657,7 +1657,7 @@
         "list": {
           "description": "Print a list of configuration keys and values",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1666,7 +1666,7 @@
         "set": {
           "description": "Update configuration with a value for the given key",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -1677,7 +1677,7 @@
     "extension": {
       "description": "GitHub CLI extensions are repositories that provide additional gh commands.",
       "effects": {
-        "network": false,
+        "network": true,
         "idempotent": true,
         "reversible": true,
         "destructive": true
@@ -1687,16 +1687,16 @@
         "browse": {
           "description": "Enter a UI for browsing, adding, and removing extensions",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
-            "reversible": false,
+            "reversible": true,
             "destructive": false
           }
         },
         "create": {
           "description": "Create a new extension",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -1705,7 +1705,7 @@
         "exec": {
           "description": "Execute an installed extension",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1714,7 +1714,7 @@
         "install": {
           "description": "Install a gh extension from a repository",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1723,7 +1723,7 @@
         "list": {
           "description": "List installed extension commands",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1732,7 +1732,7 @@
         "remove": {
           "description": "Remove an installed extension",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -1741,16 +1741,16 @@
         "search": {
           "description": "Search extensions to the GitHub CLI",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
-            "reversible": false,
+            "reversible": true,
             "destructive": false
           }
         },
         "upgrade": {
           "description": "Upgrade installed extensions",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1761,7 +1761,7 @@
     "gpg-key": {
       "description": "Manage GPG keys registered with your GitHub account.",
       "effects": {
-        "network": false,
+        "network": true,
         "idempotent": true,
         "reversible": true,
         "destructive": true
@@ -1771,7 +1771,7 @@
         "add": {
           "description": "Add a GPG key to your GitHub account",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -1780,7 +1780,7 @@
         "delete": {
           "description": "Delete a GPG key from your GitHub account",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -1789,7 +1789,7 @@
         "list": {
           "description": "Lists GPG keys in your GitHub account",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1830,7 +1830,7 @@
         "create": {
           "description": "Create a new label",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -1839,7 +1839,7 @@
         "delete": {
           "description": "Delete a label from a repository",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -1848,7 +1848,7 @@
         "edit": {
           "description": "Edit a label",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -1857,7 +1857,7 @@
         "list": {
           "description": "List labels in a repository",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1868,7 +1868,7 @@
     "preview": {
       "description": "Preview commands are for testing, demonstrative, and development purposes only.",
       "effects": {
-        "network": false,
+        "network": true,
         "idempotent": true,
         "reversible": true,
         "destructive": false
@@ -1878,7 +1878,7 @@
         "prompter": {
           "description": "Execute a test program to preview the prompter",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": false,
             "destructive": false
@@ -1889,7 +1889,7 @@
     "ruleset": {
       "description": "Repository rulesets are a way to define a set of rules that apply to a repository.",
       "effects": {
-        "network": false,
+        "network": true,
         "idempotent": true,
         "reversible": true,
         "destructive": false
@@ -1910,7 +1910,7 @@
         "check": {
           "description": "View rules that would apply to a given branch",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1919,7 +1919,7 @@
         "list": {
           "description": "List rulesets for a repository or organization",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1928,7 +1928,7 @@
         "view": {
           "description": "View information about a ruleset",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -1949,27 +1949,27 @@
         "code": {
           "description": "Search within code",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
-            "reversible": false,
+            "reversible": true,
             "destructive": false
           }
         },
         "commits": {
           "description": "Search for commits",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
-            "reversible": false,
+            "reversible": true,
             "destructive": false
           }
         },
         "issues": {
           "description": "Search for issues",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
-            "reversible": false,
+            "reversible": true,
             "destructive": false
           }
         },
@@ -1978,16 +1978,16 @@
           "effects": {
             "network": true,
             "idempotent": true,
-            "reversible": false,
+            "reversible": true,
             "destructive": false
           }
         },
         "repos": {
           "description": "Search for repositories",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
-            "reversible": false,
+            "reversible": true,
             "destructive": false
           }
         }
@@ -1996,7 +1996,7 @@
     "secret": {
       "description": "Secrets can be set at the repository, or organization level for use in",
       "effects": {
-        "network": false,
+        "network": true,
         "idempotent": true,
         "reversible": true,
         "destructive": true
@@ -2017,7 +2017,7 @@
         "delete": {
           "description": "Delete secrets",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -2026,7 +2026,7 @@
         "list": {
           "description": "List secrets",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -2035,7 +2035,7 @@
         "set": {
           "description": "Create or update secrets",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -2046,7 +2046,7 @@
     "ssh-key": {
       "description": "Manage SSH keys registered with your GitHub account.",
       "effects": {
-        "network": false,
+        "network": true,
         "idempotent": true,
         "reversible": true,
         "destructive": true
@@ -2056,7 +2056,7 @@
         "add": {
           "description": "Add an SSH key to your GitHub account",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false
@@ -2065,7 +2065,7 @@
         "delete": {
           "description": "Delete an SSH key from your GitHub account",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -2074,7 +2074,7 @@
         "list": {
           "description": "Lists SSH keys in your GitHub account",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -2116,7 +2116,7 @@
     "variable": {
       "description": "Variables can be set at the repository, environment or organization level for use in",
       "effects": {
-        "network": false,
+        "network": true,
         "idempotent": true,
         "reversible": true,
         "destructive": true
@@ -2137,7 +2137,7 @@
         "delete": {
           "description": "Delete variables",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": true
@@ -2146,7 +2146,7 @@
         "get": {
           "description": "Get variables",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -2155,7 +2155,7 @@
         "list": {
           "description": "List variables",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": true,
             "reversible": true,
             "destructive": false
@@ -2164,7 +2164,7 @@
         "set": {
           "description": "Create or update variables",
           "effects": {
-            "network": false,
+            "network": true,
             "idempotent": false,
             "reversible": false,
             "destructive": false

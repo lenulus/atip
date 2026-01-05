@@ -240,32 +240,73 @@ export class HelpParser {
       destructive: false
     };
 
-    // Network indicators
-    if (text.match(/\b(api|http|request|fetch|pull|push|clone|sync|upload|download)\b/)) {
+    // Tool-specific heuristics
+    if (this.toolName === 'gh') {
+      // GitHub CLI - almost everything needs network
+      // Exceptions: completion (generates shell scripts locally)
+      if (name === 'completion') {
+        effects.network = false;
+      } else {
+        effects.network = true;
+      }
+    }
+
+    if (this.toolName === 'kubectl') {
+      // Kubernetes - most operations are network
+      if (!text.match(/\b(completion|explain|version)\b/)) {
+        effects.network = true;
+      }
+    }
+
+    if (this.toolName === 'docker') {
+      // Docker - network for registry operations
+      if (text.match(/\b(pull|push|login|search|registry)\b/)) {
+        effects.network = true;
+      }
+    }
+
+    // Generic network indicators
+    if (text.match(/\b(api|http|request|fetch|pull|push|clone|sync|upload|download|remote|server|github|gitlab|cloud)\b/)) {
+      effects.network = true;
+    }
+
+    // Manage/work with cloud resources usually means network
+    if (text.match(/\b(manage|work with)\b/) &&
+        text.match(/\b(github|repository|repositories|pull request|issue|gist|codespace|release|project|secret|ssh|gpg)\b/)) {
       effects.network = true;
     }
 
     // Destructive indicators
-    if (text.match(/\b(delete|remove|destroy|drop|purge|force)\b/)) {
+    if (text.match(/\b(delete|remove|destroy|drop|purge|prune|force)\b/)) {
       effects.destructive = true;
       effects.idempotent = false;
       effects.reversible = false;
     }
 
     // Create/modify indicators
-    if (text.match(/\b(create|add|new|edit|update|modify|set)\b/)) {
+    if (text.match(/\b(create|add|new|edit|update|modify|set|merge|comment)\b/)) {
       effects.idempotent = false;
     }
 
     // Read-only indicators
-    if (text.match(/\b(list|show|view|get|display|status|info|describe)\b/)) {
+    if (text.match(/\b(list|show|view|get|display|status|info|describe|search|browse|watch|read)\b/)) {
       effects.idempotent = true;
       effects.reversible = true;
     }
 
-    // Reversible operations
-    if (text.match(/\b(close|lock|disable)\b/) && text.match(/\b(reopen|unlock|enable)\b/)) {
-      effects.reversible = true;
+    // Reversible operations (paired actions)
+    if (text.match(/\b(close|lock|disable|archive)\b/)) {
+      // Check if description mentions the reverse operation
+      if (text.match(/\b(reopen|unlock|enable|unarchive)\b/)) {
+        effects.reversible = true;
+      }
+    }
+
+    // Authentication is usually not destructive but not idempotent
+    if (text.match(/\b(auth|authenticate|login)\b/)) {
+      effects.destructive = false;
+      effects.idempotent = false;
+      effects.network = true;
     }
 
     return effects;
