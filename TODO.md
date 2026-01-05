@@ -29,9 +29,10 @@
 ### Examples
 - [ ] examples/gh.json - Full example (GitHub CLI)
 - [ ] examples/kubectl-partial.json - Partial discovery example
-- [ ] examples/minimal.json - Minimal valid ATIP
+- [x] examples/minimal.json - Minimal valid ATIP
 
 ### Reference Implementations
+- [x] reference/atip-validate/ - Schema validation CLI tool
 - [ ] reference/atip-bridge/ - TypeScript/Python compiler library
   - [ ] reference/atip-bridge/package.json
   - [ ] reference/atip-bridge/src/
@@ -40,9 +41,9 @@
 - [ ] reference/atip-gen/ - Auto-generate shims from --help
 
 ### Documentation
-- [ ] docs/why-not-mcp.md - Positioning document
-- [ ] docs/adoption-guide.md - For tool authors
-- [ ] docs/agent-integration.md - For agent developers
+- [x] docs/why-atip.md - Positioning document (why ATIP exists)
+- [x] docs/adoption-guide.md - For tool authors
+- [x] docs/agent-integration.md - For agent developers
 
 ## Priority Order
 
@@ -52,26 +53,31 @@
 3. ✅ CONTRIBUTING.md - Contribution guidelines
 4. ✅ schema/0.4.json - Validation schema
 
-### Phase 2: Validation Tooling (Next - REVISED)
-5. reference/atip-validate/ - Schema validation CLI tool
-6. reference/atip-gen/ - --help to --agent metadata generator
-7. Basic test suite for validation
-8. Validate schema against examples
+### Phase 2: Validation Tooling ✅ COMPLETE
+5. ✅ reference/atip-validate/ - Schema validation CLI tool
+6. ✅ examples/minimal.json - Simple reference (validated)
 
-### Phase 3: Examples & Documentation (Later)
-9. examples/minimal.json - Simple reference
+### Phase 3: Examples & Documentation ✅ COMPLETE
+7. ✅ docs/why-atip.md - Positioning document
+8. ✅ docs/adoption-guide.md - Help tool authors adopt
+9. ✅ docs/agent-integration.md - Agent integration guide
+
+### Phase 3.5: Additional Examples & Tooling (Next)
 10. examples/gh.json - Full-featured reference
-11. docs/adoption-guide.md - Help tool authors adopt
+11. examples/kubectl-partial.json - Partial discovery example
 12. shims/README.md - Shim contribution guide
+13. shims/curl.json, jq.json, etc. - Example shims
+14. reference/atip-gen/ - --help to --agent metadata generator
 
 ### Phase 4: Full Reference Implementation (Future)
-13. reference/atip-bridge/ - TypeScript/Python compiler library
-14. reference/atip-discover/ - CLI tool for discovery
+15. reference/atip-bridge/ - TypeScript/Python compiler library
+16. reference/atip-discover/ - CLI tool for discovery
 
-### Phase 5: Extended Examples (Future)
-15. More shim examples
-16. Historical spec versions
-17. Additional documentation
+### Phase 5: Extended (Future)
+17. More shim examples (rsync, ffmpeg, etc.)
+18. Historical spec versions (0.1.0, 0.2.0, 0.3.0)
+19. CHANGELOG.md - Version history
+20. schema/atip.schema.json - Symlink to latest
 
 ## Notes
 
