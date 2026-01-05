@@ -202,6 +202,49 @@ Agents use this to decide whether to run in PTY, auto-confirm, or skip.
 
 ## Development Guidelines
 
+### BRGR Methodology
+
+**Always follow BRGR (Blue, Red, Green, Refactor) for all implementations:**
+
+1. **Blue (Spec)** - Write or update the specification first
+   - Define the interface, behavior, and contracts in [spec/rfc.md](spec/rfc.md)
+   - Update schema if needed
+   - Document expected behavior
+
+2. **Red (Failing Tests)** - Write tests that fail
+   - Create test cases based on the spec
+   - Tests should fail because implementation doesn't exist yet
+   - Validates that tests actually test something
+
+3. **Green (Implement)** - Write minimal code to pass tests
+   - Implement just enough to make tests pass
+   - Don't over-engineer or add features not in spec
+   - Focus on correctness first
+
+4. **Refactor** - Clean up while keeping tests green
+   - Improve code quality, performance, readability
+   - Extract common patterns
+   - Maintain backward compatibility
+
+**Example workflow:**
+
+```bash
+# 1. Blue: Update spec/rfc.md with new feature
+# 2. Red: Write failing tests
+npm test                    # Should fail
+# 3. Green: Implement feature
+npm test                    # Should pass
+# 4. Refactor: Clean up code
+npm test                    # Should still pass
+npm run validate            # All examples validate
+```
+
+**This ensures:**
+- Spec-driven development (spec is source of truth)
+- No untested code
+- Minimal implementation complexity
+- Safe refactoring with test coverage
+
 ### Code Style
 
 **JSON**:
