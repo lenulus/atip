@@ -1,0 +1,28 @@
+{
+  "name": "atip-gen",
+  "version": "0.4.0",
+  "description": "Generate ATIP metadata from --help output",
+  "main": "src/index.js",
+  "type": "module",
+  "bin": {
+    "atip-gen": "./src/cli.js"
+  },
+  "scripts": {
+    "gen": "node src/cli.js",
+    "test": "node src/test.js"
+  },
+  "keywords": [
+    "atip",
+    "generator",
+    "help-parser",
+    "cli-tools"
+  ],
+  "author": "ATIP Contributors",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,0 +1,2176 @@
+{
+  "atip": {
+    "version": "0.4"
+  },
+  "name": "gh",
+  "version": "2.76.2",
+  "description": "Work seamlessly with GitHub from the command line.",
+  "trust": {
+    "source": "inferred",
+    "verified": false
+  },
+  "commands": {
+    "auth": {
+      "description": "Authenticate gh and git with GitHub",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": false
+      },
+      "options": [],
+      "commands": {
+        "login": {
+          "description": "Log in to a GitHub account",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "logout": {
+          "description": "Log out of a GitHub account",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "refresh": {
+          "description": "Refresh stored authentication credentials",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "setup-git": {
+          "description": "Setup git with GitHub CLI",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "status": {
+          "description": "Display active account and authentication state on each known GitHub host",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "switch": {
+          "description": "Switch active GitHub account",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "token": {
+          "description": "Print the authentication token gh uses for a hostname and account",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "browse": {
+      "description": "Transition from the terminal to the web browser to view and interact with:",
+      "effects": {
+        "network": true,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": false
+      },
+      "options": [
+        {
+          "name": "branch",
+          "flags": [
+            "-b",
+            "--branch"
+          ],
+          "type": "string",
+          "description": "Select another branch by passing in the branch name",
+          "required": false
+        },
+        {
+          "name": "commit",
+          "flags": [
+            "-c",
+            "--commit"
+          ],
+          "type": "boolean",
+          "description": "string[=\"last\"]   Select another commit by passing in the commit SHA, default is the last commit",
+          "required": false
+        },
+        {
+          "name": "no-browser",
+          "flags": [
+            "-n",
+            "--no-browser"
+          ],
+          "type": "url",
+          "description": "destination URL instead of opening the browser",
+          "required": false
+        },
+        {
+          "name": "projects",
+          "flags": [
+            "-p",
+            "--projects"
+          ],
+          "type": "string",
+          "description": "repository projects",
+          "required": false
+        },
+        {
+          "name": "releases",
+          "flags": [
+            "-r",
+            "--releases"
+          ],
+          "type": "string",
+          "description": "repository releases",
+          "required": false
+        },
+        {
+          "name": "repo",
+          "flags": [
+            "-R",
+            "--repo"
+          ],
+          "type": "boolean",
+          "description": "[HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format",
+          "required": false
+        },
+        {
+          "name": "settings",
+          "flags": [
+            "-s",
+            "--settings"
+          ],
+          "type": "string",
+          "description": "repository settings",
+          "required": false
+        },
+        {
+          "name": "wiki",
+          "flags": [
+            "-w",
+            "--wiki"
+          ],
+          "type": "string",
+          "description": "repository wiki",
+          "required": false
+        }
+      ]
+    },
+    "codespace": {
+      "description": "Connect to and manage codespaces",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [],
+      "commands": {
+        "code": {
+          "description": "Open a codespace in Visual Studio Code",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "cp": {
+          "description": "Copy files between local and remote file systems",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "create": {
+          "description": "Create a codespace",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "delete": {
+          "description": "Delete codespaces",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "edit": {
+          "description": "Edit a codespace",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "jupyter": {
+          "description": "Open a codespace in JupyterLab",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "List codespaces",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "logs": {
+          "description": "Access codespace logs",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "ports": {
+          "description": "List ports in a codespace",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "rebuild": {
+          "description": "Rebuild a codespace",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "ssh": {
+          "description": "SSH into a codespace",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "stop": {
+          "description": "Stop a running codespace",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "view": {
+          "description": "View details about a codespace",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "gist": {
+      "description": "Work with GitHub gists.",
+      "effects": {
+        "network": true,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [],
+      "commands": {
+        "clone": {
+          "description": "Clone a gist locally",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "create": {
+          "description": "Create a new gist",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "delete": {
+          "description": "Delete a gist",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "edit": {
+          "description": "Edit one of your gists",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "List your gists",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "rename": {
+          "description": "Rename a file in a gist",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "view": {
+          "description": "View a gist",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "issue": {
+      "description": "Work with GitHub issues.",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [
+        {
+          "name": "repo",
+          "flags": [
+            "-R",
+            "--repo"
+          ],
+          "type": "boolean",
+          "description": "[HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format",
+          "required": false
+        }
+      ],
+      "commands": {
+        "create": {
+          "description": "Create a new issue",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "List issues in a repository",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "status": {
+          "description": "Show status of relevant issues",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "close": {
+          "description": "Close issue",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "comment": {
+          "description": "Add a comment to an issue",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "delete": {
+          "description": "Delete issue",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "develop": {
+          "description": "Manage linked branches for an issue",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "edit": {
+          "description": "Edit issues",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "lock": {
+          "description": "Lock issue conversation",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "pin": {
+          "description": "Pin a issue",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "reopen": {
+          "description": "Reopen issue",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "transfer": {
+          "description": "Transfer issue to another repository",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "unlock": {
+          "description": "Unlock issue conversation",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "unpin": {
+          "description": "Unpin a issue",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "view": {
+          "description": "View an issue",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "org": {
+      "description": "Work with GitHub organizations.",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": false
+      },
+      "options": [],
+      "commands": {
+        "list": {
+          "description": "List organizations for the authenticated user.",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "pr": {
+      "description": "Work with GitHub pull requests.",
+      "effects": {
+        "network": true,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": false
+      },
+      "options": [
+        {
+          "name": "repo",
+          "flags": [
+            "-R",
+            "--repo"
+          ],
+          "type": "boolean",
+          "description": "[HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format",
+          "required": false
+        }
+      ],
+      "commands": {
+        "create": {
+          "description": "Create a pull request",
+          "effects": {
+            "network": true,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "List pull requests in a repository",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "status": {
+          "description": "Show status of relevant pull requests",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "checkout": {
+          "description": "Check out a pull request in git",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "checks": {
+          "description": "Show CI status for a single pull request",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "close": {
+          "description": "Close a pull request",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "comment": {
+          "description": "Add a comment to a pull request",
+          "effects": {
+            "network": true,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "diff": {
+          "description": "View changes in a pull request",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "edit": {
+          "description": "Edit a pull request",
+          "effects": {
+            "network": true,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "lock": {
+          "description": "Lock pull request conversation",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "merge": {
+          "description": "Merge a pull request",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "ready": {
+          "description": "Mark a pull request as ready for review",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "reopen": {
+          "description": "Reopen a pull request",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "review": {
+          "description": "Add a review to a pull request",
+          "effects": {
+            "network": true,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "unlock": {
+          "description": "Unlock pull request conversation",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "update-branch": {
+          "description": "Update a pull request branch",
+          "effects": {
+            "network": true,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "view": {
+          "description": "View a pull request",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "project": {
+      "description": "Work with GitHub Projects.",
+      "effects": {
+        "network": true,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [],
+      "commands": {
+        "close": {
+          "description": "Close a project",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "copy": {
+          "description": "Copy a project",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "create": {
+          "description": "Create a project",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "delete": {
+          "description": "Delete a project",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "edit": {
+          "description": "Edit a project",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "field-create": {
+          "description": "Create a field in a project",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "field-delete": {
+          "description": "Delete a field in a project",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "field-list": {
+          "description": "List the fields in a project",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "item-add": {
+          "description": "Add a pull request or an issue to a project",
+          "effects": {
+            "network": true,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "item-archive": {
+          "description": "Archive an item in a project",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "item-create": {
+          "description": "Create a draft issue item in a project",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "item-delete": {
+          "description": "Delete an item from a project by ID",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "item-edit": {
+          "description": "Edit an item in a project",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "item-list": {
+          "description": "List the items in a project",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "link": {
+          "description": "Link a project to a repository or a team",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "List the projects for an owner",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "mark-template": {
+          "description": "Mark a project as a template",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "unlink": {
+          "description": "Unlink a project from a repository or a team",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "view": {
+          "description": "View a project",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "release": {
+      "description": "Manage releases",
+      "effects": {
+        "network": true,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [
+        {
+          "name": "repo",
+          "flags": [
+            "-R",
+            "--repo"
+          ],
+          "type": "boolean",
+          "description": "[HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format",
+          "required": false
+        }
+      ],
+      "commands": {
+        "create": {
+          "description": "Create a new release",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "List releases in a repository",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "delete": {
+          "description": "Delete a release",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "delete-asset": {
+          "description": "Delete an asset from a release",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "download": {
+          "description": "Download release assets",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "edit": {
+          "description": "Edit a release",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "upload": {
+          "description": "Upload assets to a release",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "view": {
+          "description": "View information about a release",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "repo": {
+      "description": "Work with GitHub repositories.",
+      "effects": {
+        "network": true,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [],
+      "commands": {
+        "create": {
+          "description": "Create a new repository",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "List repositories owned by user or organization",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "archive": {
+          "description": "Archive a repository",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "autolink": {
+          "description": "Manage autolink references",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "clone": {
+          "description": "Clone a repository locally",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "delete": {
+          "description": "Delete a repository",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "deploy-key": {
+          "description": "Manage deploy keys in a repository",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "edit": {
+          "description": "Edit repository settings",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "fork": {
+          "description": "Create a fork of a repository",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "gitignore": {
+          "description": "List and view available repository gitignore templates",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "license": {
+          "description": "Explore repository licenses",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "rename": {
+          "description": "Rename a repository",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "set-default": {
+          "description": "Configure default repository for this directory",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "sync": {
+          "description": "Sync a repository",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "unarchive": {
+          "description": "Unarchive a repository",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "view": {
+          "description": "View a repository",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "cache": {
+      "description": "Work with GitHub Actions caches.",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [
+        {
+          "name": "repo",
+          "flags": [
+            "-R",
+            "--repo"
+          ],
+          "type": "boolean",
+          "description": "[HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format",
+          "required": false
+        }
+      ],
+      "commands": {
+        "delete": {
+          "description": "Delete GitHub Actions caches",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "list": {
+          "description": "List GitHub Actions caches",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "run": {
+      "description": "List, view, and watch recent workflow runs from GitHub Actions.",
+      "effects": {
+        "network": true,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [
+        {
+          "name": "repo",
+          "flags": [
+            "-R",
+            "--repo"
+          ],
+          "type": "boolean",
+          "description": "[HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format",
+          "required": false
+        }
+      ],
+      "commands": {
+        "cancel": {
+          "description": "Cancel a workflow run",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "delete": {
+          "description": "Delete a workflow run",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "download": {
+          "description": "Download artifacts generated by a workflow run",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "List recent workflow runs",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "rerun": {
+          "description": "Rerun a run",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "view": {
+          "description": "View a summary of a workflow run",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "watch": {
+          "description": "Watch a run until it completes, showing its progress",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "workflow": {
+      "description": "List, view, and run workflows in GitHub Actions.",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": false
+      },
+      "options": [
+        {
+          "name": "repo",
+          "flags": [
+            "-R",
+            "--repo"
+          ],
+          "type": "boolean",
+          "description": "[HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format",
+          "required": false
+        }
+      ],
+      "commands": {
+        "disable": {
+          "description": "Disable a workflow",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "enable": {
+          "description": "Enable a workflow",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "List workflows",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "run": {
+          "description": "Run a workflow by creating a workflow_dispatch event",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "view": {
+          "description": "View the summary of a workflow",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "alias": {
+      "description": "Aliases can be used to make shortcuts for gh commands or to compose multiple commands.",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [],
+      "commands": {
+        "delete": {
+          "description": "Delete set aliases",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "import": {
+          "description": "Import aliases from a YAML file",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "List your aliases",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "set": {
+          "description": "Create a shortcut for a gh command",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "api": {
+      "description": "Makes an authenticated HTTP request to the GitHub API and prints the response.",
+      "effects": {
+        "network": true,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": false
+      },
+      "options": [
+        {
+          "name": "cache",
+          "flags": [
+            "--cache"
+          ],
+          "type": "string",
+          "description": "Cache the response, e.g. \"3600s\", \"60m\", \"1h\"",
+          "required": false
+        },
+        {
+          "name": "field",
+          "flags": [
+            "-F",
+            "--field"
+          ],
+          "type": "boolean",
+          "description": "key=value       Add a typed parameter in key=value format",
+          "required": false
+        },
+        {
+          "name": "header",
+          "flags": [
+            "-H",
+            "--header"
+          ],
+          "type": "boolean",
+          "description": "key:value      Add a HTTP request header in key:value format",
+          "required": false
+        },
+        {
+          "name": "hostname",
+          "flags": [
+            "--hostname"
+          ],
+          "type": "string",
+          "description": "The GitHub hostname for the request (default \"github.com\")",
+          "required": false
+        },
+        {
+          "name": "include",
+          "flags": [
+            "-i",
+            "--include"
+          ],
+          "type": "string",
+          "description": "HTTP response status line and headers in the output",
+          "required": false
+        },
+        {
+          "name": "input",
+          "flags": [
+            "--input"
+          ],
+          "type": "file",
+          "description": "The file to use as body for the HTTP request (use \"-\" to read from standard input)",
+          "required": false
+        },
+        {
+          "name": "jq",
+          "flags": [
+            "-q",
+            "--jq"
+          ],
+          "type": "string",
+          "description": "Query to select values from the response using jq syntax",
+          "required": false
+        },
+        {
+          "name": "method",
+          "flags": [
+            "-X",
+            "--method"
+          ],
+          "type": "string",
+          "description": "The HTTP method for the request (default \"GET\")",
+          "required": false
+        },
+        {
+          "name": "paginate",
+          "flags": [
+            "--paginate"
+          ],
+          "type": "string",
+          "description": "additional HTTP requests to fetch all pages of results",
+          "required": false
+        },
+        {
+          "name": "preview",
+          "flags": [
+            "-p",
+            "--preview"
+          ],
+          "type": "string",
+          "description": "Opt into GitHub API previews (names should omit '-preview')",
+          "required": false
+        },
+        {
+          "name": "raw-field",
+          "flags": [
+            "-f",
+            "--raw-field"
+          ],
+          "type": "boolean",
+          "description": "key=value   Add a string parameter in key=value format",
+          "required": false
+        },
+        {
+          "name": "silent",
+          "flags": [
+            "--silent"
+          ],
+          "type": "string",
+          "description": "not print the response body",
+          "required": false
+        },
+        {
+          "name": "slurp",
+          "flags": [
+            "--slurp"
+          ],
+          "type": "string",
+          "description": "with \"--paginate\" to return an array of all pages of either JSON arrays or objects",
+          "required": false
+        },
+        {
+          "name": "template",
+          "flags": [
+            "-t",
+            "--template"
+          ],
+          "type": "string",
+          "description": "Format JSON output using a Go template; see \"gh help formatting\"",
+          "required": false
+        },
+        {
+          "name": "verbose",
+          "flags": [
+            "--verbose"
+          ],
+          "type": "string",
+          "description": "full HTTP request and response in the output",
+          "required": false
+        }
+      ]
+    },
+    "attestation": {
+      "description": "Download and verify artifact attestations.",
+      "effects": {
+        "network": true,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": false
+      },
+      "options": [],
+      "commands": {
+        "download": {
+          "description": "Download an artifact's attestations for offline use",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "trusted-root": {
+          "description": "Output trusted_root.jsonl contents, likely for offline verification",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "verify": {
+          "description": "Verify an artifact's integrity using attestations",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "completion": {
+      "description": "Generate shell completion scripts for GitHub CLI commands.",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": false
+      },
+      "options": [
+        {
+          "name": "shell",
+          "flags": [
+            "-s",
+            "--shell"
+          ],
+          "type": "string",
+          "description": "Shell type: {bash|zsh|fish|powershell}",
+          "required": false
+        }
+      ]
+    },
+    "config": {
+      "description": "Display or change configuration settings for gh.",
+      "effects": {
+        "network": true,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": false
+      },
+      "options": [],
+      "commands": {
+        "clear-cache": {
+          "description": "Clear the cli cache",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "get": {
+          "description": "Print the value of a given configuration key",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "Print a list of configuration keys and values",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "set": {
+          "description": "Update configuration with a value for the given key",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "extension": {
+      "description": "GitHub CLI extensions are repositories that provide additional gh commands.",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [],
+      "commands": {
+        "browse": {
+          "description": "Enter a UI for browsing, adding, and removing extensions",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "create": {
+          "description": "Create a new extension",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "exec": {
+          "description": "Execute an installed extension",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "install": {
+          "description": "Install a gh extension from a repository",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "List installed extension commands",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "remove": {
+          "description": "Remove an installed extension",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "search": {
+          "description": "Search extensions to the GitHub CLI",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "upgrade": {
+          "description": "Upgrade installed extensions",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "gpg-key": {
+      "description": "Manage GPG keys registered with your GitHub account.",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [],
+      "commands": {
+        "add": {
+          "description": "Add a GPG key to your GitHub account",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "delete": {
+          "description": "Delete a GPG key from your GitHub account",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "list": {
+          "description": "Lists GPG keys in your GitHub account",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "label": {
+      "description": "Work with GitHub labels.",
+      "effects": {
+        "network": true,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [
+        {
+          "name": "repo",
+          "flags": [
+            "-R",
+            "--repo"
+          ],
+          "type": "boolean",
+          "description": "[HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format",
+          "required": false
+        }
+      ],
+      "commands": {
+        "clone": {
+          "description": "Clones labels from one repository to another",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "create": {
+          "description": "Create a new label",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "delete": {
+          "description": "Delete a label from a repository",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "edit": {
+          "description": "Edit a label",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "List labels in a repository",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "preview": {
+      "description": "Preview commands are for testing, demonstrative, and development purposes only.",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": false
+      },
+      "options": [],
+      "commands": {
+        "prompter": {
+          "description": "Execute a test program to preview the prompter",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "ruleset": {
+      "description": "Repository rulesets are a way to define a set of rules that apply to a repository.",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": false
+      },
+      "options": [
+        {
+          "name": "repo",
+          "flags": [
+            "-R",
+            "--repo"
+          ],
+          "type": "boolean",
+          "description": "[HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format",
+          "required": false
+        }
+      ],
+      "commands": {
+        "check": {
+          "description": "View rules that would apply to a given branch",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "List rulesets for a repository or organization",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "view": {
+          "description": "View information about a ruleset",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "search": {
+      "description": "Search across all of GitHub.",
+      "effects": {
+        "network": true,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": false
+      },
+      "options": [],
+      "commands": {
+        "code": {
+          "description": "Search within code",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "commits": {
+          "description": "Search for commits",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "issues": {
+          "description": "Search for issues",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "prs": {
+          "description": "Search for pull requests",
+          "effects": {
+            "network": true,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "repos": {
+          "description": "Search for repositories",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": false,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "secret": {
+      "description": "Secrets can be set at the repository, or organization level for use in",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [
+        {
+          "name": "repo",
+          "flags": [
+            "-R",
+            "--repo"
+          ],
+          "type": "boolean",
+          "description": "[HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format",
+          "required": false
+        }
+      ],
+      "commands": {
+        "delete": {
+          "description": "Delete secrets",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "list": {
+          "description": "List secrets",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "set": {
+          "description": "Create or update secrets",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "ssh-key": {
+      "description": "Manage SSH keys registered with your GitHub account.",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [],
+      "commands": {
+        "add": {
+          "description": "Add an SSH key to your GitHub account",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        },
+        "delete": {
+          "description": "Delete an SSH key from your GitHub account",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "list": {
+          "description": "Lists SSH keys in your GitHub account",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        }
+      }
+    },
+    "status": {
+      "description": "The status command prints information about your work on GitHub across all the repositories you're subscribed to, including:",
+      "effects": {
+        "network": true,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": false
+      },
+      "options": [
+        {
+          "name": "exclude",
+          "flags": [
+            "-e",
+            "--exclude"
+          ],
+          "type": "string",
+          "description": "Comma separated list of repos to exclude in owner/name format",
+          "required": false
+        },
+        {
+          "name": "org",
+          "flags": [
+            "-o",
+            "--org"
+          ],
+          "type": "string",
+          "description": "Report status within an organization",
+          "required": false
+        }
+      ]
+    },
+    "variable": {
+      "description": "Variables can be set at the repository, environment or organization level for use in",
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "reversible": true,
+        "destructive": true
+      },
+      "options": [
+        {
+          "name": "repo",
+          "flags": [
+            "-R",
+            "--repo"
+          ],
+          "type": "boolean",
+          "description": "[HOST/]OWNER/REPO   Select another repository using the [HOST/]OWNER/REPO format",
+          "required": false
+        }
+      ],
+      "commands": {
+        "delete": {
+          "description": "Delete variables",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": true
+          }
+        },
+        "get": {
+          "description": "Get variables",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "list": {
+          "description": "List variables",
+          "effects": {
+            "network": false,
+            "idempotent": true,
+            "reversible": true,
+            "destructive": false
+          }
+        },
+        "set": {
+          "description": "Create or update variables",
+          "effects": {
+            "network": false,
+            "idempotent": false,
+            "reversible": false,
+            "destructive": false
+          }
+        }
+      }
+    }
+  }
+}
