@@ -1,0 +1,457 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://atip.dev/schema/0.4.json",
+  "title": "Agent Tool Introspection Protocol (ATIP)",
+  "description": "Schema for ATIP v0.4 tool metadata",
+  "type": "object",
+  "required": ["atip", "name", "version", "description"],
+  "properties": {
+    "atip": {
+      "description": "Protocol version and features",
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^0\\.[1-4]$",
+          "description": "Legacy format (v0.1-0.3)"
+        },
+        {
+          "type": "object",
+          "required": ["version"],
+          "properties": {
+            "version": {
+              "type": "string",
+              "pattern": "^0\\.[1-4]$",
+              "description": "Protocol version"
+            },
+            "features": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "partial-discovery",
+                  "interactive-effects",
+                  "trust-v1",
+                  "patterns-v1"
+                ]
+              },
+              "description": "Optional features used by this metadata"
+            },
+            "minAgentVersion": {
+              "type": "string",
+              "pattern": "^0\\.[1-4]$",
+              "description": "Minimum agent version required"
+            }
+          }
+        }
+      ]
+    },
+    "name": {
+      "type": "string",
+      "description": "Command name (must match executable)",
+      "pattern": "^[a-zA-Z0-9_-]+$"
+    },
+    "version": {
+      "type": "string",
+      "description": "Tool version"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "One-line description"
+    },
+    "homepage": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL for documentation"
+    },
+    "partial": {
+      "type": "boolean",
+      "description": "True if this is partial metadata (filtered)"
+    },
+    "filter": {
+      "type": "object",
+      "properties": {
+        "commands": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "depth": {
+          "type": ["integer", "null"],
+          "minimum": 1
+        }
+      }
+    },
+    "totalCommands": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "includedCommands": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "omitted": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "type": "string",
+          "enum": ["filtered", "depth-limited", "size-limited", "deprecated"]
+        },
+        "safetyAssumption": {
+          "type": "string",
+          "enum": ["unknown", "known-safe", "known-unsafe", "same-as-included"]
+        }
+      }
+    },
+    "trust": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": ["native", "vendor", "org", "community", "user", "inferred"],
+          "description": "Origin of metadata"
+        },
+        "verified": {
+          "type": "boolean",
+          "description": "Whether metadata has been verified"
+        },
+        "checksum": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+:[a-fA-F0-9]+$",
+          "description": "Hash of tool binary (format: algo:hex)"
+        },
+        "signedBy": {
+          "type": "string",
+          "description": "Entity that signed this metadata"
+        },
+        "attestation": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to verification attestation"
+        }
+      }
+    },
+    "commands": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/command"
+      }
+    },
+    "globalOptions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/option"
+      }
+    },
+    "authentication": {
+      "$ref": "#/definitions/authentication"
+    },
+    "effects": {
+      "$ref": "#/definitions/effects"
+    },
+    "patterns": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/pattern"
+      }
+    }
+  },
+  "additionalProperties": {
+    "description": "Allow vendor extensions with x- prefix"
+  },
+  "definitions": {
+    "command": {
+      "type": "object",
+      "required": ["description"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "What this command does"
+        },
+        "arguments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/argument"
+          }
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/option"
+          }
+        },
+        "commands": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/command"
+          },
+          "description": "Nested subcommands"
+        },
+        "effects": {
+          "$ref": "#/definitions/effects"
+        },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "argument": {
+      "type": "object",
+      "required": ["name", "type", "description"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/paramType"
+        },
+        "description": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean",
+          "default": true
+        },
+        "default": {},
+        "variadic": {
+          "type": "boolean",
+          "default": false
+        },
+        "enum": {
+          "type": "array",
+          "items": {
+            "type": ["string", "number", "integer"]
+          }
+        }
+      }
+    },
+    "option": {
+      "type": "object",
+      "required": ["name", "flags", "type", "description"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^-"
+          },
+          "minItems": 1
+        },
+        "type": {
+          "$ref": "#/definitions/paramType"
+        },
+        "description": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean",
+          "default": false
+        },
+        "default": {},
+        "enum": {
+          "type": "array",
+          "items": {
+            "type": ["string", "number", "integer"]
+          }
+        },
+        "envVar": {
+          "type": "string",
+          "pattern": "^[A-Z_][A-Z0-9_]*$"
+        }
+      }
+    },
+    "paramType": {
+      "type": "string",
+      "enum": [
+        "string",
+        "integer",
+        "number",
+        "boolean",
+        "file",
+        "directory",
+        "url",
+        "enum",
+        "array"
+      ]
+    },
+    "effects": {
+      "type": "object",
+      "properties": {
+        "filesystem": {
+          "type": "object",
+          "properties": {
+            "read": {
+              "type": "boolean"
+            },
+            "write": {
+              "type": "boolean"
+            },
+            "delete": {
+              "type": "boolean"
+            },
+            "paths": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "network": {
+          "type": "boolean"
+        },
+        "subprocess": {
+          "type": "boolean"
+        },
+        "idempotent": {
+          "type": "boolean"
+        },
+        "reversible": {
+          "type": "boolean"
+        },
+        "destructive": {
+          "type": "boolean"
+        },
+        "creates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "modifies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deletes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "interactive": {
+          "type": "object",
+          "properties": {
+            "stdin": {
+              "type": "string",
+              "enum": ["none", "optional", "required", "password"]
+            },
+            "prompts": {
+              "type": "boolean"
+            },
+            "tty": {
+              "type": "boolean"
+            }
+          }
+        },
+        "cost": {
+          "type": "object",
+          "properties": {
+            "estimate": {
+              "type": "string",
+              "enum": ["free", "low", "medium", "high"]
+            },
+            "billable": {
+              "type": "boolean"
+            }
+          }
+        },
+        "duration": {
+          "type": "object",
+          "properties": {
+            "typical": {
+              "type": "string",
+              "pattern": "^[0-9]+-[0-9]+[smh]$"
+            },
+            "timeout": {
+              "type": "string",
+              "pattern": "^[0-9]+[smh]$"
+            }
+          }
+        }
+      }
+    },
+    "authentication": {
+      "type": "object",
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "methods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["token", "oauth", "api-key", "password", "certificate"]
+              },
+              "envVar": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "setupCommand": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "checkCommand": {
+          "type": "string",
+          "description": "Command to verify authentication"
+        }
+      }
+    },
+    "pattern": {
+      "type": "object",
+      "required": ["name", "description", "steps"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["command"],
+            "properties": {
+              "command": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "variables": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["type", "description"],
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
