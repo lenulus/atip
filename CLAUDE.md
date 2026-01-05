@@ -29,18 +29,26 @@ atip/
 ├── examples/                # Reference ATIP metadata (must validate)
 ├── shims/                   # Community shims for legacy tools
 ├── reference/               # Reference implementations
-│   ├── atip-validate/       # Schema validator
-│   │   ├── blue/            # Design docs for this implementation
+│   ├── atip-validate/       # Schema validator (pre-BRGR)
 │   │   └── src/
-│   ├── atip-gen/            # --help parser/generator
-│   │   ├── blue/            # Design docs for this implementation
+│   ├── atip-gen/            # --help parser/generator (pre-BRGR)
 │   │   └── src/
-│   ├── atip-bridge/         # Compiler library (OpenAI/Gemini/Anthropic)
-│   │   ├── blue/            # Design docs for this implementation
-│   │   └── src/
-│   └── atip-discover/       # Discovery tool
-│       ├── blue/            # Design docs for this implementation
-│       └── src/
+│   ├── atip-bridge/         # Compiler library (NEW - follows BRGR)
+│   │   ├── blue/            # Design docs (api.md, design.md, examples.md)
+│   │   ├── src/             # Source code
+│   │   ├── tests/           # Test files
+│   │   │   ├── unit/        # Unit tests
+│   │   │   └── integration/ # Integration tests
+│   │   ├── package.json
+│   │   └── README.md
+│   └── atip-discover/       # Discovery tool (NEW - follows BRGR)
+│       ├── blue/
+│       ├── src/
+│       ├── tests/
+│       │   ├── unit/
+│       │   └── integration/
+│       ├── package.json
+│       └── README.md
 └── docs/                    # Additional documentation
 ```
 
@@ -311,13 +319,34 @@ Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`
 
 ### Testing
 
-Once test infrastructure exists:
-
-```bash
-npm test              # Run all tests
-npm run validate      # Validate all JSON against schema
-npm run test:schema   # Schema-specific tests
+**Directory structure:**
 ```
+tests/
+├── unit/              # Fast, isolated unit tests
+│   ├── transformers.test.ts
+│   └── validators.test.ts
+└── integration/       # End-to-end integration tests
+    └── compile-tools.test.ts
+```
+
+**Naming conventions:**
+- Test files: `*.test.ts` or `*.spec.ts`
+- Unit tests: One file per source module (e.g., `transformer.ts` → `tests/unit/transformer.test.ts`)
+- Integration tests: One file per workflow/scenario
+
+**Running tests:**
+```bash
+npm test                    # Run all tests (unit + integration)
+npm run test:unit           # Unit tests only (fast)
+npm run test:integration    # Integration tests only
+npm run test:watch          # Watch mode for development
+npm run validate            # Validate all JSON against schema
+```
+
+**Coverage requirements:**
+- Aim for 80%+ coverage on core logic
+- 100% coverage on safety-critical code (effects handling, validation)
+- Integration tests must use real ATIP examples from `examples/`
 
 ---
 
