@@ -108,7 +108,7 @@ See [docs/adoption-guide.md](./docs/adoption-guide.md) for full details.
 
 ### For Legacy Tools
 
-Create a shim file for tools that don't natively support `--agent`:
+For tools that don't natively support `--agent`, you can create shim files:
 
 ```bash
 # ~/.local/share/agent-tools/shims/curl.json
@@ -127,7 +127,11 @@ Create a shim file for tools that don't natively support `--agent`:
 }
 ```
 
-See [shims/README.md](./shims/README.md) for contribution guidelines.
+Or use `atip-gen` to auto-generate metadata from `--help` output:
+
+```bash
+atip-gen curl -o shims/curl.json
+```
 
 ### For Agent Developers
 
@@ -210,18 +214,18 @@ ATIP complements MCP—use ATIP for discovery, MCP for stateful execution when n
 atip/
 ├── spec/rfc.md              # Full specification (v0.4.0)
 ├── schema/0.4.json          # JSON Schema for validation
-├── examples/                # Reference implementations
+├── examples/                # Example ATIP metadata
 │   ├── gh.json              # Full example (GitHub CLI)
 │   ├── minimal.json         # Minimal valid ATIP
-│   └── kubectl-partial.json # Partial discovery
-├── shims/                   # Community shims for legacy tools
-│   ├── curl.json
-│   ├── rsync.json
-│   └── jq.json
+│   └── tools/               # Example tools implementing --agent
+│       ├── hello-atip       # Minimal bash example
+│       └── atip-echo        # Effects metadata example
 ├── reference/               # Reference implementations
-│   ├── atip-bridge/         # TypeScript/Python library
-│   ├── atip-discover/       # Discovery CLI tool
-│   └── atip-gen/            # Auto-generate shims
+│   ├── atip-bridge/         # TypeScript compiler library
+│   ├── atip-discover/       # Discovery CLI (TypeScript)
+│   ├── atip-discover-go/    # Discovery CLI (Go)
+│   ├── atip-validate/       # Schema validator
+│   └── atip-gen/            # Auto-generate from --help
 └── docs/                    # Additional documentation
     ├── adoption-guide.md
     ├── agent-integration.md
@@ -237,6 +241,13 @@ atip/
 - **[Agent Integration](./docs/agent-integration.md)** — For agent developers
 - **[Why Not MCP?](./docs/why-not-mcp.md)** — Positioning and comparison
 - **[Contributing](./CONTRIBUTING.md)** — How to contribute
+
+### Reference Tools
+
+- **[atip-discover](./reference/atip-discover/)** — Scan PATH for ATIP-compatible tools
+- **[atip-validate](./reference/atip-validate/)** — Validate ATIP metadata against schema
+- **[atip-gen](./reference/atip-gen/)** — Generate ATIP metadata from --help output
+- **[atip-bridge](./reference/atip-bridge/)** — TypeScript library for compiling ATIP to provider formats
 
 ---
 
@@ -269,6 +280,12 @@ See [examples/gh.json](./examples/gh.json) for a complete GitHub CLI example wit
 - Authentication requirements
 - Effect declarations
 - Usage patterns
+
+### Example Tools
+
+See [examples/tools/](./examples/tools/) for working CLI tools that implement `--agent`:
+- `hello-atip` — Minimal bash example
+- `atip-echo` — Demonstrates various effects metadata
 
 ---
 
