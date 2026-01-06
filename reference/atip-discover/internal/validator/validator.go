@@ -1,3 +1,5 @@
+// Package validator provides JSON schema validation for ATIP metadata,
+// ensuring tool metadata conforms to the ATIP specification.
 package validator
 
 import (

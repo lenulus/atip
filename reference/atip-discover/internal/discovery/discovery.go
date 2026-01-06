@@ -1,3 +1,5 @@
+// Package discovery provides tools for scanning directories and discovering
+// ATIP-compatible command-line tools by probing executables with the --agent flag.
 package discovery
 
 import (
@@ -38,7 +40,10 @@ func NewScanner(timeout time.Duration, parallelism int, skipList []string) (*Sca
 	}, nil
 }
 
-// Scan scans the specified directories for ATIP tools.
+// Scan scans the specified directories for ATIP-compatible tools.
+// It enumerates executables, filters by skip list, and probes them in parallel.
+// When incremental is true, only probes tools that have been modified since last scan.
+// Returns aggregated scan results including discovered tools and errors.
 func (s *Scanner) Scan(ctx context.Context, paths []string, incremental bool, existingRegistry map[string]time.Time) (*ScanResult, error) {
 	start := time.Now()
 	result := &ScanResult{
@@ -159,7 +164,9 @@ func NewProber(timeout time.Duration) *Prober {
 	return &Prober{timeout: timeout}
 }
 
-// Probe executes a tool with --agent and returns parsed metadata.
+// Probe executes a tool with --agent flag and returns parsed ATIP metadata.
+// Respects the configured timeout and validates the JSON output.
+// Returns an error if the tool doesn't support --agent, times out, or returns invalid JSON.
 func (p *Prober) Probe(ctx context.Context, path string) (*validator.AtipMetadata, error) {
 	ctx, cancel := context.WithTimeout(ctx, p.timeout)
 	defer cancel()
@@ -209,7 +216,8 @@ type ScanError struct {
 	Error string `json:"error"`
 }
 
-// IsSafePath checks if a path is safe to scan.
+// IsSafePath checks if a path is safe to scan based on ownership and permissions.
+// Returns false if the path is world-writable, owned by another user, or is the current directory.
 func IsSafePath(path string) (bool, error) {
 	// Reject current directory
 	if path == "." || path == "" {
@@ -218,7 +226,7 @@ func IsSafePath(path string) (bool, error) {
 
 	info, err := os.Stat(path)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("failed to stat path %s: %w", path, err)
 	}
 
 	// Check world-writable (on Unix systems)
@@ -241,10 +249,11 @@ func IsSafePath(path string) (bool, error) {
 }
 
 // EnumerateExecutables finds all executables in a directory.
+// Returns a list of absolute paths to executable files.
 func EnumerateExecutables(dir string) ([]string, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read directory %s: %w", dir, err)
 	}
 
 	var executables []string
@@ -277,7 +286,8 @@ func EnumerateExecutables(dir string) ([]string, error) {
 	return executables, nil
 }
 
-// MatchesSkipList checks if a tool name is in the skip list.
+// MatchesSkipList checks if a tool name matches any pattern in the skip list.
+// Supports both exact matches and glob patterns (e.g., "test*").
 func MatchesSkipList(toolName string, skipList []string) bool {
 	for _, skip := range skipList {
 		// Support glob patterns

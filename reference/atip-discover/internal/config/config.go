@@ -1,3 +1,5 @@
+// Package config provides configuration management for atip-discover,
+// supporting configuration files, environment variables, and CLI flags.
 package config
 
 import (

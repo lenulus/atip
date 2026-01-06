@@ -178,9 +178,7 @@ func runScan(args []string) {
 	}
 
 	// Load existing registry for incremental scan
-	dataDir := xdg.AgentToolsDataDir()
-	registryPath := filepath.Join(dataDir, "registry.json")
-	reg, err := registry.Load(registryPath, dataDir)
+	reg, err := loadRegistry()
 	if err != nil {
 		exitWithError("Failed to load registry", err)
 	}
@@ -230,7 +228,7 @@ func runScan(args []string) {
 		}
 
 		// Add to registry
-		reg.Add(&registry.RegistryEntry{
+		entry := &registry.RegistryEntry{
 			Name:         tool.Name,
 			Version:      tool.Version,
 			Path:         tool.Path,
@@ -238,19 +236,11 @@ func runScan(args []string) {
 			DiscoveredAt: tool.DiscoveredAt,
 			LastVerified: time.Now(),
 			ModTime:      modTime,
-		})
-
-		// Cache metadata
-		cachePath := filepath.Join(dataDir, "tools", tool.Name+".json")
-		os.MkdirAll(filepath.Dir(cachePath), 0755)
-
-		// Probe again to get full metadata for caching
-		prober := discovery.NewProber(timeout)
-		metadata, err := prober.Probe(ctx, tool.Path)
-		if err == nil {
-			data, _ := json.MarshalIndent(metadata, "", "  ")
-			os.WriteFile(cachePath, data, 0644)
 		}
+		reg.Add(entry)
+
+		// Cache metadata (ignore errors - caching is optional)
+		_ = cacheMetadata(ctx, entry, timeout)
 	}
 
 	// Override result counts with CLI-level counts
@@ -266,7 +256,7 @@ func runScan(args []string) {
 	}
 
 	// Write output
-	writer, err := output.NewWriter(output.Format(*outputFormat), os.Stdout)
+	writer, err := createOutputWriter(*outputFormat)
 	if err != nil {
 		exitWithError("Invalid output format", err)
 	}
@@ -281,12 +271,11 @@ func runList(args []string) {
 	fs.Parse(args)
 
 	// Load registry
-	dataDir := xdg.AgentToolsDataDir()
-	registryPath := filepath.Join(dataDir, "registry.json")
-	reg, err := registry.Load(registryPath, dataDir)
+	reg, err := loadRegistry()
 	if err != nil {
 		exitWithError("Failed to load registry", err)
 	}
+	dataDir := xdg.AgentToolsDataDir()
 
 	// List tools
 	tools, err := reg.List(*pattern, *sourceFilter)
@@ -333,7 +322,7 @@ func runList(args []string) {
 	}
 
 	// Write output
-	writer, err := output.NewWriter(output.Format(*outputFormat), os.Stdout)
+	writer, err := createOutputWriter(*outputFormat)
 	if err != nil {
 		exitWithError("Invalid output format", err)
 	}
@@ -353,12 +342,11 @@ func runGet(args []string) {
 	toolName := fs.Args()[0]
 
 	// Load registry
-	dataDir := xdg.AgentToolsDataDir()
-	registryPath := filepath.Join(dataDir, "registry.json")
-	reg, err := registry.Load(registryPath, dataDir)
+	reg, err := loadRegistry()
 	if err != nil {
 		exitWithError("Failed to load registry", err)
 	}
+	dataDir := xdg.AgentToolsDataDir()
 
 	// Get tool
 	entry, err := reg.Get(toolName)
@@ -391,7 +379,7 @@ func runGet(args []string) {
 		if err := json.Unmarshal(data, &metadata); err != nil {
 			exitWithError("Failed to parse metadata", err)
 		}
-		writer, _ := output.NewWriter(output.Format(*outputFormat), os.Stdout)
+		writer, _ := createOutputWriter(*outputFormat)
 		writer.Write(metadata)
 	}
 }
@@ -402,15 +390,14 @@ func runRefresh(args []string) {
 	fs.Parse(args)
 
 	// Load registry
-	dataDir := xdg.AgentToolsDataDir()
-	registryPath := filepath.Join(dataDir, "registry.json")
-	reg, err := registry.Load(registryPath, dataDir)
+	reg, err := loadRegistry()
 	if err != nil {
 		exitWithError("Failed to load registry", err)
 	}
 
 	ctx := context.Background()
-	prober := discovery.NewProber(2 * time.Second)
+	timeout := 2 * time.Second
+	prober := discovery.NewProber(timeout)
 
 	type RefreshTool struct {
 		Name       string `json:"name"`
@@ -440,7 +427,7 @@ func runRefresh(args []string) {
 			continue
 		}
 
-		// Update registry entry
+		// Update registry entry with new version and mod time
 		info, _ := os.Stat(entry.Path)
 		var modTime time.Time
 		if info != nil {
@@ -452,10 +439,8 @@ func runRefresh(args []string) {
 		entry.ModTime = modTime
 		reg.Add(entry)
 
-		// Update cache
-		cachePath := entry.CachePath(dataDir)
-		data, _ := json.MarshalIndent(metadata, "", "  ")
-		os.WriteFile(cachePath, data, 0644)
+		// Update cache (ignore errors - caching is optional)
+		_ = cacheMetadata(ctx, entry, timeout)
 
 		status := "unchanged"
 		if metadata.Version != oldVersion {
@@ -486,7 +471,7 @@ func runRefresh(args []string) {
 	}
 
 	// Write output
-	writer, err := output.NewWriter(output.Format(*outputFormat), os.Stdout)
+	writer, err := createOutputWriter(*outputFormat)
 	if err != nil {
 		exitWithError("Invalid output format", err)
 	}
@@ -517,4 +502,39 @@ func printUsage() {
 func exitWithError(msg string, err error) {
 	fmt.Fprintf(os.Stderr, "Error: %s: %v\n", msg, err)
 	os.Exit(1)
+}
+
+// loadRegistry loads the registry from the standard location
+func loadRegistry() (*registry.Registry, error) {
+	dataDir := xdg.AgentToolsDataDir()
+	registryPath := filepath.Join(dataDir, "registry.json")
+	return registry.Load(registryPath, dataDir)
+}
+
+// createOutputWriter creates an output writer for the given format
+func createOutputWriter(format string) (output.Writer, error) {
+	return output.NewWriter(output.Format(format), os.Stdout)
+}
+
+// cacheMetadata saves tool metadata to the cache
+func cacheMetadata(ctx context.Context, tool *registry.RegistryEntry, timeout time.Duration) error {
+	dataDir := xdg.AgentToolsDataDir()
+	cachePath := filepath.Join(dataDir, "tools", tool.Name+".json")
+
+	if err := os.MkdirAll(filepath.Dir(cachePath), 0755); err != nil {
+		return err
+	}
+
+	prober := discovery.NewProber(timeout)
+	metadata, err := prober.Probe(ctx, tool.Path)
+	if err != nil {
+		return err
+	}
+
+	data, err := json.MarshalIndent(metadata, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(cachePath, data, 0644)
 }

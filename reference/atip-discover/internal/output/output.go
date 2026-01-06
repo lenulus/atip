@@ -1,3 +1,5 @@
+// Package output provides output formatters for displaying scan results
+// and tool metadata in various formats (JSON, table, quiet).
 package output
 
 import (
@@ -5,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"reflect"
-	"strings"
 )
 
 // Format represents an output format.
@@ -200,80 +201,4 @@ func (qw *QuietWriter) Write(v interface{}) error {
 
 	// Empty output for empty lists
 	return nil
-}
-
-// Helper function to extract tools from various structures
-func extractTools(v interface{}) []interface{} {
-	val := reflect.ValueOf(v)
-
-	if val.Kind() == reflect.Struct {
-		for i := 0; i < val.NumField(); i++ {
-			field := val.Field(i)
-			if val.Type().Field(i).Name == "Tools" && field.Kind() == reflect.Slice {
-				tools := make([]interface{}, field.Len())
-				for j := 0; j < field.Len(); j++ {
-					tools[j] = field.Index(j).Interface()
-				}
-				return tools
-			}
-		}
-	}
-
-	return nil
-}
-
-// Helper function to format table with proper alignment
-func formatTable(headers []string, rows [][]string) string {
-	if len(rows) == 0 {
-		return "No tools found"
-	}
-
-	// Calculate column widths
-	widths := make([]int, len(headers))
-	for i, h := range headers {
-		widths[i] = len(h)
-	}
-
-	for _, row := range rows {
-		for i, cell := range row {
-			if i < len(widths) && len(cell) > widths[i] {
-				widths[i] = len(cell)
-			}
-		}
-	}
-
-	var b strings.Builder
-
-	// Write header
-	for i, h := range headers {
-		if i > 0 {
-			b.WriteString(" ")
-		}
-		b.WriteString(padRight(h, widths[i]))
-	}
-	b.WriteString("\n")
-
-	// Write rows
-	for _, row := range rows {
-		for i, cell := range row {
-			if i > 0 {
-				b.WriteString(" ")
-			}
-			if i < len(widths) {
-				b.WriteString(padRight(cell, widths[i]))
-			} else {
-				b.WriteString(cell)
-			}
-		}
-		b.WriteString("\n")
-	}
-
-	return b.String()
-}
-
-func padRight(s string, width int) string {
-	if len(s) >= width {
-		return s
-	}
-	return s + strings.Repeat(" ", width-len(s))
 }

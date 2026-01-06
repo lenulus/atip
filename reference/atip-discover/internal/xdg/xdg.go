@@ -1,3 +1,5 @@
+// Package xdg provides XDG Base Directory specification support,
+// managing configuration and data directories for atip-discover.
 package xdg
 
 import (

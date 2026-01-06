@@ -1,3 +1,5 @@
+// Package registry manages the persistent index of discovered ATIP tools,
+// providing storage, retrieval, and metadata caching functionality.
 package registry
 
 import (
@@ -98,10 +100,8 @@ func (r *Registry) Add(entry *RegistryEntry) error {
 	for i, existing := range r.Tools {
 		if existing.Name == entry.Name {
 			// Update existing entry
-			// Preserve DiscoveredAt from original
-			if !entry.DiscoveredAt.IsZero() {
-				// Use provided DiscoveredAt
-			} else {
+			// Preserve DiscoveredAt from original if not provided
+			if entry.DiscoveredAt.IsZero() {
 				entry.DiscoveredAt = existing.DiscoveredAt
 			}
 			r.Tools[i] = entry
@@ -174,7 +174,9 @@ func (r *Registry) Clear() error {
 	return nil
 }
 
-// LoadShims loads shim files from the shims directory.
+// LoadShims loads shim metadata files from the shims directory.
+// Shims are JSON files providing ATIP metadata for tools that don't natively support --agent.
+// Invalid shims are silently skipped to avoid breaking the registry.
 func (r *Registry) LoadShims() error {
 	shimsDir := filepath.Join(r.dataDir, "shims")
 	entries, err := os.ReadDir(shimsDir)
@@ -225,7 +227,8 @@ func (r *Registry) LoadShims() error {
 	return nil
 }
 
-// IsStale returns true if the entry's executable has been modified.
+// IsStale returns true if the entry's executable has been modified since last verification.
+// Shims are never considered stale. Returns true if file is inaccessible.
 func (e *RegistryEntry) IsStale() bool {
 	if e.Source == "shim" {
 		return false // Shims don't change
@@ -243,7 +246,8 @@ func (e *RegistryEntry) IsStale() bool {
 	return info.ModTime().After(e.ModTime)
 }
 
-// CachePath returns the path to the cached metadata file.
+// CachePath returns the path to the cached metadata file for this tool.
+// If MetadataFile is set, uses that; otherwise constructs path from tool name.
 func (e *RegistryEntry) CachePath(dataDir string) string {
 	if e.MetadataFile != "" {
 		return filepath.Join(dataDir, "tools", e.MetadataFile)
