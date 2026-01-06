@@ -8,7 +8,7 @@ describe('Minimal Example Integration', () => {
   let minimalTool: AtipTool;
 
   test('should load minimal.json example', () => {
-    const minimalPath = join(__dirname, '../../../examples/minimal.json');
+    const minimalPath = join(__dirname, '../../../../examples/minimal.json');
     const minimalJson = readFileSync(minimalPath, 'utf-8');
     minimalTool = JSON.parse(minimalJson);
 
@@ -55,8 +55,10 @@ describe('Minimal Example Integration', () => {
       expect(result[0].function.description).not.toContain('⚠️ DESTRUCTIVE');
       expect(result[0].function.description).not.toContain('⚠️ NOT REVERSIBLE');
 
-      // Should have READ-ONLY flag since no network or filesystem writes
-      expect(result[0].function.description).toContain('🔒 READ-ONLY');
+      // Should NOT have READ-ONLY flag because filesystem.write is not explicitly false
+      // An empty filesystem object {} means "unspecified", not "read-only"
+      // READ-ONLY requires: network === false AND filesystem.write === false (explicit)
+      expect(result[0].function.description).not.toContain('🔒 READ-ONLY');
     });
   });
 

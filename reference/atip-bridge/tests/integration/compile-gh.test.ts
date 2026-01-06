@@ -17,7 +17,7 @@ describe('GitHub CLI Integration', () => {
 
   // Load the actual gh.json example from the repository
   test('should load gh.json example', () => {
-    const ghPath = join(__dirname, '../../../examples/gh.json');
+    const ghPath = join(__dirname, '../../../../examples/gh.json');
     const ghJson = readFileSync(ghPath, 'utf-8');
     ghTool = JSON.parse(ghJson);
 
