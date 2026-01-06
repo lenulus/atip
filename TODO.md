@@ -74,6 +74,7 @@
 | atip-bridge | TypeScript | npm, tsup, vitest | Library for JS/TS agents; matches spec Appendix A |
 | atip-bridge-py | Python | uv, pytest | Python port (future) - better debugging, wider adoption |
 | atip-discover | Go | go test | CLI tool; single binary, fast startup, ideal for PATH scanning |
+| atip-discover-ts | TypeScript | npm, tsup, vitest | TypeScript port for Node.js agents and npm ecosystem |
 
 **BRGR Agent Workflow:**
 Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`):
@@ -117,23 +118,23 @@ Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`
       - [ ] Complete API documentation
       - [ ] Usage examples and cookbook
 
-### Phase 4.2: atip-discover Tool (Go)
+### Phase 4.2: atip-discover Tool (Go) ✅ COMPLETE
 
 13. reference/atip-discover/ - Go CLI tool for discovery
-    - [ ] 4.2.1: Project setup and Blue phase
-      - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
-      - [ ] Initialize Go module
-      - [ ] Set up test framework (go test)
-    - [ ] 4.2.2: Discovery implementation (BRGR cycle)
-      - [ ] Blue: Document discovery algorithm and security model
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for discovery tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement discovery
-      - [ ] Refactor: **Use `brgr-refactor` agent** to optimize and secure
-    - [ ] 4.2.3: Registry and caching (BRGR cycle)
-      - [ ] Blue: Document registry format and caching strategy
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for registry tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement registry
-      - [ ] Refactor: **Use `brgr-refactor` agent** to optimize performance
+    - [x] 4.2.1: Project setup and Blue phase ✅
+      - [x] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
+      - [x] Initialize Go module
+      - [x] Set up test framework (go test)
+    - [x] 4.2.2: Discovery implementation (BRGR cycle) ✅
+      - [x] Blue: Document discovery algorithm and security model
+      - [x] Red: **Use `brgr-red-test-writer` agent** for discovery tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement discovery
+      - [x] Refactor: **Use `brgr-refactor` agent** to optimize and secure
+    - [x] 4.2.3: Registry and caching (BRGR cycle) ✅
+      - [x] Blue: Document registry format and caching strategy
+      - [x] Red: **Use `brgr-red-test-writer` agent** for registry tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement registry
+      - [x] Refactor: **Use `brgr-refactor` agent** to optimize performance
 
 ### Phase 4.3: atip-bridge-py (Python)
 
@@ -154,15 +155,38 @@ Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`
       - [ ] Package for PyPI distribution
       - [ ] Complete API documentation (Sphinx/mkdocs)
 
+### Phase 4.4: atip-discover-ts (TypeScript)
+
+15. reference/atip-discover-ts/ - TypeScript port of atip-discover
+    - [ ] 4.4.1: Project setup and Blue phase
+      - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
+      - [ ] Initialize npm package with TypeScript
+      - [ ] Configure build tooling (tsup/esbuild)
+      - [ ] Set up test framework (vitest)
+    - [ ] 4.4.2: Discovery implementation (BRGR cycle)
+      - [ ] Blue: Port discovery algorithm from Go implementation
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for discovery tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement discovery
+      - [ ] Refactor: **Use `brgr-refactor` agent** to optimize
+    - [ ] 4.4.3: Registry and CLI (BRGR cycle)
+      - [ ] Blue: Port registry format and CLI from Go
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for registry/CLI tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
+      - [ ] Refactor: **Use `brgr-refactor` agent** to make idiomatic TypeScript
+    - [ ] 4.4.4: Packaging
+      - [ ] Package for npm distribution
+      - [ ] Complete API documentation
+      - [ ] CLI binary via npx
+
 ### Phase 5: Shims & Partial Discovery (Future)
-15. examples/kubectl-partial.json - Partial discovery example
-16. shims/README.md - Shim contribution guide
-17. shims/curl.json, jq.json, etc. - Example shims
+16. examples/kubectl-partial.json - Partial discovery example
+17. shims/README.md - Shim contribution guide
+18. shims/curl.json, jq.json, etc. - Example shims
 
 ### Phase 6: Extended (Future)
-18. More shim examples (rsync, ffmpeg, etc.)
-19. ✅ Historical spec versions (0.1.0, 0.2.0, 0.3.0)
-20. schema/atip.schema.json - Symlink to latest
+19. More shim examples (rsync, ffmpeg, etc.)
+20. ✅ Historical spec versions (0.1.0, 0.2.0, 0.3.0)
+21. schema/atip.schema.json - Symlink to latest
 
 ## Notes
 
