@@ -7,6 +7,23 @@ import { transformToGeminiParams } from '../internal/params';
 
 /**
  * Transform ATIP tool metadata to Gemini function declaration format.
+ *
+ * @param tool - ATIP tool metadata to transform
+ * @returns Array of Gemini function declarations (one per flattened command)
+ *
+ * @remarks
+ * - Flattens nested subcommands (gh pr create -> gh_pr_create)
+ * - Embeds safety metadata in descriptions per spec section 8.2
+ * - Only required parameters added to required array
+ * - No description length limit enforced (Gemini has no explicit limit)
+ *
+ * @throws {AtipValidationError} If tool metadata is invalid (missing required fields)
+ *
+ * @example
+ * ```typescript
+ * const tools = toGemini(ghTool);
+ * // Returns GeminiFunctionDeclaration[] with flattened commands
+ * ```
  */
 export function toGemini(tool: AtipTool): GeminiFunctionDeclaration[] {
   validateAtipTool(tool);

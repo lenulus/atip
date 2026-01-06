@@ -3,6 +3,32 @@ import { AtipParseError } from '../errors';
 
 /**
  * Parse tool calls from a provider's response.
+ *
+ * @param provider - Source provider ('openai', 'gemini', or 'anthropic')
+ * @param response - Raw API response object
+ * @returns Array of parsed tool calls
+ *
+ * @remarks
+ * - Handles provider-specific response structures
+ * - Returns empty array if no tool calls in response
+ * - Arguments are parsed from JSON strings where applicable (OpenAI)
+ * - Tool call ID is populated from provider-specific field:
+ *   - OpenAI: tool_calls[].id
+ *   - Gemini: function name (no explicit ID)
+ *   - Anthropic: content[].id where type === 'tool_use'
+ *
+ * @throws {AtipParseError} If response structure is invalid or doesn't match expected provider format
+ *
+ * @example
+ * ```typescript
+ * // OpenAI response
+ * const calls = parseToolCall('openai', response);
+ * // Extracts from response.choices[0].message.tool_calls
+ *
+ * // Anthropic response
+ * const calls = parseToolCall('anthropic', response);
+ * // Extracts from response.content blocks where type === 'tool_use'
+ * ```
  */
 export function parseToolCall(provider: Provider, response: unknown): ToolCall[] {
   if (!response || typeof response !== 'object') {

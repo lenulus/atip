@@ -3,6 +3,27 @@ import { flattenCommands } from '../internal/flatten';
 
 /**
  * Generate a system prompt section describing tool safety properties.
+ *
+ * @param tools - Array of ATIP tools to summarize
+ * @returns Markdown-formatted safety summary for system prompt
+ *
+ * @remarks
+ * - Groups tools by safety category (destructive, billable, etc.)
+ * - Provides agent guidance for each category
+ * - Suitable for inclusion in system prompts
+ * - Returns empty string if no tools provided or no safety concerns
+ *
+ * @example
+ * ```typescript
+ * const prompt = generateSafetyPrompt([ghTool]);
+ * // Returns markdown like:
+ * // "## Tool Safety Summary
+ * //
+ * // ### Destructive Operations
+ * // The following commands permanently destroy data:
+ * // - gh_repo_delete: Delete a repository
+ * // ..."
+ * ```
  */
 export function generateSafetyPrompt(tools: AtipTool[]): string {
   if (tools.length === 0) {

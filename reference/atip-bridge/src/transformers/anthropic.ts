@@ -7,6 +7,23 @@ import { transformToAnthropicParams } from '../internal/params';
 
 /**
  * Transform ATIP tool metadata to Anthropic tool definition format.
+ *
+ * @param tool - ATIP tool metadata to transform
+ * @returns Array of Anthropic tool definitions (one per flattened command)
+ *
+ * @remarks
+ * - Flattens nested subcommands (gh pr create -> gh_pr_create)
+ * - Embeds safety metadata in descriptions per spec section 8.2
+ * - Uses input_schema instead of parameters
+ * - Only required parameters added to required array
+ *
+ * @throws {AtipValidationError} If tool metadata is invalid (missing required fields)
+ *
+ * @example
+ * ```typescript
+ * const tools = toAnthropic(ghTool);
+ * // Returns AnthropicTool[] with flattened commands
+ * ```
  */
 export function toAnthropic(tool: AtipTool): AnthropicTool[] {
   validateAtipTool(tool);

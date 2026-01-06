@@ -8,6 +8,25 @@ import { OPENAI_DESCRIPTION_MAX_LENGTH } from '../constants';
 
 /**
  * Transform ATIP tool metadata to OpenAI function calling format.
+ *
+ * @param tool - ATIP tool metadata to transform
+ * @param options - Transformation options
+ * @param options.strict - Enable OpenAI strict mode (optional params become nullable, all params required)
+ * @returns Array of OpenAI tool definitions (one per flattened command)
+ *
+ * @remarks
+ * - Flattens nested subcommands (gh pr create -> gh_pr_create)
+ * - Embeds safety metadata in descriptions per spec section 8.2
+ * - In strict mode, transforms optional parameters to nullable types
+ * - Truncates descriptions to 1024 characters (OpenAI limit)
+ *
+ * @throws {AtipValidationError} If tool metadata is invalid (missing required fields)
+ *
+ * @example
+ * ```typescript
+ * const tools = toOpenAI(ghTool, { strict: true });
+ * // Returns OpenAITool[] with flattened commands like gh_pr_create, gh_repo_list, etc.
+ * ```
  */
 export function toOpenAI(tool: AtipTool, options?: { strict?: boolean }): OpenAITool[] {
   validateAtipTool(tool);

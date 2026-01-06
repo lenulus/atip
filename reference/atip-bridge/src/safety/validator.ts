@@ -4,6 +4,30 @@ import { flattenCommands, type FlattenedCommand } from '../internal/flatten';
 
 /**
  * Create a validator for checking tool calls against a safety policy.
+ *
+ * @param tools - ATIP tools that may be called
+ * @param policy - Safety policy to enforce
+ * @returns Validator instance for checking calls
+ *
+ * @remarks
+ * - Validator caches tool metadata for fast lookups
+ * - Unknown tools are flagged with UNKNOWN_COMMAND violation
+ * - All policy violations are returned (not just first)
+ * - Policy defaults: all operations allowed
+ * - Destructive/non-reversible violations have severity 'error'
+ * - Network/filesystem violations have severity 'warning'
+ *
+ * @example
+ * ```typescript
+ * const validator = createValidator([ghTool], {
+ *   allowDestructive: false,
+ *   allowBillable: false
+ * });
+ *
+ * const result = validator.validate('gh_repo_delete', { repo: 'test' });
+ * // result.valid === false
+ * // result.violations includes DESTRUCTIVE_OPERATION
+ * ```
  */
 export function createValidator(tools: AtipTool[], policy: Policy): Validator {
   // Build index of flattened commands and tool metadata

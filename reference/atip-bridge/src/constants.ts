@@ -4,6 +4,11 @@
 export const OPENAI_DESCRIPTION_MAX_LENGTH = 1024;
 
 /**
+ * Default maximum length for result filtering (100,000 characters).
+ */
+export const DEFAULT_MAX_RESULT_LENGTH = 100000;
+
+/**
  * Safety flag prefixes used in description suffixes.
  */
 export const SAFETY_FLAGS = {

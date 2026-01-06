@@ -64,4 +64,9 @@ export type {
 export { AtipValidationError, AtipParseError } from './errors';
 
 // Constants
-export { OPENAI_DESCRIPTION_MAX_LENGTH, SAFETY_FLAGS, DEFAULT_REDACT_PATTERNS } from './constants';
+export {
+  OPENAI_DESCRIPTION_MAX_LENGTH,
+  DEFAULT_MAX_RESULT_LENGTH,
+  SAFETY_FLAGS,
+  DEFAULT_REDACT_PATTERNS,
+} from './constants';

@@ -87,32 +87,32 @@ Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`
 ### Phase 4.1: atip-bridge Library (TypeScript)
 
 12. reference/atip-bridge/ - TypeScript compiler library
-    - [ ] 4.1.1: Project setup and Blue phase
-      - [ ] **Use `brgr-blue-spec-writer` agent** to create:
-        - [ ] `blue/api.md` - Public API contracts and signatures
-        - [ ] `blue/design.md` - Architecture decisions and rationale
-        - [ ] `blue/examples.md` - Usage examples and expected behaviors
-      - [ ] Initialize npm package with TypeScript
-      - [ ] Configure build tooling (tsup/esbuild)
-      - [ ] Set up test framework (vitest)
+    - [x] 4.1.1: Project setup and Blue phase ✅
+      - [x] **Use `brgr-blue-spec-writer` agent** to create:
+        - [x] `blue/api.md` - Public API contracts and signatures
+        - [x] `blue/design.md` - Architecture decisions and rationale
+        - [x] `blue/examples.md` - Usage examples and expected behaviors
+      - [x] Initialize npm package with TypeScript
+      - [x] Configure build tooling (tsup/esbuild)
+      - [x] Set up test framework (vitest)
       - [ ] Create initial README with API reference
-    - [ ] 4.1.2: Core transformers (BRGR cycle)
-      - [ ] Blue: Document API contracts for toOpenAI/toGemini/toAnthropic
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for core transformer tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement transformers
+    - [x] 4.1.2: Core transformers (BRGR cycle) ✅
+      - [x] Blue: Document API contracts for toOpenAI/toGemini/toAnthropic
+      - [x] Red: **Use `brgr-red-test-writer` agent** for core transformer tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement transformers
       - [ ] Refactor: **Use `brgr-refactor` agent** to optimize and extract patterns
-    - [ ] 4.1.3: Safety utilities (BRGR cycle)
-      - [ ] Blue: Document API contracts for safety utilities
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for safety utility tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement utilities
+    - [x] 4.1.3: Safety utilities (BRGR cycle) ✅
+      - [x] Blue: Document API contracts for safety utilities
+      - [x] Red: **Use `brgr-red-test-writer` agent** for safety utility tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement utilities
       - [ ] Refactor: **Use `brgr-refactor` agent** to clean up and document
-    - [ ] 4.1.4: Lifecycle helpers (BRGR cycle)
-      - [ ] Blue: Document API contracts for lifecycle helpers
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for lifecycle helper tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement helpers
+    - [x] 4.1.4: Lifecycle helpers (BRGR cycle) ✅
+      - [x] Blue: Document API contracts for lifecycle helpers
+      - [x] Red: **Use `brgr-red-test-writer` agent** for lifecycle helper tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement helpers
       - [ ] Refactor: **Use `brgr-refactor` agent** to optimize provider handling
     - [ ] 4.1.5: Integration and packaging
-      - [ ] Integration tests with real ATIP examples
+      - [x] Integration tests with real ATIP examples
       - [ ] Package for npm distribution
       - [ ] Complete API documentation
       - [ ] Usage examples and cookbook
