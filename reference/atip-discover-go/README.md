@@ -1,162 +1,90 @@
-# atip-discover
+# atip-discover-go
 
-A Go CLI tool for discovering ATIP-compatible tools on your system.
+Go implementation of the ATIP discovery tool.
 
-## Status
+`atip-discover` scans for CLI tools that implement the ATIP `--agent` flag, maintains a registry of discovered tools, and caches their metadata for fast access.
 
-**RED Phase (BRGR Methodology)** - Tests are written and FAILING. Implementation is next.
-
-This project follows the BRGR (Blue, Red, Green, Refactor) methodology:
-- **Blue** - Design complete in `blue/` directory
-- **Red** - Tests written and failing (current phase)
-- **Green** - Implementation needed
-- **Refactor** - Pending
-
-## Overview
-
-`atip-discover` scans your system for tools that implement the ATIP `--agent` flag convention, maintains a local registry of discovered tools, and provides fast cached access to tool metadata.
-
-**Key Features:**
-
-- **Discovery** - Scan PATH for ATIP-compatible tools
-- **Registry** - Maintain a local index of discovered tools
-- **Caching** - Cache metadata for fast repeated access
-- **Security** - Safe defaults, respects XDG conventions
+> **Note:** The canonical implementation is the [TypeScript version](../atip-discover/). This Go version provides a single-binary alternative with fast startup time.
 
 ## Installation
 
 ```bash
-# Build from source
-cd reference/atip-discover
-go build -o atip-discover ./cmd/atip-discover
-
-# Install to PATH
+# Install to $GOPATH/bin
 go install ./cmd/atip-discover
+
+# Or build locally
+go build -o atip-discover ./cmd/atip-discover
 ```
 
-## Quick Start
+## CLI Usage
+
+### Scan for Tools
 
 ```bash
-# Discover ATIP tools on your system
+# Scan safe system paths (default)
 atip-discover scan
 
-# List all known tools
-atip-discover list
-
-# Get metadata for a specific tool
-atip-discover get gh
-
-# Refresh cached metadata
-atip-discover refresh gh
-```
-
-## Commands
-
-### scan
-
-Scan for ATIP-compatible tools.
-
-```bash
-# Default incremental scan (safe paths only)
-atip-discover scan
-
-# Full scan, ignoring cache
-atip-discover scan --full
-
-# Include additional directories
-atip-discover scan --allow-path ~/bin --allow-path /opt/tools/bin
+# Scan specific directories only
+atip-discover scan --allow-path ~/bin,/opt/tools/bin
 
 # Skip specific tools
-atip-discover scan --skip slow-tool --skip broken-tool
+atip-discover scan --skip slow-tool,broken-tool
 
-# Dry run (show what would be scanned)
+# Preview what would be scanned
 atip-discover scan --dry-run
+
+# Output formats: json (default), table, quiet
+atip-discover scan -o table
 ```
 
-### list
-
-List discovered tools from the registry.
+### List Discovered Tools
 
 ```bash
-# JSON output (default)
+# List all tools (JSON)
 atip-discover list
 
 # Human-readable table
 atip-discover list -o table
 
-# Just tool names
-atip-discover list -o quiet
-
-# Filter by source
+# Filter by source type
 atip-discover list --source native
 atip-discover list --source shim
 ```
 
-### get
-
-Get metadata for a specific tool.
+### Get Tool Metadata
 
 ```bash
-# Get full metadata as JSON
+# Get full ATIP metadata for a tool
 atip-discover get gh
 
-# Get specific field
-atip-discover get gh --field commands
-
-# Force refresh from tool
-atip-discover get gh --refresh
+# Force refresh from the tool
+atip-discover get --refresh gh
 ```
 
-### refresh
-
-Refresh cached metadata for tools.
+### Manage Registry
 
 ```bash
-# Refresh specific tool
-atip-discover refresh gh
-
-# Refresh all tools
-atip-discover refresh --all
-```
-
-### registry
-
-Manage the local registry.
-
-```bash
-# Show registry location and stats
+# Show registry stats
 atip-discover registry show
 
 # Clear all cached data
 atip-discover registry clear
 
-# Export registry to file
-atip-discover registry export > backup.json
-
-# Import registry from file
-atip-discover registry import < backup.json
+# Refresh stale entries
+atip-discover refresh --all
 ```
-
-## Output Formats
-
-| Format | Flag | Use Case |
-|--------|------|----------|
-| `json` | `-o json` | Agent integration, scripting (default) |
-| `table` | `-o table` | Human-readable display |
-| `quiet` | `-o quiet` | Minimal output (names/counts only) |
 
 ## Configuration
 
-Configuration file: `$XDG_CONFIG_HOME/agent-tools/config.json`
+Config file: `~/.config/agent-tools/config.json`
 
 ```json
 {
-  "scan": {
-    "timeout": "2s",
-    "parallel": 4,
-    "safe_paths_only": true,
-    "additional_paths": [],
-    "skip_tools": []
+  "discovery": {
+    "safe_paths": ["/usr/bin", "/usr/local/bin", "~/.local/bin"],
+    "skip_list": ["slow-tool"],
+    "scan_timeout": "2s",
+    "parallelism": 4
   },
   "cache": {
     "ttl": "24h",
@@ -165,95 +93,64 @@ Configuration file: `$XDG_CONFIG_HOME/agent-tools/config.json`
 }
 ```
 
+### Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `ATIP_DISCOVER_TIMEOUT` | Probe timeout (e.g., "5s") |
+| `ATIP_DISCOVER_PARALLEL` | Parallelism level |
+| `ATIP_DISCOVER_SKIP` | Comma-separated skip list |
+| `ATIP_DISCOVER_SAFE_PATHS` | Colon-separated safe paths |
+
 ## File Locations
 
-Following XDG Base Directory conventions:
+Following [XDG Base Directory](https://specifications.freedesktop.org/basedir-spec/) conventions:
 
 ```
-$XDG_DATA_HOME/agent-tools/     # ~/.local/share/agent-tools/
-├── registry.json               # Tool registry index
-├── tools/                      # Cached tool metadata
+~/.local/share/agent-tools/
+├── registry.json          # Index of discovered tools
+├── tools/                 # Cached ATIP metadata
 │   ├── gh.json
 │   └── kubectl.json
-└── shims/                      # Shim files for legacy tools
-    └── curl.json
+└── shims/                 # Metadata for legacy tools
 
-$XDG_CONFIG_HOME/agent-tools/   # ~/.config/agent-tools/
-├── config.json                 # User configuration
-└── overrides/                  # Per-tool overrides
-    └── gh.json
+~/.config/agent-tools/
+└── config.json            # User configuration
 ```
 
 ## Security
 
-`atip-discover` follows security best practices from the ATIP spec:
+By default, `atip-discover` only scans known-safe directories:
 
-- **Safe PATH prefixes** - By default, only scans known-safe directories:
-  - `/usr/bin`
-  - `/usr/local/bin`
-  - `/opt/homebrew/bin`
-  - `~/.local/bin`
+- `/usr/bin`
+- `/usr/local/bin`
+- `/opt/homebrew/bin`
+- `~/.local/bin`
 
-- **Skips dangerous paths**:
-  - World-writable directories
-  - Directories owned by other users
-  - Current directory (`.`) in PATH
+It automatically skips:
+- World-writable directories
+- Directories owned by other users
+- Current directory (`.`) in PATH
 
-- **Timeouts** - 2 second default timeout for probing tools
-
-Use `--allow-path` to explicitly add additional directories when needed.
+Use `--allow-path` to explicitly scan additional directories.
 
 ## Exit Codes
 
 | Code | Meaning |
 |------|---------|
 | 0 | Success |
-| 1 | Partial success (some tools failed) |
+| 1 | Partial success / no results |
 | 2 | Configuration error |
 | 3 | Fatal error |
-
-## Agent Integration
-
-### Shell Script
-
-```bash
-#!/bin/bash
-# Get all ATIP tools as JSON for agent consumption
-tools=$(atip-discover list)
-
-# Get specific tool metadata
-gh_meta=$(atip-discover get gh)
-
-# Check if tool exists
-if atip-discover get mytool >/dev/null 2>&1; then
-  echo "mytool is ATIP-compatible"
-fi
-```
-
-### Go
-
-```go
-import (
-    "encoding/json"
-    "os/exec"
-)
-
-// Discover ATIP tools
-cmd := exec.Command("atip-discover", "list")
-output, err := cmd.Output()
-if err != nil {
-    log.Fatal(err)
-}
-
-var tools []Tool
-json.Unmarshal(output, &tools)
-```
 
 ## Development
 
 ```bash
 # Run tests
 go test ./...
+
+# Run tests with coverage
+go test -cover ./...
 
 # Build
 go build -o atip-discover ./cmd/atip-discover
@@ -262,14 +159,6 @@ go build -o atip-discover ./cmd/atip-discover
 go install ./cmd/atip-discover
 ```
 
-## Design Documentation
-
-See the `blue/` directory for detailed design documentation:
-
-- [`blue/api.md`](blue/api.md) - CLI interface specification
-- [`blue/design.md`](blue/design.md) - Architecture and design decisions
-- [`blue/examples.md`](blue/examples.md) - Usage examples
-
 ## License
 
-MIT - See [LICENSE](../../LICENSE) for details.
+MIT - See [LICENSE](../../LICENSE)
