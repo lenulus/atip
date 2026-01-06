@@ -1,7 +1,6 @@
 package integration
 
 import (
-	"context"
 	"encoding/json"
 	"os"
 	"os/exec"
@@ -15,7 +14,7 @@ import (
 
 // TestFullScanWorkflow tests the complete scan workflow from design.md
 func TestFullScanWorkflow(t *testing.T) {
-	// This test validates the complete scan flow from examples.md Example 1
+	binary := getBinaryPath(t)
 
 	tmpDir := t.TempDir()
 	os.Setenv("XDG_DATA_HOME", tmpDir)
@@ -30,7 +29,7 @@ func TestFullScanWorkflow(t *testing.T) {
 	createMockATIPTool(t, mockToolsDir, "terraform", "1.6.0", "Infrastructure as Code")
 
 	// Run scan
-	cmd := exec.Command("atip-discover", "scan", "--allow-path="+mockToolsDir, "-o", "json")
+	cmd := exec.Command(binary, "scan", "--allow-path="+mockToolsDir, "-o", "json")
 	output, err := cmd.Output()
 	require.NoError(t, err)
 
@@ -60,6 +59,8 @@ func TestFullScanWorkflow(t *testing.T) {
 
 // TestIncrementalScan tests incremental vs full scan behavior from Example 7
 func TestIncrementalScan(t *testing.T) {
+	binary := getBinaryPath(t)
+
 	tmpDir := t.TempDir()
 	os.Setenv("XDG_DATA_HOME", tmpDir)
 	defer os.Unsetenv("XDG_DATA_HOME")
@@ -67,15 +68,15 @@ func TestIncrementalScan(t *testing.T) {
 	mockToolsDir := filepath.Join(tmpDir, "mock-bin")
 	require.NoError(t, os.MkdirAll(mockToolsDir, 0755))
 
-	toolPath := createMockATIPTool(t, mockToolsDir, "gh", "2.45.0", "GitHub CLI")
+	_ = createMockATIPTool(t, mockToolsDir, "gh", "2.45.0", "GitHub CLI")
 
 	// First scan
-	cmd := exec.Command("atip-discover", "scan", "--allow-path="+mockToolsDir)
+	cmd := exec.Command(binary, "scan", "--allow-path="+mockToolsDir)
 	_, err := cmd.Output()
 	require.NoError(t, err)
 
 	// Second scan (incremental, no changes)
-	cmd = exec.Command("atip-discover", "scan", "--allow-path="+mockToolsDir, "-o", "json")
+	cmd = exec.Command(binary, "scan", "--allow-path="+mockToolsDir, "-o", "json")
 	output, err := cmd.Output()
 	require.NoError(t, err)
 
@@ -94,7 +95,7 @@ func TestIncrementalScan(t *testing.T) {
 	createMockATIPTool(t, mockToolsDir, "gh", "2.46.0", "GitHub CLI")
 
 	// Third scan (incremental, tool changed)
-	cmd = exec.Command("atip-discover", "scan", "--allow-path="+mockToolsDir, "-o", "json")
+	cmd = exec.Command(binary, "scan", "--allow-path="+mockToolsDir, "-o", "json")
 	output, err = cmd.Output()
 	require.NoError(t, err)
 
@@ -107,6 +108,8 @@ func TestIncrementalScan(t *testing.T) {
 
 // TestListCommand tests the list command from Example 2
 func TestListCommand(t *testing.T) {
+	binary := getBinaryPath(t)
+
 	tmpDir := t.TempDir()
 	os.Setenv("XDG_DATA_HOME", tmpDir)
 	defer os.Unsetenv("XDG_DATA_HOME")
@@ -118,12 +121,12 @@ func TestListCommand(t *testing.T) {
 	createMockATIPTool(t, mockToolsDir, "kubectl", "1.28.0", "Kubernetes CLI")
 
 	// Scan first
-	cmd := exec.Command("atip-discover", "scan", "--allow-path="+mockToolsDir)
+	cmd := exec.Command(binary, "scan", "--allow-path="+mockToolsDir)
 	_, err := cmd.Output()
 	require.NoError(t, err)
 
 	// List tools
-	cmd = exec.Command("atip-discover", "list", "-o", "json")
+	cmd = exec.Command(binary, "list", "-o", "json")
 	output, err := cmd.Output()
 	require.NoError(t, err)
 
@@ -146,6 +149,8 @@ func TestListCommand(t *testing.T) {
 
 // TestGetCommand tests the get command from Example 3
 func TestGetCommand(t *testing.T) {
+	binary := getBinaryPath(t)
+
 	tmpDir := t.TempDir()
 	os.Setenv("XDG_DATA_HOME", tmpDir)
 	defer os.Unsetenv("XDG_DATA_HOME")
@@ -156,12 +161,12 @@ func TestGetCommand(t *testing.T) {
 	createMockATIPTool(t, mockToolsDir, "gh", "2.45.0", "GitHub CLI")
 
 	// Scan first
-	cmd := exec.Command("atip-discover", "scan", "--allow-path="+mockToolsDir)
+	cmd := exec.Command(binary, "scan", "--allow-path="+mockToolsDir)
 	_, err := cmd.Output()
 	require.NoError(t, err)
 
 	// Get tool metadata
-	cmd = exec.Command("atip-discover", "get", "gh")
+	cmd = exec.Command(binary, "get", "gh")
 	output, err := cmd.Output()
 	require.NoError(t, err)
 
@@ -184,12 +189,14 @@ func TestGetCommand(t *testing.T) {
 
 // TestGetCommand_NotFound tests error handling from Example 19
 func TestGetCommand_NotFound(t *testing.T) {
+	binary := getBinaryPath(t)
+
 	tmpDir := t.TempDir()
 	os.Setenv("XDG_DATA_HOME", tmpDir)
 	defer os.Unsetenv("XDG_DATA_HOME")
 
 	// Try to get nonexistent tool
-	cmd := exec.Command("atip-discover", "get", "nonexistent-tool", "-o", "json")
+	cmd := exec.Command(binary, "get", "nonexistent-tool", "-o", "json")
 	output, err := cmd.CombinedOutput()
 
 	// Should exit with code 1
@@ -212,6 +219,8 @@ func TestGetCommand_NotFound(t *testing.T) {
 
 // TestSkipList tests skip list functionality from Example 6
 func TestSkipList(t *testing.T) {
+	binary := getBinaryPath(t)
+
 	tmpDir := t.TempDir()
 	os.Setenv("XDG_DATA_HOME", tmpDir)
 	defer os.Unsetenv("XDG_DATA_HOME")
@@ -223,7 +232,7 @@ func TestSkipList(t *testing.T) {
 	createMockATIPTool(t, mockToolsDir, "skip-this", "1.0.0", "Skipped tool")
 
 	// Scan with skip list
-	cmd := exec.Command("atip-discover", "scan",
+	cmd := exec.Command(binary, "scan",
 		"--allow-path="+mockToolsDir,
 		"--skip=skip-this",
 		"-o", "json")
@@ -248,6 +257,8 @@ func TestSkipList(t *testing.T) {
 
 // TestDryRun tests dry run mode from Example 8
 func TestDryRun(t *testing.T) {
+	binary := getBinaryPath(t)
+
 	tmpDir := t.TempDir()
 	os.Setenv("XDG_DATA_HOME", tmpDir)
 	defer os.Unsetenv("XDG_DATA_HOME")
@@ -258,7 +269,7 @@ func TestDryRun(t *testing.T) {
 	createMockATIPTool(t, mockToolsDir, "gh", "2.45.0", "GitHub CLI")
 
 	// Dry run scan
-	cmd := exec.Command("atip-discover", "scan",
+	cmd := exec.Command(binary, "scan",
 		"--allow-path="+mockToolsDir,
 		"--dry-run",
 		"-o", "json")
@@ -266,8 +277,8 @@ func TestDryRun(t *testing.T) {
 	require.NoError(t, err)
 
 	var result struct {
-		WouldScan  []string `json:"would_scan"`
-		ScanPaths  []string `json:"scan_paths"`
+		WouldScan []string `json:"would_scan"`
+		ScanPaths []string `json:"scan_paths"`
 	}
 
 	err = json.Unmarshal(output, &result)
@@ -280,6 +291,8 @@ func TestDryRun(t *testing.T) {
 
 // TestOutputFormats tests different output formats from Examples 2
 func TestOutputFormats(t *testing.T) {
+	binary := getBinaryPath(t)
+
 	tmpDir := t.TempDir()
 	os.Setenv("XDG_DATA_HOME", tmpDir)
 	defer os.Unsetenv("XDG_DATA_HOME")
@@ -290,25 +303,25 @@ func TestOutputFormats(t *testing.T) {
 	createMockATIPTool(t, mockToolsDir, "gh", "2.45.0", "GitHub CLI")
 
 	// Scan first
-	cmd := exec.Command("atip-discover", "scan", "--allow-path="+mockToolsDir)
+	cmd := exec.Command(binary, "scan", "--allow-path="+mockToolsDir)
 	_, err := cmd.Output()
 	require.NoError(t, err)
 
 	// Test JSON output
-	cmd = exec.Command("atip-discover", "list", "-o", "json")
+	cmd = exec.Command(binary, "list", "-o", "json")
 	output, err := cmd.Output()
 	require.NoError(t, err)
 	assert.True(t, json.Valid(output))
 
 	// Test table output
-	cmd = exec.Command("atip-discover", "list", "-o", "table")
+	cmd = exec.Command(binary, "list", "-o", "table")
 	output, err = cmd.Output()
 	require.NoError(t, err)
 	assert.Contains(t, string(output), "NAME")
 	assert.Contains(t, string(output), "VERSION")
 
 	// Test quiet output
-	cmd = exec.Command("atip-discover", "list", "-o", "quiet")
+	cmd = exec.Command(binary, "list", "-o", "quiet")
 	output, err = cmd.Output()
 	require.NoError(t, err)
 	assert.Contains(t, string(output), "gh")
@@ -317,6 +330,8 @@ func TestOutputFormats(t *testing.T) {
 
 // TestRefreshCommand tests the refresh command from Example 15
 func TestRefreshCommand(t *testing.T) {
+	binary := getBinaryPath(t)
+
 	tmpDir := t.TempDir()
 	os.Setenv("XDG_DATA_HOME", tmpDir)
 	defer os.Unsetenv("XDG_DATA_HOME")
@@ -327,7 +342,7 @@ func TestRefreshCommand(t *testing.T) {
 	createMockATIPTool(t, mockToolsDir, "gh", "2.44.0", "GitHub CLI")
 
 	// Initial scan
-	cmd := exec.Command("atip-discover", "scan", "--allow-path="+mockToolsDir)
+	cmd := exec.Command(binary, "scan", "--allow-path="+mockToolsDir)
 	_, err := cmd.Output()
 	require.NoError(t, err)
 
@@ -336,7 +351,7 @@ func TestRefreshCommand(t *testing.T) {
 	createMockATIPTool(t, mockToolsDir, "gh", "2.45.0", "GitHub CLI")
 
 	// Refresh
-	cmd = exec.Command("atip-discover", "refresh", "-o", "json")
+	cmd = exec.Command(binary, "refresh", "-o", "json")
 	output, err := cmd.Output()
 	require.NoError(t, err)
 

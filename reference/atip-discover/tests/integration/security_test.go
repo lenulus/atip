@@ -23,12 +23,14 @@ func TestSafePathEnforcement(t *testing.T) {
 
 	// Create world-writable directory
 	unsafeDir := filepath.Join(tmpDir, "unsafe-tools")
-	require.NoError(t, os.MkdirAll(unsafeDir, 0777))
+	require.NoError(t, os.MkdirAll(unsafeDir, 0755))
+	require.NoError(t, os.Chmod(unsafeDir, 0777)) // Explicitly set world-writable
 
 	createMockATIPTool(t, unsafeDir, "suspicious-tool", "1.0.0", "Suspicious")
 
 	// Try to scan unsafe directory
-	cmd := exec.Command("atip-discover", "scan",
+	binaryPath := getBinaryPath(t)
+	cmd := exec.Command(binaryPath, "scan",
 		"--allow-path="+unsafeDir,
 		"-o", "json")
 	output, err := cmd.CombinedOutput()
@@ -46,13 +48,21 @@ func TestSafePathsOnlyDefault(t *testing.T) {
 	os.Setenv("XDG_DATA_HOME", tmpDir)
 	defer os.Unsetenv("XDG_DATA_HOME")
 
+	// Override default safe paths to avoid scanning real system paths
+	// which can trigger keychain prompts and take a long time
+	emptyDir := filepath.Join(tmpDir, "empty-safe-paths")
+	require.NoError(t, os.MkdirAll(emptyDir, 0755))
+	os.Setenv("ATIP_DISCOVER_SAFE_PATHS", emptyDir)
+	defer os.Unsetenv("ATIP_DISCOVER_SAFE_PATHS")
+
 	customDir := filepath.Join(tmpDir, "custom-tools")
 	require.NoError(t, os.MkdirAll(customDir, 0755))
 
 	createMockATIPTool(t, customDir, "custom-tool", "1.0.0", "Custom")
 
 	// Scan without --allow-path should not scan custom directory
-	cmd := exec.Command("atip-discover", "scan", "-o", "json")
+	binaryPath := getBinaryPath(t)
+	cmd := exec.Command(binaryPath, "scan", "-o", "json")
 	output, err := cmd.Output()
 	require.NoError(t, err)
 
@@ -67,7 +77,8 @@ func TestCurrentDirectoryRejection(t *testing.T) {
 	defer os.Unsetenv("XDG_DATA_HOME")
 
 	// Try to scan current directory
-	cmd := exec.Command("atip-discover", "scan",
+	binaryPath := getBinaryPath(t)
+	cmd := exec.Command(binaryPath, "scan",
 		"--allow-path=.",
 		"-o", "json")
 	output, err := cmd.CombinedOutput()
@@ -88,7 +99,8 @@ func TestDisableSafePathsWarning(t *testing.T) {
 	require.NoError(t, os.MkdirAll(unsafeDir, 0755))
 
 	// Disable safe path checking
-	cmd := exec.Command("atip-discover", "scan",
+	binaryPath := getBinaryPath(t)
+	cmd := exec.Command(binaryPath, "scan",
 		"--safe-paths-only=false",
 		"--allow-path="+unsafeDir)
 	output, err := cmd.CombinedOutput()
@@ -111,7 +123,8 @@ func TestVerboseSecurityLogging(t *testing.T) {
 	createMockATIPTool(t, safeDir, "safe-tool", "1.0.0", "Safe")
 
 	// Run with verbose flag
-	cmd := exec.Command("atip-discover", "scan",
+	binaryPath := getBinaryPath(t)
+	cmd := exec.Command(binaryPath, "scan",
 		"--allow-path="+safeDir,
 		"-v")
 	output, err := cmd.CombinedOutput()
@@ -140,7 +153,8 @@ sleep 10
 	require.NoError(t, err)
 
 	// Scan with short timeout
-	cmd := exec.Command("atip-discover", "scan",
+	binaryPath := getBinaryPath(t)
+	cmd := exec.Command(binaryPath, "scan",
 		"--allow-path="+slowToolDir,
 		"--timeout=100ms",
 		"-o", "json")
@@ -174,7 +188,8 @@ fi
 	require.NoError(t, err)
 
 	// Scan should handle or reject large output
-	cmd := exec.Command("atip-discover", "scan",
+	binaryPath := getBinaryPath(t)
+	cmd := exec.Command(binaryPath, "scan",
 		"--allow-path="+largeOutputDir,
 		"-o", "json")
 	output, err := cmd.CombinedOutput()
@@ -198,7 +213,8 @@ func TestNoShellExpansion(t *testing.T) {
 	createMockATIPTool(t, specialDir, "tool", "1.0.0", "Test")
 
 	// Should handle path with spaces correctly (no shell expansion)
-	cmd := exec.Command("atip-discover", "scan",
+	binaryPath := getBinaryPath(t)
+	cmd := exec.Command(binaryPath, "scan",
 		"--allow-path="+specialDir,
 		"-o", "json")
 	_, err := cmd.Output()
@@ -230,7 +246,8 @@ func TestSymlinkHandling(t *testing.T) {
 	require.NoError(t, err)
 
 	// Scan should handle symlinks appropriately
-	cmd := exec.Command("atip-discover", "scan",
+	binaryPath := getBinaryPath(t)
+	cmd := exec.Command(binaryPath, "scan",
 		"--allow-path="+binDir,
 		"-o", "json")
 	_, err = cmd.Output()
@@ -255,7 +272,8 @@ func TestRegistryFilePermissions(t *testing.T) {
 	createMockATIPTool(t, mockToolsDir, "tool", "1.0.0", "Test")
 
 	// Run scan to create registry
-	cmd := exec.Command("atip-discover", "scan", "--allow-path="+mockToolsDir)
+	binaryPath := getBinaryPath(t)
+	cmd := exec.Command(binaryPath, "scan", "--allow-path="+mockToolsDir)
 	_, err := cmd.Output()
 	require.NoError(t, err)
 
