@@ -1,0 +1,48 @@
+#!/bin/sh
+# Mock ATIP tool for testing
+# Returns valid ATIP metadata when called with --agent
+
+if [ "$1" = "--agent" ]; then
+  cat <<'EOF'
+{
+  "atip": {"version": "0.4"},
+  "name": "mock-atip-tool",
+  "version": "1.0.0",
+  "description": "A mock ATIP tool for testing",
+  "homepage": "https://example.com",
+  "trust": {
+    "source": "native",
+    "verified": true
+  },
+  "commands": {
+    "run": {
+      "description": "Run the mock tool",
+      "options": [
+        {
+          "name": "verbose",
+          "flags": ["-v", "--verbose"],
+          "type": "boolean",
+          "description": "Enable verbose output"
+        }
+      ],
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "destructive": false,
+        "reversible": true
+      }
+    },
+    "test": {
+      "description": "Test the mock tool",
+      "effects": {
+        "network": false,
+        "idempotent": true
+      }
+    }
+  }
+}
+EOF
+else
+  echo "Usage: mock-atip-tool --agent"
+  exit 1
+fi

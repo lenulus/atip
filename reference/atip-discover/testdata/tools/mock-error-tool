@@ -1,0 +1,10 @@
+#!/bin/sh
+# Mock tool that returns error when called with --agent
+
+if [ "$1" = "--agent" ]; then
+  echo "Error: --agent not supported" >&2
+  exit 1
+else
+  echo "Usage: mock-error-tool --agent"
+  exit 1
+fi

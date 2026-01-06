@@ -2,6 +2,16 @@
 
 A Go CLI tool for discovering ATIP-compatible tools on your system.
 
+## Status
+
+**RED Phase (BRGR Methodology)** - Tests are written and FAILING. Implementation is next.
+
+This project follows the BRGR (Blue, Red, Green, Refactor) methodology:
+- **Blue** - Design complete in `blue/` directory
+- **Red** - Tests written and failing (current phase)
+- **Green** - Implementation needed
+- **Refactor** - Pending
+
 ## Overview
 
 `atip-discover` scans your system for tools that implement the ATIP `--agent` flag convention, maintains a local registry of discovered tools, and provides fast cached access to tool metadata.

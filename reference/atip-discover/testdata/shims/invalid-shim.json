@@ -1,0 +1,5 @@
+{
+  "atip": {"version": "0.4"},
+  "name": "invalid-shim",
+  "description": "Missing required version field"
+}

@@ -1,0 +1,9 @@
+#!/bin/sh
+# Mock tool that hangs (for timeout testing)
+
+if [ "$1" = "--agent" ]; then
+  sleep 30
+else
+  echo "Usage: mock-timeout-tool --agent"
+  exit 1
+fi

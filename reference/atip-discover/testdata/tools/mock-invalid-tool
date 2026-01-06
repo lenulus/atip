@@ -1,0 +1,10 @@
+#!/bin/sh
+# Mock tool that returns invalid JSON
+
+if [ "$1" = "--agent" ]; then
+  echo "This is not valid JSON at all"
+  exit 0
+else
+  echo "Usage: mock-invalid-tool --agent"
+  exit 1
+fi
