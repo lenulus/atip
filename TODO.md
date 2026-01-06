@@ -73,8 +73,8 @@
 |---------------|----------|---------|-----------|
 | atip-bridge | TypeScript | npm, tsup, vitest | Library for JS/TS agents; matches spec Appendix A |
 | atip-bridge-py | Python | uv, pytest | Python port (future) - better debugging, wider adoption |
-| atip-discover | Go | go test | CLI tool; single binary, fast startup, ideal for PATH scanning |
-| atip-discover-ts | TypeScript | npm, tsup, vitest | TypeScript port for Node.js agents and npm ecosystem |
+| atip-discover | TypeScript | npm, tsup, vitest | Canonical CLI tool; matches major agent CLIs (Claude Code, etc.) |
+| atip-discover-go | Go | go test | Go port; single binary, fast startup, ideal for standalone use |
 
 **BRGR Agent Workflow:**
 Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`):
@@ -118,9 +118,9 @@ Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`
       - [ ] Complete API documentation
       - [ ] Usage examples and cookbook
 
-### Phase 4.2: atip-discover Tool (Go) ✅ COMPLETE
+### Phase 4.2: atip-discover-go Tool (Go) ✅ COMPLETE
 
-13. reference/atip-discover/ - Go CLI tool for discovery
+13. reference/atip-discover-go/ - Go CLI tool for discovery
     - [x] 4.2.1: Project setup and Blue phase ✅
       - [x] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
       - [x] Initialize Go module
@@ -155,9 +155,9 @@ Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`
       - [ ] Package for PyPI distribution
       - [ ] Complete API documentation (Sphinx/mkdocs)
 
-### Phase 4.4: atip-discover-ts (TypeScript)
+### Phase 4.4: atip-discover (TypeScript) - Canonical Implementation
 
-15. reference/atip-discover-ts/ - TypeScript port of atip-discover
+15. reference/atip-discover/ - Canonical TypeScript CLI tool for discovery
     - [ ] 4.4.1: Project setup and Blue phase
       - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
       - [ ] Initialize npm package with TypeScript
