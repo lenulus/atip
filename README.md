@@ -1,6 +1,6 @@
-# ATIP — Agent Tool Introspection Protocol
+# ATIP (Agent Tool Introspection Protocol)
 
-**A lightweight protocol for AI agents to discover and understand command-line tools.**
+## A lightweight, CLI-first protocol that allows AI agents to safely introspect local tools via a simple --agent contract, without requiring MCP servers or additional infrastructure.
 
 [![Version](https://img.shields.io/badge/version-0.4.0-blue)](./spec/rfc.md)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
