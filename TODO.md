@@ -34,11 +34,9 @@
 ### Reference Implementations
 - [x] reference/atip-validate/ - Schema validation CLI tool
 - [x] reference/atip-gen/ - Auto-generate shims from --help
-- [ ] reference/atip-bridge/ - TypeScript/Python compiler library
-  - [ ] reference/atip-bridge/package.json
-  - [ ] reference/atip-bridge/src/
-  - [ ] reference/atip-bridge/README.md
-- [ ] reference/atip-discover/ - CLI tool for discovery
+- [x] reference/atip-bridge/ - TypeScript compiler library
+- [x] reference/atip-discover/ - CLI tool for discovery (TypeScript, canonical)
+- [x] reference/atip-discover-go/ - CLI tool for discovery (Go, alternative)
 
 ### Documentation
 - [x] docs/why-atip.md - Positioning document (why ATIP exists)
@@ -155,38 +153,54 @@ Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`
       - [ ] Package for PyPI distribution
       - [ ] Complete API documentation (Sphinx/mkdocs)
 
-### Phase 4.4: atip-discover (TypeScript) - Canonical Implementation
+### Phase 4.4: atip-discover (TypeScript) - Canonical Implementation ✅ COMPLETE
 
 15. reference/atip-discover/ - Canonical TypeScript CLI tool for discovery
-    - [ ] 4.4.1: Project setup and Blue phase
-      - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
-      - [ ] Initialize npm package with TypeScript
-      - [ ] Configure build tooling (tsup/esbuild)
-      - [ ] Set up test framework (vitest)
-    - [ ] 4.4.2: Discovery implementation (BRGR cycle)
-      - [ ] Blue: Port discovery algorithm from Go implementation
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for discovery tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement discovery
-      - [ ] Refactor: **Use `brgr-refactor` agent** to optimize
-    - [ ] 4.4.3: Registry and CLI (BRGR cycle)
-      - [ ] Blue: Port registry format and CLI from Go
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for registry/CLI tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
-      - [ ] Refactor: **Use `brgr-refactor` agent** to make idiomatic TypeScript
-    - [ ] 4.4.4: Packaging
-      - [ ] Package for npm distribution
-      - [ ] Complete API documentation
-      - [ ] CLI binary via npx
+    - [x] 4.4.1: Project setup and Blue phase ✅
+      - [x] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
+      - [x] Initialize npm package with TypeScript
+      - [x] Configure build tooling (tsup/esbuild)
+      - [x] Set up test framework (vitest)
+    - [x] 4.4.2: Discovery implementation (BRGR cycle) ✅
+      - [x] Blue: Port discovery algorithm from Go implementation
+      - [x] Red: **Use `brgr-red-test-writer` agent** for discovery tests (137 tests)
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement discovery
+      - [x] Refactor: **Use `brgr-refactor` agent** to optimize
+    - [x] 4.4.3: Registry and CLI (BRGR cycle) ✅
+      - [x] Blue: Port registry format and CLI from Go
+      - [x] Red: **Use `brgr-red-test-writer` agent** for registry/CLI tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement
+      - [x] Refactor: **Use `brgr-refactor` agent** to make idiomatic TypeScript
+    - [x] 4.4.4: Packaging ✅
+      - [x] CLI binary via npm link / npx
+      - [x] README with installation and usage guide
+      - [x] Implements `--agent` flag (dogfooding!)
+
+### Phase 4.5: Dogfooding - ATIP Tools Implement --agent
+
+Make all ATIP reference tools implement the `--agent` flag themselves:
+
+16. Add `--agent` flag to reference implementations
+    - [x] atip-discover (TypeScript) - Implements `--agent` ✅
+    - [ ] atip-discover-go (Go) - Add `--agent` flag
+    - [ ] atip-validate - Add `--agent` flag
+    - [ ] atip-gen - Add `--agent` flag
+    - [ ] atip-bridge CLI wrapper (if applicable)
+
+17. Create example ATIP-native tools
+    - [ ] examples/tools/hello-atip - Minimal example tool with `--agent`
+    - [ ] examples/tools/atip-echo - Echo tool demonstrating effects metadata
+    - [ ] Documentation: "How to add --agent to your CLI tool"
 
 ### Phase 5: Shims & Partial Discovery (Future)
-16. examples/kubectl-partial.json - Partial discovery example
-17. shims/README.md - Shim contribution guide
-18. shims/curl.json, jq.json, etc. - Example shims
+18. examples/kubectl-partial.json - Partial discovery example
+19. shims/README.md - Shim contribution guide
+20. shims/curl.json, jq.json, etc. - Example shims
 
 ### Phase 6: Extended (Future)
-19. More shim examples (rsync, ffmpeg, etc.)
-20. ✅ Historical spec versions (0.1.0, 0.2.0, 0.3.0)
-21. schema/atip.schema.json - Symlink to latest
+21. More shim examples (rsync, ffmpeg, etc.)
+22. ✅ Historical spec versions (0.1.0, 0.2.0, 0.3.0)
+23. schema/atip.schema.json - Symlink to latest
 
 ## Notes
 

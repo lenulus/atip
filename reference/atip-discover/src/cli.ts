@@ -12,12 +12,106 @@ import { loadRegistry } from './registry';
 import { getAtipPaths } from './xdg';
 import type { AtipPaths } from './types';
 
+const VERSION = '0.1.0';
+
+/**
+ * ATIP metadata for atip-discover itself.
+ * This tool eats its own dogfood!
+ */
+const ATIP_METADATA = {
+  atip: { version: '0.4', features: ['trust-v1'] },
+  name: 'atip-discover',
+  version: VERSION,
+  description: 'Discover ATIP-compatible tools on your system',
+  homepage: 'https://github.com/anthropics/atip',
+  trust: {
+    source: 'native',
+    verified: true,
+  },
+  commands: {
+    scan: {
+      description: 'Scan for ATIP-compatible tools in PATH',
+      options: [
+        { name: 'allow-path', flags: ['-a', '--allow-path'], type: 'string', description: 'Additional directory to scan' },
+        { name: 'skip', flags: ['-s', '--skip'], type: 'string', description: 'Tools to skip during scan' },
+        { name: 'timeout', flags: ['-t', '--timeout'], type: 'string', default: '2s', description: 'Timeout for probing each tool' },
+        { name: 'parallel', flags: ['-p', '--parallel'], type: 'integer', default: 4, description: 'Number of parallel probes' },
+        { name: 'dry-run', flags: ['-n', '--dry-run'], type: 'boolean', description: 'Show what would be scanned' },
+      ],
+      effects: {
+        filesystem: { read: true, write: true, paths: ['~/.local/share/agent-tools/'] },
+        network: false,
+        idempotent: true,
+        destructive: false,
+      },
+    },
+    list: {
+      description: 'List known ATIP tools from the registry',
+      arguments: [{ name: 'pattern', type: 'string', required: false, description: 'Glob pattern to filter tools' }],
+      options: [
+        { name: 'source', flags: ['--source'], type: 'enum', enum: ['all', 'native', 'shim'], default: 'all', description: 'Filter by source type' },
+      ],
+      effects: {
+        filesystem: { read: true, write: false },
+        network: false,
+        idempotent: true,
+        destructive: false,
+      },
+    },
+    get: {
+      description: 'Get full ATIP metadata for a specific tool',
+      arguments: [{ name: 'tool-name', type: 'string', required: true, description: 'Name of the tool' }],
+      options: [
+        { name: 'refresh', flags: ['-r', '--refresh'], type: 'boolean', description: 'Force refresh from tool' },
+      ],
+      effects: {
+        filesystem: { read: true, write: false },
+        network: false,
+        idempotent: true,
+        destructive: false,
+      },
+    },
+    cache: {
+      description: 'Manage cached metadata',
+      commands: {
+        info: {
+          description: 'Display cache information',
+          effects: { filesystem: { read: true, write: false }, idempotent: true },
+        },
+        clear: {
+          description: 'Clear cached metadata',
+          options: [
+            { name: 'all', flags: ['--all'], type: 'boolean', description: 'Clear all cached data' },
+          ],
+          effects: { filesystem: { read: true, write: true, delete: true }, idempotent: true, destructive: true },
+        },
+        refresh: {
+          description: 'Refresh cached metadata',
+          effects: { filesystem: { read: true, write: true }, idempotent: true },
+        },
+      },
+    },
+  },
+  globalOptions: [
+    { name: 'output', flags: ['-o', '--output'], type: 'enum', enum: ['json', 'table', 'quiet'], default: 'json', description: 'Output format' },
+    { name: 'config', flags: ['-c', '--config'], type: 'file', description: 'Path to config file' },
+    { name: 'data-dir', flags: ['--data-dir'], type: 'directory', description: 'Path to data directory' },
+    { name: 'verbose', flags: ['-v', '--verbose'], type: 'boolean', description: 'Enable verbose logging' },
+  ],
+};
+
+// Handle --agent flag before Commander parses (must be first)
+if (process.argv.includes('--agent')) {
+  console.log(JSON.stringify(ATIP_METADATA, null, 2));
+  process.exit(0);
+}
+
 const program = new Command();
 
 program
   .name('atip-discover')
   .description('Discover ATIP-compatible tools on your system')
-  .version('0.1.0');
+  .version(VERSION);
 
 // Global options
 program
