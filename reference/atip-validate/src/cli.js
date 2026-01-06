@@ -10,6 +10,54 @@ import path from 'path';
  * Command-line interface for validating ATIP metadata files
  */
 
+const VERSION = '0.1.0';
+
+/**
+ * ATIP metadata for atip-validate itself.
+ * This tool eats its own dogfood!
+ */
+const ATIP_METADATA = {
+  atip: { version: '0.4', features: ['trust-v1'] },
+  name: 'atip-validate',
+  version: VERSION,
+  description: 'Validate ATIP metadata files against JSON Schema',
+  homepage: 'https://github.com/anthropics/atip',
+  trust: {
+    source: 'native',
+    verified: true,
+  },
+  commands: {
+    validate: {
+      description: 'Validate ATIP metadata files (default command)',
+      arguments: [
+        { name: 'paths', type: 'string', required: true, variadic: true, description: 'Files or directories to validate' },
+      ],
+      options: [
+        { name: 'recursive', flags: ['-r', '--recursive'], type: 'boolean', description: 'Recursively scan subdirectories' },
+        { name: 'schema', flags: ['-s', '--schema'], type: 'file', description: 'Use custom schema file' },
+        { name: 'quiet', flags: ['-q', '--quiet'], type: 'boolean', description: 'Only show errors (no success messages)' },
+        { name: 'verbose', flags: ['-v', '--verbose'], type: 'boolean', description: 'Show detailed validation info' },
+        { name: 'json', flags: ['--json'], type: 'boolean', description: 'Output results as JSON' },
+      ],
+      effects: {
+        filesystem: { read: true, write: false },
+        network: false,
+        idempotent: true,
+        destructive: false,
+      },
+    },
+  },
+  globalOptions: [
+    { name: 'help', flags: ['-h', '--help'], type: 'boolean', description: 'Show help' },
+  ],
+};
+
+// Handle --agent flag before anything else
+if (process.argv.includes('--agent')) {
+  console.log(JSON.stringify(ATIP_METADATA, null, 2));
+  process.exit(0);
+}
+
 function printUsage() {
   console.log(`
 ${chalk.bold('atip-validate')} - Validate ATIP metadata files against JSON Schema
@@ -26,6 +74,7 @@ ${chalk.bold('OPTIONS:')}
   -q, --quiet                       Only show errors (no success messages)
   -v, --verbose                     Show detailed validation info
   --json                            Output results as JSON
+  --agent                           Output ATIP metadata (for agent discovery)
 
 ${chalk.bold('EXAMPLES:')}
   atip-validate examples/gh.json

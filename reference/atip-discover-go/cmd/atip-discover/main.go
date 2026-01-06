@@ -26,7 +26,94 @@ var (
 	Commit    = "unknown"
 )
 
+// ATIP metadata for atip-discover itself.
+// This tool eats its own dogfood!
+var atipMetadata = map[string]interface{}{
+	"atip": map[string]interface{}{
+		"version":  "0.4",
+		"features": []string{"trust-v1"},
+	},
+	"name":        "atip-discover",
+	"version":     Version,
+	"description": "Discover ATIP-compatible tools on your system",
+	"homepage":    "https://github.com/anthropics/atip",
+	"trust": map[string]interface{}{
+		"source":   "native",
+		"verified": true,
+	},
+	"commands": map[string]interface{}{
+		"scan": map[string]interface{}{
+			"description": "Scan for ATIP-compatible tools in PATH",
+			"options": []map[string]interface{}{
+				{"name": "allow-path", "flags": []string{"--allow-path"}, "type": "string", "description": "Additional directory to scan"},
+				{"name": "skip", "flags": []string{"--skip"}, "type": "string", "description": "Comma-separated list of tools to skip"},
+				{"name": "timeout", "flags": []string{"--timeout", "-t"}, "type": "string", "default": "2s", "description": "Timeout for probing each tool"},
+				{"name": "parallel", "flags": []string{"--parallel", "-p"}, "type": "integer", "default": 4, "description": "Number of parallel probes"},
+				{"name": "dry-run", "flags": []string{"--dry-run", "-n"}, "type": "boolean", "description": "Show what would be scanned"},
+				{"name": "safe-paths-only", "flags": []string{"--safe-paths-only"}, "type": "boolean", "default": true, "description": "Only scan safe paths"},
+			},
+			"effects": map[string]interface{}{
+				"filesystem": map[string]interface{}{"read": true, "write": true, "paths": []string{"~/.local/share/agent-tools/"}},
+				"network":    false,
+				"idempotent": true,
+			},
+		},
+		"list": map[string]interface{}{
+			"description": "List discovered ATIP tools from the registry",
+			"arguments":   []map[string]interface{}{{"name": "pattern", "type": "string", "required": false, "description": "Filter pattern for tool names"}},
+			"options": []map[string]interface{}{
+				{"name": "source", "flags": []string{"--source"}, "type": "enum", "enum": []string{"all", "native", "shim"}, "default": "all", "description": "Filter by source type"},
+				{"name": "output", "flags": []string{"-o"}, "type": "enum", "enum": []string{"json", "table", "quiet"}, "default": "json", "description": "Output format"},
+			},
+			"effects": map[string]interface{}{
+				"filesystem": map[string]interface{}{"read": true, "write": false},
+				"network":    false,
+				"idempotent": true,
+			},
+		},
+		"get": map[string]interface{}{
+			"description": "Get full ATIP metadata for a specific tool",
+			"arguments":   []map[string]interface{}{{"name": "tool-name", "type": "string", "required": true, "description": "Name of the tool"}},
+			"options": []map[string]interface{}{
+				{"name": "output", "flags": []string{"-o"}, "type": "enum", "enum": []string{"json", "table", "quiet"}, "default": "json", "description": "Output format"},
+			},
+			"effects": map[string]interface{}{
+				"filesystem": map[string]interface{}{"read": true, "write": false},
+				"network":    false,
+				"idempotent": true,
+			},
+		},
+		"refresh": map[string]interface{}{
+			"description": "Refresh cached metadata for tools",
+			"effects": map[string]interface{}{
+				"filesystem": map[string]interface{}{"read": true, "write": true},
+				"network":    false,
+				"idempotent": true,
+			},
+		},
+	},
+	"globalOptions": []map[string]interface{}{
+		{"name": "output", "flags": []string{"-o"}, "type": "enum", "enum": []string{"json", "table", "quiet"}, "default": "json", "description": "Output format"},
+		{"name": "verbose", "flags": []string{"-v"}, "type": "boolean", "description": "Enable verbose logging"},
+	},
+}
+
 func main() {
+	// Handle --agent flag before anything else
+	for _, arg := range os.Args[1:] {
+		if arg == "--agent" {
+			// Update version in metadata to match current version
+			atipMetadata["version"] = Version
+			data, err := json.MarshalIndent(atipMetadata, "", "  ")
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: failed to marshal ATIP metadata: %v\n", err)
+				os.Exit(1)
+			}
+			fmt.Println(string(data))
+			os.Exit(0)
+		}
+	}
+
 	if len(os.Args) < 2 {
 		printUsage()
 		os.Exit(2)
@@ -497,6 +584,7 @@ func printUsage() {
 	fmt.Println("Flags:")
 	fmt.Println("  -h, --help     Show this help")
 	fmt.Println("  -v, --version  Show version")
+	fmt.Println("  --agent        Output ATIP metadata (for agent discovery)")
 }
 
 func exitWithError(msg string, err error) {

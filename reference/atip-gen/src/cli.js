@@ -9,6 +9,54 @@ import fs from 'fs';
  * Generate ATIP metadata from --help output
  */
 
+const VERSION = '0.1.0';
+
+/**
+ * ATIP metadata for atip-gen itself.
+ * This tool eats its own dogfood!
+ */
+const ATIP_METADATA = {
+  atip: { version: '0.4', features: ['trust-v1'] },
+  name: 'atip-gen',
+  version: VERSION,
+  description: 'Generate ATIP metadata from --help output',
+  homepage: 'https://github.com/anthropics/atip',
+  trust: {
+    source: 'native',
+    verified: true,
+  },
+  commands: {
+    generate: {
+      description: 'Generate ATIP metadata for a tool (default command)',
+      arguments: [
+        { name: 'tool', type: 'string', required: true, description: 'Name of the tool to generate metadata for' },
+      ],
+      options: [
+        { name: 'output', flags: ['-o', '--output'], type: 'file', description: 'Output file path' },
+        { name: 'depth', flags: ['-d', '--depth'], type: 'integer', default: 1, description: 'Parse subcommands to depth N' },
+        { name: 'no-effects', flags: ['--no-effects'], type: 'boolean', description: 'Skip effects inference' },
+        { name: 'format', flags: ['--format'], type: 'enum', enum: ['json', 'yaml'], default: 'json', description: 'Output format' },
+      ],
+      effects: {
+        filesystem: { read: true, write: true },
+        subprocess: true,
+        network: false,
+        idempotent: true,
+        destructive: false,
+      },
+    },
+  },
+  globalOptions: [
+    { name: 'help', flags: ['-h', '--help'], type: 'boolean', description: 'Show help' },
+  ],
+};
+
+// Handle --agent flag before anything else
+if (process.argv.includes('--agent')) {
+  console.log(JSON.stringify(ATIP_METADATA, null, 2));
+  process.exit(0);
+}
+
 function printUsage() {
   console.log(`
 ${chalk.bold('atip-gen')} - Generate ATIP metadata from --help output
@@ -24,6 +72,7 @@ ${chalk.bold('OPTIONS:')}
   -d, --depth <n>                   Parse subcommands to depth N (default: 1)
   --no-effects                      Skip effects inference
   --format <json|yaml>              Output format (default: json)
+  --agent                           Output ATIP metadata (for agent discovery)
 
 ${chalk.bold('EXAMPLES:')}
   atip-gen gh -o examples/gh.json

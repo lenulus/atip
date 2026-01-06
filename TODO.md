@@ -176,21 +176,21 @@ Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`
       - [x] README with installation and usage guide
       - [x] Implements `--agent` flag (dogfooding!)
 
-### Phase 4.5: Dogfooding - ATIP Tools Implement --agent
+### Phase 4.5: Dogfooding - ATIP Tools Implement --agent ✅ COMPLETE
 
 Make all ATIP reference tools implement the `--agent` flag themselves:
 
 16. Add `--agent` flag to reference implementations
     - [x] atip-discover (TypeScript) - Implements `--agent` ✅
-    - [ ] atip-discover-go (Go) - Add `--agent` flag
-    - [ ] atip-validate - Add `--agent` flag
-    - [ ] atip-gen - Add `--agent` flag
+    - [x] atip-discover-go (Go) - Add `--agent` flag ✅
+    - [x] atip-validate - Add `--agent` flag ✅
+    - [x] atip-gen - Add `--agent` flag ✅
     - [ ] atip-bridge CLI wrapper (if applicable)
 
 17. Create example ATIP-native tools
-    - [ ] examples/tools/hello-atip - Minimal example tool with `--agent`
-    - [ ] examples/tools/atip-echo - Echo tool demonstrating effects metadata
-    - [ ] Documentation: "How to add --agent to your CLI tool"
+    - [x] examples/tools/hello-atip - Minimal example tool with `--agent` ✅
+    - [x] examples/tools/atip-echo - Echo tool demonstrating effects metadata ✅
+    - [x] examples/tools/README.md - Documentation: "How to add --agent to your CLI tool" ✅
 
 ### Phase 5: Shims & Partial Discovery (Future)
 18. examples/kubectl-partial.json - Partial discovery example

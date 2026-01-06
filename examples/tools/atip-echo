@@ -1,0 +1,253 @@
+#!/usr/bin/env bash
+#
+# atip-echo - Example tool demonstrating ATIP effects metadata
+#
+# This tool demonstrates how to declare various effects in ATIP metadata,
+# including filesystem, network, and destructive operations.
+#
+
+VERSION="1.0.0"
+
+# ATIP metadata - demonstrates comprehensive effects metadata
+ATIP_METADATA='{
+  "atip": { "version": "0.4", "features": ["trust-v1"] },
+  "name": "atip-echo",
+  "version": "'"$VERSION"'",
+  "description": "Example tool demonstrating ATIP effects metadata",
+  "homepage": "https://github.com/anthropics/atip",
+  "trust": {
+    "source": "native",
+    "verified": true
+  },
+  "commands": {
+    "print": {
+      "description": "Print text to stdout (safe, read-only)",
+      "arguments": [
+        { "name": "text", "type": "string", "required": true, "variadic": true, "description": "Text to print" }
+      ],
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "destructive": false
+      }
+    },
+    "write": {
+      "description": "Write text to a file (filesystem write)",
+      "arguments": [
+        { "name": "file", "type": "file", "required": true, "description": "File to write to" },
+        { "name": "text", "type": "string", "required": true, "variadic": true, "description": "Text to write" }
+      ],
+      "options": [
+        { "name": "append", "flags": ["-a", "--append"], "type": "boolean", "description": "Append instead of overwrite" }
+      ],
+      "effects": {
+        "filesystem": { "read": false, "write": true },
+        "network": false,
+        "idempotent": false,
+        "destructive": false,
+        "reversible": true
+      }
+    },
+    "delete": {
+      "description": "Delete a file (DESTRUCTIVE operation)",
+      "arguments": [
+        { "name": "file", "type": "file", "required": true, "description": "File to delete" }
+      ],
+      "options": [
+        { "name": "force", "flags": ["-f", "--force"], "type": "boolean", "description": "Force deletion without confirmation" }
+      ],
+      "effects": {
+        "filesystem": { "read": false, "write": false, "delete": true },
+        "network": false,
+        "idempotent": true,
+        "destructive": true,
+        "reversible": false
+      },
+      "interactive": {
+        "prompts": true,
+        "description": "Prompts for confirmation unless --force is used"
+      }
+    },
+    "fetch": {
+      "description": "Fetch content from a URL (network operation)",
+      "arguments": [
+        { "name": "url", "type": "string", "required": true, "description": "URL to fetch" }
+      ],
+      "effects": {
+        "network": true,
+        "idempotent": true,
+        "destructive": false
+      }
+    },
+    "deploy": {
+      "description": "Deploy to a remote server (network + non-idempotent)",
+      "arguments": [
+        { "name": "target", "type": "string", "required": true, "description": "Deployment target" }
+      ],
+      "options": [
+        { "name": "dry-run", "flags": ["-n", "--dry-run"], "type": "boolean", "description": "Show what would be deployed" }
+      ],
+      "effects": {
+        "network": true,
+        "idempotent": false,
+        "destructive": false,
+        "reversible": true,
+        "cost": { "billable": true, "estimatedCost": "Varies by target" }
+      }
+    }
+  },
+  "globalOptions": [
+    { "name": "help", "flags": ["-h", "--help"], "type": "boolean", "description": "Show help" },
+    { "name": "version", "flags": ["-v", "--version"], "type": "boolean", "description": "Show version" },
+    { "name": "verbose", "flags": ["--verbose"], "type": "boolean", "description": "Enable verbose output" }
+  ]
+}'
+
+# Handle --agent flag first (before any other argument processing)
+for arg in "$@"; do
+  if [ "$arg" = "--agent" ]; then
+    echo "$ATIP_METADATA"
+    exit 0
+  fi
+done
+
+# Handle --help
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+  echo "atip-echo - Example tool demonstrating ATIP effects metadata"
+  echo ""
+  echo "USAGE:"
+  echo "  atip-echo <command> [arguments] [options]"
+  echo ""
+  echo "COMMANDS:"
+  echo "  print <text>...              Print text to stdout (safe)"
+  echo "  write <file> <text>...       Write text to file"
+  echo "  delete <file>                Delete a file (DESTRUCTIVE!)"
+  echo "  fetch <url>                  Fetch URL content (network)"
+  echo "  deploy <target>              Deploy to server (network, non-idempotent)"
+  echo ""
+  echo "OPTIONS:"
+  echo "  -h, --help                   Show this help"
+  echo "  -v, --version                Show version"
+  echo "  --agent                      Output ATIP metadata"
+  echo ""
+  echo "This tool demonstrates how to declare ATIP effects metadata for:"
+  echo "  - Safe read-only operations (print)"
+  echo "  - Filesystem write operations (write)"
+  echo "  - Destructive operations (delete)"
+  echo "  - Network operations (fetch)"
+  echo "  - Non-idempotent operations (deploy)"
+  exit 0
+fi
+
+# Handle --version
+if [ "$1" = "--version" ] || [ "$1" = "-v" ]; then
+  echo "atip-echo $VERSION"
+  exit 0
+fi
+
+# Check for command
+if [ $# -lt 1 ]; then
+  echo "Error: No command specified. Use --help for usage." >&2
+  exit 1
+fi
+
+COMMAND="$1"
+shift
+
+case "$COMMAND" in
+  print)
+    echo "$*"
+    ;;
+  write)
+    if [ $# -lt 2 ]; then
+      echo "Error: write requires <file> and <text>" >&2
+      exit 1
+    fi
+    FILE="$1"
+    shift
+    APPEND=false
+    TEXT=""
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        -a|--append)
+          APPEND=true
+          shift
+          ;;
+        *)
+          if [ -n "$TEXT" ]; then
+            TEXT="$TEXT $1"
+          else
+            TEXT="$1"
+          fi
+          shift
+          ;;
+      esac
+    done
+    if [ "$APPEND" = true ]; then
+      echo "$TEXT" >> "$FILE"
+    else
+      echo "$TEXT" > "$FILE"
+    fi
+    echo "Written to $FILE"
+    ;;
+  delete)
+    if [ $# -lt 1 ]; then
+      echo "Error: delete requires <file>" >&2
+      exit 1
+    fi
+    FILE="$1"
+    FORCE=false
+    shift
+    for arg in "$@"; do
+      if [ "$arg" = "-f" ] || [ "$arg" = "--force" ]; then
+        FORCE=true
+      fi
+    done
+    if [ ! -f "$FILE" ]; then
+      echo "Error: File not found: $FILE" >&2
+      exit 1
+    fi
+    if [ "$FORCE" = false ]; then
+      echo -n "Delete $FILE? [y/N] "
+      read -r CONFIRM
+      if [ "$CONFIRM" != "y" ] && [ "$CONFIRM" != "Y" ]; then
+        echo "Cancelled"
+        exit 0
+      fi
+    fi
+    rm "$FILE"
+    echo "Deleted $FILE"
+    ;;
+  fetch)
+    if [ $# -lt 1 ]; then
+      echo "Error: fetch requires <url>" >&2
+      exit 1
+    fi
+    URL="$1"
+    echo "(Demo mode: Would fetch $URL)"
+    echo "In a real implementation, this would use curl/wget"
+    ;;
+  deploy)
+    if [ $# -lt 1 ]; then
+      echo "Error: deploy requires <target>" >&2
+      exit 1
+    fi
+    TARGET="$1"
+    DRY_RUN=false
+    for arg in "$@"; do
+      if [ "$arg" = "-n" ] || [ "$arg" = "--dry-run" ]; then
+        DRY_RUN=true
+      fi
+    done
+    if [ "$DRY_RUN" = true ]; then
+      echo "(Dry run) Would deploy to: $TARGET"
+    else
+      echo "(Demo mode: Would deploy to $TARGET)"
+      echo "In a real implementation, this would deploy code"
+    fi
+    ;;
+  *)
+    echo "Error: Unknown command: $COMMAND" >&2
+    exit 1
+    ;;
+esac

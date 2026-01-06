@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+#
+# hello-atip - Minimal example tool demonstrating ATIP --agent flag
+#
+# This is a simple example showing how to add ATIP support to any CLI tool.
+# Run with --agent to see the ATIP metadata.
+#
+
+VERSION="1.0.0"
+
+# ATIP metadata - output this when --agent is passed
+ATIP_METADATA='{
+  "atip": { "version": "0.4", "features": ["trust-v1"] },
+  "name": "hello-atip",
+  "version": "'"$VERSION"'",
+  "description": "A minimal example tool demonstrating ATIP --agent flag",
+  "homepage": "https://github.com/anthropics/atip",
+  "trust": {
+    "source": "native",
+    "verified": true
+  },
+  "commands": {
+    "greet": {
+      "description": "Print a greeting message",
+      "arguments": [
+        { "name": "name", "type": "string", "required": false, "description": "Name to greet (default: World)" }
+      ],
+      "options": [
+        { "name": "uppercase", "flags": ["-u", "--uppercase"], "type": "boolean", "description": "Print greeting in uppercase" }
+      ],
+      "effects": {
+        "network": false,
+        "idempotent": true,
+        "destructive": false
+      }
+    }
+  },
+  "globalOptions": [
+    { "name": "help", "flags": ["-h", "--help"], "type": "boolean", "description": "Show help" },
+    { "name": "version", "flags": ["-v", "--version"], "type": "boolean", "description": "Show version" }
+  ]
+}'
+
+# Handle --agent flag first (before any other argument processing)
+for arg in "$@"; do
+  if [ "$arg" = "--agent" ]; then
+    echo "$ATIP_METADATA"
+    exit 0
+  fi
+done
+
+# Handle --help
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+  echo "hello-atip - A minimal example tool demonstrating ATIP --agent flag"
+  echo ""
+  echo "USAGE:"
+  echo "  hello-atip [greet] [name] [options]"
+  echo "  hello-atip --agent              Output ATIP metadata (for agent discovery)"
+  echo ""
+  echo "OPTIONS:"
+  echo "  -u, --uppercase                 Print greeting in uppercase"
+  echo "  -h, --help                      Show this help"
+  echo "  -v, --version                   Show version"
+  echo "  --agent                         Output ATIP metadata"
+  echo ""
+  echo "EXAMPLES:"
+  echo "  hello-atip                      Print 'Hello, World!'"
+  echo "  hello-atip Alice                Print 'Hello, Alice!'"
+  echo "  hello-atip greet Bob --uppercase  Print 'HELLO, BOB!'"
+  exit 0
+fi
+
+# Handle --version
+if [ "$1" = "--version" ] || [ "$1" = "-v" ]; then
+  echo "hello-atip $VERSION"
+  exit 0
+fi
+
+# Parse arguments
+NAME="World"
+UPPERCASE=false
+COMMAND="greet"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    greet)
+      COMMAND="greet"
+      shift
+      ;;
+    -u|--uppercase)
+      UPPERCASE=true
+      shift
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      exit 1
+      ;;
+    *)
+      NAME="$1"
+      shift
+      ;;
+  esac
+done
+
+# Execute command
+case "$COMMAND" in
+  greet)
+    MESSAGE="Hello, $NAME!"
+    if [ "$UPPERCASE" = true ]; then
+      MESSAGE=$(echo "$MESSAGE" | tr '[:lower:]' '[:upper:]')
+    fi
+    echo "$MESSAGE"
+    ;;
+esac
