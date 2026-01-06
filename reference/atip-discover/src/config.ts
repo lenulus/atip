@@ -4,10 +4,10 @@
 
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as os from 'os';
 import type { DiscoverConfig } from './types';
 import { ConfigError } from './errors';
 import { getAtipPaths } from './xdg';
+import { expandTilde, parseDuration } from './utils';
 
 /**
  * Default safe paths for scanning (per spec section 5.2).
@@ -40,43 +40,19 @@ export const DEFAULT_CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 export const DEFAULT_CACHE_MAX_SIZE_BYTES = 100 * 1024 * 1024;
 
 /**
- * Expand tilde in path
- */
-function expandTilde(filepath: string): string {
-  if (filepath.startsWith('~/') || filepath === '~') {
-    return path.join(os.homedir(), filepath.slice(1));
-  }
-  return filepath;
-}
-
-/**
- * Parse duration string like "2s", "5m", "24h" to milliseconds
- */
-function parseDuration(duration: string): number {
-  const match = duration.match(/^(\d+)(s|m|h|ms)$/);
-  if (!match) {
-    throw new Error(`Invalid duration format: ${duration}`);
-  }
-
-  const value = parseInt(match[1], 10);
-  const unit = match[2];
-
-  switch (unit) {
-    case 'ms':
-      return value;
-    case 's':
-      return value * 1000;
-    case 'm':
-      return value * 60 * 1000;
-    case 'h':
-      return value * 60 * 60 * 1000;
-    default:
-      throw new Error(`Unknown duration unit: ${unit}`);
-  }
-}
-
-/**
- * Get default configuration
+ * Get default configuration for discovery operations.
+ *
+ * Returns a configuration object with safe defaults as specified in the ATIP spec.
+ * This configuration can be customized via config file or environment variables.
+ *
+ * @returns Default discovery configuration with safe defaults
+ *
+ * @example
+ * ```typescript
+ * const config = getDefaultConfig();
+ * console.log(config.scanTimeoutMs);  // 2000
+ * console.log(config.parallelism);    // 4
+ * ```
  */
 export function getDefaultConfig(): DiscoverConfig {
   return {
@@ -92,10 +68,32 @@ export function getDefaultConfig(): DiscoverConfig {
 }
 
 /**
- * Load configuration from file and environment.
+ * Load configuration from file and environment variables.
  *
- * @param configPath - Optional explicit config path
- * @returns Merged configuration
+ * Configuration priority (highest to lowest):
+ * 1. Environment variables (ATIP_DISCOVER_*)
+ * 2. Config file (JSON)
+ * 3. Default values
+ *
+ * Config file locations (in order of precedence):
+ * - Explicit path via `configPath` parameter
+ * - ATIP_DISCOVER_CONFIG environment variable
+ * - $XDG_CONFIG_HOME/agent-tools/config.json (default)
+ *
+ * @param configPath - Optional explicit config file path
+ * @returns Promise resolving to merged configuration
+ *
+ * @throws {ConfigError} If config file exists but contains invalid JSON
+ * @throws {ConfigError} If configuration values are invalid (e.g., negative timeout)
+ *
+ * @example
+ * ```typescript
+ * // Load from default location
+ * const config = await loadConfig();
+ *
+ * // Load from specific file
+ * const config = await loadConfig('/path/to/config.json');
+ * ```
  */
 export async function loadConfig(configPath?: string): Promise<DiscoverConfig> {
   const config = getDefaultConfig();

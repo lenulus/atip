@@ -6,10 +6,26 @@ import * as fs from 'fs/promises';
 import { minimatch } from 'minimatch';
 
 /**
- * Check if a path is safe to scan.
+ * Check if a path is safe to scan for tools.
+ *
+ * Per ATIP spec section 5.2, unsafe paths include:
+ * - Current directory (.) to prevent scanning arbitrary locations
+ * - World-writable directories (mode & 0o002) that could contain malicious executables
+ * - Paths that don't exist or are inaccessible
+ * - Non-directory paths
  *
  * @param dirPath - Directory path to check
- * @returns Object with safety status and reason
+ * @returns Promise resolving to object with:
+ *   - `safe`: boolean indicating if path is safe to scan
+ *   - `reason`: optional string describing why path is unsafe
+ *
+ * @example
+ * ```typescript
+ * const result = await isSafePath('/usr/local/bin');
+ * if (!result.safe) {
+ *   console.log(`Unsafe: ${result.reason}`);
+ * }
+ * ```
  */
 export async function isSafePath(
   dirPath: string
@@ -51,9 +67,23 @@ export async function isSafePath(
 /**
  * Check if a tool name matches any pattern in the skip list.
  *
- * @param toolName - Name to check
- * @param skipList - Patterns to match against
- * @returns True if tool should be skipped
+ * Supports both exact matches and glob patterns (using minimatch):
+ * - Exact: "dangerous-tool"
+ * - Wildcard: "test*", "*-dev"
+ * - Character class: "tool[123]"
+ *
+ * @param toolName - Name of the tool to check
+ * @param skipList - Array of exact names or glob patterns to match against
+ * @returns `true` if tool name matches any pattern and should be skipped, `false` otherwise
+ *
+ * @example
+ * ```typescript
+ * const skip = matchesSkipList('test-runner', ['test*', 'debug*']);
+ * console.log(skip);  // true
+ *
+ * const skip2 = matchesSkipList('production-tool', ['test*', 'debug*']);
+ * console.log(skip2); // false
+ * ```
  */
 export function matchesSkipList(toolName: string, skipList: string[]): boolean {
   for (const pattern of skipList) {

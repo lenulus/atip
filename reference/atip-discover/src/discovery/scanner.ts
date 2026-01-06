@@ -49,9 +49,34 @@ async function enumerateExecutables(dirPath: string): Promise<string[]> {
 /**
  * Scan for ATIP-compatible tools on the system.
  *
- * @param options - Scan configuration options
- * @param paths - Optional custom paths
- * @returns Scan results including discovered tools and errors
+ * Performs a complete scan of safe directories (or specified paths) to discover
+ * tools that support the --agent flag. Updates the registry with discovered tools
+ * and caches their metadata.
+ *
+ * Security: By default, only scans known-safe PATH prefixes (per spec section 5.2).
+ * Skips world-writable directories and current directory.
+ *
+ * @param options - Optional scan configuration:
+ *   - `safePathsOnly`: Only scan known-safe PATH prefixes (default: true)
+ *   - `allowPaths`: Additional directories to scan
+ *   - `skipList`: Tool names/patterns to skip
+ *   - `timeoutMs`: Timeout for probing each tool (default: 2000ms)
+ *   - `parallelism`: Number of parallel probes (default: 4)
+ *   - `incremental`: Only scan new/changed executables (default: true)
+ *   - `includeShims`: Include shim files (default: true)
+ *   - `onProgress`: Callback for progress updates
+ * @param paths - Optional custom paths for registry and cache location
+ * @returns Promise resolving to scan results with counts and discovered tools
+ *
+ * @example
+ * ```typescript
+ * // Scan safe paths with progress updates
+ * const result = await scan({
+ *   safePathsOnly: true,
+ *   onProgress: (p) => console.log(`${p.current}/${p.total}`)
+ * });
+ * console.log(`Discovered ${result.discovered} new tools`);
+ * ```
  */
 export async function scan(
   options?: ScanOptions,

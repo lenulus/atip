@@ -12,11 +12,31 @@ import { ToolNotFoundError, MetadataNotFoundError } from './errors';
 import { probe } from './discovery/prober';
 
 /**
- * List tools from the registry with optional filtering.
+ * List tools from the registry with optional filtering and sorting.
  *
- * @param options - List options for filtering and sorting
- * @param paths - Optional custom paths
- * @returns Array of registry entries matching criteria
+ * Returns an array of registry entries that match the specified criteria.
+ * If no registry exists, returns an empty array.
+ *
+ * @param options - Optional list options for filtering and sorting:
+ *   - `pattern`: Glob pattern to filter tool names (e.g., "gh*", "kube*")
+ *   - `source`: Filter by source type ("all", "native", "shim")
+ *   - `sortBy`: Sort field ("name", "discovered", "path")
+ *   - `limit`: Maximum number of results (0 = unlimited)
+ *   - `staleOnly`: Only show tools that may need refresh
+ * @param paths - Optional custom paths for registry location
+ * @returns Promise resolving to array of registry entries matching criteria
+ *
+ * @example
+ * ```typescript
+ * // List all tools
+ * const all = await list();
+ *
+ * // List tools matching pattern
+ * const ghTools = await list({ pattern: 'gh*' });
+ *
+ * // List native tools only, sorted by discovery time
+ * const native = await list({ source: 'native', sortBy: 'discovered' });
+ * ```
  */
 export async function list(
   options?: ListOptions,
@@ -58,14 +78,30 @@ export async function list(
 /**
  * Get full ATIP metadata for a specific tool.
  *
- * @param toolName - Name of the tool to retrieve
- * @param options - Get options
- * @param paths - Optional custom paths
- * @returns Full ATIP metadata for the tool
+ * Retrieves the complete ATIP metadata for a tool from the cache.
+ * Can optionally refresh the metadata by re-probing the tool.
  *
- * @throws {ToolNotFoundError} If tool not in registry
- * @throws {MetadataNotFoundError} If cache file missing
- * @throws {ProbeError} If refresh fails
+ * @param toolName - Name of the tool to retrieve (must be in registry)
+ * @param options - Optional get options:
+ *   - `refresh`: If true, probe tool first and update cache before returning
+ *   - `commands`: Array of command subtrees to filter (not yet implemented)
+ *   - `depth`: Limit command nesting depth (not yet implemented)
+ * @param paths - Optional custom paths for registry and cache location
+ * @returns Promise resolving to full ATIP metadata for the tool
+ *
+ * @throws {ToolNotFoundError} If tool not found in registry
+ * @throws {MetadataNotFoundError} If cached metadata file is missing
+ * @throws {ProbeError} If refresh is requested but probe fails
+ *
+ * @example
+ * ```typescript
+ * // Get cached metadata
+ * const metadata = await get('gh');
+ * console.log(metadata.version);
+ *
+ * // Force refresh from tool
+ * const fresh = await get('gh', { refresh: true });
+ * ```
  */
 export async function get(
   toolName: string,

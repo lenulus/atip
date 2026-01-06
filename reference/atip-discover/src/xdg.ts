@@ -5,16 +5,7 @@
 import * as os from 'os';
 import * as path from 'path';
 import type { AtipPaths } from './types';
-
-/**
- * Expand tilde in path to home directory
- */
-function expandTilde(filepath: string): string {
-  if (filepath.startsWith('~/') || filepath === '~') {
-    return path.join(os.homedir(), filepath.slice(1));
-  }
-  return filepath;
-}
+import { expandTilde } from './utils';
 
 /**
  * Get the default data directory based on platform
@@ -51,8 +42,22 @@ function getDefaultConfigDir(): string {
 /**
  * Get XDG-compliant paths for ATIP tool storage.
  *
- * @param overrides - Optional path overrides
- * @returns Resolved paths for data, config, and cache directories
+ * Respects XDG Base Directory specification:
+ * - Uses XDG_DATA_HOME and XDG_CONFIG_HOME environment variables if set
+ * - Falls back to ~/.local/share and ~/.config on Unix systems
+ * - On Windows, uses %LOCALAPPDATA%
+ * - Expands ~ to home directory
+ *
+ * @param overrides - Optional path overrides for testing or custom configurations
+ * @returns Resolved absolute paths for data, config, registry, tools, and shims directories
+ *
+ * @example
+ * ```typescript
+ * const paths = getAtipPaths();
+ * console.log(paths.registryPath);
+ * // Unix: /home/user/.local/share/agent-tools/registry.json
+ * // Windows: C:\Users\user\AppData\Local\agent-tools\registry.json
+ * ```
  */
 export function getAtipPaths(overrides?: Partial<AtipPaths>): AtipPaths {
   // Check for environment variable override first

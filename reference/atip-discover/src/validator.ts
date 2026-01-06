@@ -3,6 +3,7 @@
  */
 
 import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 import * as fs from 'fs';
 import * as path from 'path';
 import type { ValidationResult, ValidationError } from './types';
@@ -25,6 +26,9 @@ try {
 }
 
 const ajv = new Ajv({ allErrors: true, strict: false });
+// Add format validators (including 'uri')
+addFormats(ajv);
+
 let validateFn: ReturnType<typeof ajv.compile> | null = null;
 
 if (schema) {
@@ -34,8 +38,24 @@ if (schema) {
 /**
  * Validate ATIP metadata against the schema.
  *
- * @param metadata - Parsed JSON to validate
- * @returns Validation result with errors if invalid
+ * Validates the provided metadata object against the ATIP v0.4 JSON schema.
+ * If the schema cannot be loaded, performs minimal validation of required fields.
+ *
+ * @param metadata - Parsed JSON object to validate (typically from tool --agent output)
+ * @returns Validation result object containing:
+ *   - `valid`: boolean indicating if metadata is valid
+ *   - `errors`: array of validation errors (empty if valid)
+ *
+ * @example
+ * ```typescript
+ * const result = validateMetadata(parsedJson);
+ * if (!result.valid) {
+ *   console.error('Validation errors:', result.errors);
+ *   result.errors.forEach(err => {
+ *     console.log(`  ${err.path.join('.')}: ${err.message}`);
+ *   });
+ * }
+ * ```
  */
 export function validateMetadata(metadata: unknown): ValidationResult {
   // If we couldn't load the schema, do minimal validation
