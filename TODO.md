@@ -43,6 +43,10 @@
 - [x] reference/atip-discover/ - CLI tool for discovery (TypeScript, canonical)
 - [x] reference/atip-discover-go/ - CLI tool for discovery (Go, alternative)
 - [ ] reference/atip-registry/ - Content-addressable registry server (Go)
+- [ ] reference/atip-execute/ - Safe tool execution from LLM calls (TypeScript)
+- [ ] reference/atip-lint/ - Metadata quality linter (TypeScript)
+- [ ] reference/atip-diff/ - Version comparison tool (TypeScript)
+- [ ] reference/atip-mcp/ - MCP adapter for ATIP tools (Future)
 
 ### Documentation
 - [x] docs/why-atip.md - Positioning document (why ATIP exists)
@@ -80,6 +84,10 @@
 | atip-discover | TypeScript | npm, tsup, vitest | Canonical CLI tool; matches major agent CLIs (Claude Code, etc.) |
 | atip-discover-go | Go | go test | Go port; single binary, fast startup, ideal for standalone use |
 | atip-registry | Go | go test | Registry server; single binary, good for deployment, handles hash lookups |
+| atip-execute | TypeScript | npm, tsup, vitest | Pairs with atip-bridge; same ecosystem for seamless integration |
+| atip-lint | TypeScript | npm, tsup, vitest | Extends atip-validate; shares validation infrastructure |
+| atip-diff | TypeScript | npm, tsup, vitest | CLI tool; TypeScript for JSON manipulation and rich output |
+| atip-mcp | TypeScript | npm, MCP SDK | MCP servers typically TypeScript; uses official MCP SDK |
 
 **BRGR Agent Workflow:**
 Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`):
@@ -238,15 +246,117 @@ Make all ATIP reference tools implement the `--agent` flag themselves:
       - [ ] README with deployment guide
       - [ ] Implements `--agent` flag (dogfooding!)
 
+### Phase 4.7: atip-execute (TypeScript) - Safe Tool Execution
+
+19. reference/atip-execute/ - Execute LLM tool calls safely
+    - [ ] 4.7.1: Project setup and Blue phase
+      - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
+      - [ ] Initialize npm package with TypeScript
+      - [ ] Set up test framework (vitest)
+    - [ ] 4.7.2: Tool call parsing (BRGR cycle)
+      - [ ] Blue: Document parsing for OpenAI/Gemini/Anthropic tool call formats
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for parser tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
+      - [ ] Features:
+        - [ ] Parse tool calls from all three provider response formats
+        - [ ] Map flattened names back to CLI commands (e.g., `gh_pr_create` → `gh pr create`)
+    - [ ] 4.7.3: Validation and safety (BRGR cycle)
+      - [ ] Blue: Document validation against ATIP metadata
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for validation tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
+      - [ ] Features:
+        - [ ] Validate arguments against ATIP schema
+        - [ ] Check effects metadata (warn/prompt for destructive operations)
+        - [ ] Timeout configuration
+    - [ ] 4.7.4: Subprocess execution (BRGR cycle)
+      - [ ] Blue: Document safe subprocess execution model
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for execution tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
+      - [ ] Features:
+        - [ ] Execute CLI with proper argument escaping
+        - [ ] Capture stdout/stderr
+        - [ ] Handle timeouts and errors
+        - [ ] Format result for LLM consumption
+    - [ ] 4.7.5: Packaging
+      - [ ] Library API for programmatic use
+      - [ ] CLI wrapper for standalone use
+      - [ ] Integration examples with atip-bridge
+      - [ ] Implements `--agent` flag (dogfooding!)
+
+### Phase 4.8: atip-lint (TypeScript) - Metadata Quality Checks
+
+20. reference/atip-lint/ - Quality linting beyond schema validation
+    - [ ] 4.8.1: Project setup and Blue phase
+      - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
+      - [ ] Initialize npm package with TypeScript
+      - [ ] Set up test framework (vitest)
+    - [ ] 4.8.2: Quality rules (BRGR cycle)
+      - [ ] Blue: Document lint rules and severity levels
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for rule tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
+      - [ ] Rules:
+        - [ ] Missing effects declarations (warn if command has no effects)
+        - [ ] Description quality (min length, no placeholder text)
+        - [ ] Consistent naming conventions
+        - [ ] Required fields for specific trust levels
+    - [ ] 4.8.3: Executable validation (BRGR cycle)
+      - [ ] Blue: Document executable checks
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for executable tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
+      - [ ] Features:
+        - [ ] Verify tool binary exists at expected path
+        - [ ] Test that `--agent` flag works (for native tools)
+        - [ ] Validate examples actually execute
+    - [ ] 4.8.4: Packaging
+      - [ ] CLI with configurable rules (`.atiplintrc`)
+      - [ ] CI/CD integration (exit codes, JSON output)
+      - [ ] Implements `--agent` flag (dogfooding!)
+
+### Phase 4.9: atip-diff (TypeScript) - Version Comparison
+
+21. reference/atip-diff/ - Compare ATIP metadata versions
+    - [ ] 4.9.1: Project setup and Blue phase
+      - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
+      - [ ] Initialize npm package with TypeScript
+      - [ ] Set up test framework (vitest)
+    - [ ] 4.9.2: Diff engine (BRGR cycle)
+      - [ ] Blue: Document diff algorithm and change categories
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for diff tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
+      - [ ] Change categories:
+        - [ ] Breaking: removed commands, changed required args, stricter types
+        - [ ] Non-breaking: new commands, new optional args, relaxed types
+        - [ ] Effects changes: destructive flag added/removed
+    - [ ] 4.9.3: Output formats (BRGR cycle)
+      - [ ] Blue: Document output format options
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for output tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
+      - [ ] Formats:
+        - [ ] Human-readable summary
+        - [ ] JSON for programmatic use
+        - [ ] Markdown for changelogs
+    - [ ] 4.9.4: Packaging
+      - [ ] CLI: `atip-diff old.json new.json`
+      - [ ] Library API for CI integration
+      - [ ] Implements `--agent` flag (dogfooding!)
+
 ### Phase 5: Shims & Partial Discovery (Future)
-19. examples/kubectl-partial.json - Partial discovery example
-20. shims/README.md - Shim contribution guide
-21. shims/curl.json, jq.json, etc. - Example shims
+22. examples/kubectl-partial.json - Partial discovery example
+23. shims/README.md - Shim contribution guide
+24. shims/curl.json, jq.json, etc. - Example shims
 
 ### Phase 6: Extended (Future)
-22. More shim examples (rsync, ffmpeg, etc.)
-23. ✅ Historical spec versions (0.1.0, 0.2.0, 0.3.0)
-24. schema/atip.schema.json - Symlink to latest
+25. More shim examples (rsync, ffmpeg, etc.)
+26. ✅ Historical spec versions (0.1.0, 0.2.0, 0.3.0)
+27. schema/atip.schema.json - Symlink to latest
+
+### Phase 8: MCP Integration (Future)
+
+28. reference/atip-mcp/ - MCP adapter for ATIP tools
+    - [ ] Expose ATIP-discovered tools as MCP servers
+    - [ ] Bridge for stateful execution scenarios (per spec §10)
+    - [ ] Handle tools requiring stdin/TTY via MCP's streaming capabilities
+    - [ ] Configuration for which tools to expose
 
 ### Phase 7: Post v0.6.0 Update Validation
 
