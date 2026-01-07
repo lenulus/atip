@@ -2,7 +2,7 @@
 
 ## A lightweight, CLI-first protocol that allows AI agents to safely introspect local tools via a simple --agent contract, without requiring MCP servers or additional infrastructure.
 
-[![Version](https://img.shields.io/badge/version-0.4.0-blue)](./spec/rfc.md)
+[![Version](https://img.shields.io/badge/version-0.6.0-blue)](./spec/rfc.md)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
 
 ---
@@ -14,7 +14,7 @@ ATIP defines a simple convention for CLI tools to expose their capabilities to A
 ```bash
 $ gh --agent
 {
-  "atip": {"version": "0.4"},
+  "atip": {"version": "0.6"},
   "name": "gh",
   "description": "GitHub CLI",
   "commands": {
@@ -73,7 +73,7 @@ Add ATIP support to your CLI tool in 30 minutes:
 import json, sys
 
 ATIP_METADATA = {
-    "atip": {"version": "0.4"},
+    "atip": {"version": "0.6"},
     "name": "mytool",
     "version": "1.0.0",
     "description": "Does something useful",
@@ -113,7 +113,7 @@ For tools that don't natively support `--agent`, you can create shim files:
 ```bash
 # ~/.local/share/agent-tools/shims/curl.json
 {
-  "atip": {"version": "0.4"},
+  "atip": {"version": "0.6"},
   "name": "curl",
   "version": "8.4.0",
   "description": "Transfer data from or to a server",
@@ -212,8 +212,8 @@ ATIP complements MCP—use ATIP for discovery, MCP for stateful execution when n
 
 ```
 atip/
-├── spec/rfc.md              # Full specification (v0.4.0)
-├── schema/0.4.json          # JSON Schema for validation
+├── spec/rfc.md              # Full specification (v0.6.0)
+├── schema/0.6.json          # JSON Schema for validation
 ├── examples/                # Example ATIP metadata
 │   ├── gh.json              # Full example (GitHub CLI)
 │   ├── minimal.json         # Minimal valid ATIP
@@ -257,7 +257,7 @@ atip/
 
 ```json
 {
-  "atip": {"version": "0.4"},
+  "atip": {"version": "0.6"},
   "name": "hello",
   "version": "1.0.0",
   "description": "Print a greeting",
@@ -304,7 +304,7 @@ ATIP and MCP solve different problems. See [docs/why-not-mcp.md](./docs/why-not-
 
 ## Status
 
-**Current Version:** 0.4.0 (Draft)
+**Current Version:** 0.6.0 (Draft)
 
 This specification is open for community feedback and contributions.
 
@@ -314,7 +314,8 @@ This specification is open for community feedback and contributions.
 - [x] v0.2.0 — Partial discovery
 - [x] v0.3.0 — Interactive effects
 - [x] v0.4.0 — Trust and provenance
-- [ ] v0.5.0 — Reference implementation (atip-bridge)
+- [x] v0.5.0 — Cryptographic verification (SLSA/Sigstore)
+- [x] v0.6.0 — Content-addressable registry
 - [ ] v1.0.0 — Stable release
 
 ---
@@ -338,7 +339,7 @@ This specification and reference implementations are released under the [MIT Lic
 ## Links
 
 - **Specification:** [spec/rfc.md](./spec/rfc.md)
-- **JSON Schema:** [schema/0.4.json](./schema/0.4.json)
+- **JSON Schema:** [schema/0.6.json](./schema/0.6.json)
 - **Issues:** [GitHub Issues](https://github.com/lenulus/atip/issues)
 - **Discussions:** [GitHub Discussions](https://github.com/lenulus/atip/discussions)
 
