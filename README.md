@@ -208,6 +208,37 @@ ATIP complements MCP—use ATIP for discovery, MCP for stateful execution when n
 
 ---
 
+## Architecture
+
+How ATIP tools work together to enable AI agents to safely use CLI tools:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           ATIP Toolchain                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌──────────────┐    ┌─────────────┐    ┌─────┐    ┌──────────────┐        │
+│  │atip-discover │ →  │ atip-bridge │ →  │ LLM │ →  │ atip-execute │        │
+│  │              │    │             │    │     │    │              │        │
+│  │ Find tools   │    │ Compile to  │    │     │    │ Run safely   │        │
+│  │ with --agent │    │ OpenAI/etc  │    │     │    │ with checks  │        │
+│  └──────────────┘    └─────────────┘    └─────┘    └──────┬───────┘        │
+│         ↑                                                  │               │
+│         │            ┌──────────────┐                      ↓               │
+│         │            │atip-registry │              ┌──────────────┐        │
+│         └────────────│              │              │   CLI Tool   │        │
+│                      │ Shim hosting │              │              │        │
+│                      └──────────────┘              │ gh, kubectl, │        │
+│                                                    │ terraform... │        │
+│  Supporting: atip-validate, atip-gen,              └──────────────┘        │
+│              atip-lint, atip-diff                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+See [reference/README.md](./reference/README.md) for detailed tool documentation.
+
+---
+
 ## Repository Structure
 
 ```
