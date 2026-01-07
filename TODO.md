@@ -9,14 +9,19 @@
 - [x] CHANGELOG.md - Version history
 
 ### Specification
-- [x] spec/rfc.md - Main specification (v0.4.0)
+- [x] spec/rfc.md - Main specification (v0.6.0)
 - [x] spec/versions/ - Historical versions
   - [x] spec/versions/0.1.0.md
   - [x] spec/versions/0.2.0.md
   - [x] spec/versions/0.3.0.md
+  - [x] spec/versions/0.4.0.md
+  - [x] spec/versions/0.5.0.md
+  - [x] spec/versions/0.5.1.md
+  - [x] spec/versions/0.6.0.md
 
 ### Schema
-- [x] schema/0.4.json - JSON Schema for validation
+- [x] schema/0.4.json - JSON Schema for v0.4.0
+- [x] schema/0.6.json - JSON Schema for v0.6.0 (current)
 - [ ] schema/atip.schema.json - Symlink to latest version
 
 ### Shims (Community-maintained tool metadata)
@@ -202,11 +207,21 @@ Make all ATIP reference tools implement the `--agent` flag themselves:
 22. ✅ Historical spec versions (0.1.0, 0.2.0, 0.3.0)
 23. schema/atip.schema.json - Symlink to latest
 
+### Phase 7: Post v0.6.0 Update Validation
+
+After updating all reference tools from v0.4 to v0.6:
+
+- [ ] Run atip-discover (TypeScript) tests: `cd reference/atip-discover && npm test`
+- [ ] Run atip-discover-go tests: `cd reference/atip-discover-go && go test ./...`
+- [ ] Run atip-bridge tests: `cd reference/atip-bridge && npm test`
+- [ ] Run atip-validate tests: `cd reference/atip-validate && npm test`
+- [ ] Validate all examples against schema/0.6.json
+
 ## Notes
 
-- Keep examples aligned with spec v0.4.0
+- Keep examples aligned with spec v0.6.0
 - JSON Schema should validate all examples
 - Reference implementation should match Appendix A
-- All files should reference canonical schema at https://atip.dev/schema/0.4.json
+- All files should reference canonical schema at https://atip.dev/schema/0.6.json
 - **100% of tests must pass before marking a phase complete** (see CLAUDE.md § Phase Transitions)
 - Follow BRGR methodology for all implementation phases (see CLAUDE.md § BRGR Methodology)
