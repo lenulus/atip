@@ -9,7 +9,7 @@ import { toOpenAI } from 'atip-bridge';
 
 // Minimal ATIP tool
 const myTool = {
-  atip: { version: '0.4' },
+  atip: { version: '0.6' },
   name: 'greet',
   version: '1.0.0',
   description: 'A greeting tool',
@@ -83,7 +83,7 @@ console.log(JSON.stringify(openaiTools, null, 2));
 import { toOpenAI } from 'atip-bridge';
 
 const myTool = {
-  atip: { version: '0.4' },
+  atip: { version: '0.6' },
   name: 'deploy',
   version: '2.0.0',
   description: 'Deployment tool',
@@ -165,7 +165,7 @@ console.log(JSON.stringify(openaiTools, null, 2));
 import { toGemini } from 'atip-bridge';
 
 const ghTool = {
-  atip: { version: '0.4' },
+  atip: { version: '0.6' },
   name: 'gh',
   version: '2.45.0',
   description: 'GitHub CLI',
@@ -233,7 +233,7 @@ console.log(JSON.stringify(geminiTools, null, 2));
 import { toAnthropic } from 'atip-bridge';
 
 const repoTool = {
-  atip: { version: '0.4' },
+  atip: { version: '0.6' },
   name: 'gh',
   version: '2.45.0',
   description: 'GitHub CLI',
@@ -301,7 +301,7 @@ console.log(JSON.stringify(anthropicTools, null, 2));
 import { compileTools } from 'atip-bridge';
 
 const ghTool = {
-  atip: { version: '0.4' },
+  atip: { version: '0.6' },
   name: 'gh',
   version: '2.45.0',
   description: 'GitHub CLI',
@@ -332,7 +332,7 @@ const ghTool = {
 };
 
 const kubectlTool = {
-  atip: { version: '0.4' },
+  atip: { version: '0.6' },
   name: 'kubectl',
   version: '1.28.0',
   description: 'Kubernetes CLI',
@@ -382,7 +382,7 @@ console.log(result.tools.length); // 3 tools total
 import { generateSafetyPrompt } from 'atip-bridge';
 
 const ghTool = {
-  atip: { version: '0.4' },
+  atip: { version: '0.6' },
   name: 'gh',
   version: '2.45.0',
   description: 'GitHub CLI',
@@ -449,7 +449,7 @@ The following commands have different effects on repeated execution:
 import { createValidator } from 'atip-bridge';
 
 const ghTool = {
-  atip: { version: '0.4' },
+  atip: { version: '0.6' },
   name: 'gh',
   version: '2.45.0',
   description: 'GitHub CLI',
@@ -554,7 +554,7 @@ Violations: [
 import { createResultFilter } from 'atip-bridge';
 
 const ghTool = {
-  atip: { version: '0.4' },
+  atip: { version: '0.6' },
   name: 'gh',
   version: '2.45.0',
   description: 'GitHub CLI',
@@ -882,7 +882,7 @@ import { toOpenAI, AtipValidationError, parseToolCall, AtipParseError } from 'at
 
 // Invalid ATIP (missing required fields)
 const invalidTool = {
-  atip: { version: '0.4' },
+  atip: { version: '0.6' },
   // missing: name, version, description
   commands: {},
 };
@@ -956,7 +956,7 @@ console.log('Compiled', tools.length, 'tools');
 import { toOpenAI } from 'atip-bridge';
 
 const fileTool = {
-  atip: { version: '0.4' },
+  atip: { version: '0.6' },
   name: 'processor',
   version: '1.0.0',
   description: 'File processor',
@@ -1023,7 +1023,7 @@ import { toOpenAI, OPENAI_DESCRIPTION_MAX_LENGTH } from 'atip-bridge';
 const longDescription = 'A'.repeat(1100); // Over 1024 limit
 
 const verboseTool = {
-  atip: { version: '0.4' },
+  atip: { version: '0.6' },
   name: 'verbose',
   version: '1.0.0',
   description: 'Short root description',

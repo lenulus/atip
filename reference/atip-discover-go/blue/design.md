@@ -129,7 +129,7 @@ The CLI is organized into three main functional areas:
 | File | Purpose |
 |------|---------|
 | `validator.go` | JSON Schema validation |
-| `schema.go` | Embedded ATIP 0.4 schema |
+| `schema.go` | Embedded ATIP 0.6 schema |
 | `errors.go` | Validation error types |
 
 ### 5. Output Module (`internal/output/`)
@@ -879,7 +879,7 @@ testdata/
     valid-shim.json      - Valid shim file
     invalid-shim.json    - Invalid shim file
   schemas/
-    0.4.json             - Copy of ATIP schema for testing
+    0.6.json             - Copy of ATIP schema for testing
 ```
 
 ### Test Coverage Requirements

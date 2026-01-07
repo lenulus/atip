@@ -85,11 +85,11 @@ func validateAtipField(atip interface{}) error {
 	switch v := atip.(type) {
 	case string:
 		// Legacy format: "atip": "0.3"
-		if v != "0.1" && v != "0.2" && v != "0.3" && v != "0.4" {
+		if v != "0.1" && v != "0.2" && v != "0.3" && v != "0.4" && v != "0.5" && v != "0.6" {
 			return &ValidationError{Field: "atip", Message: fmt.Sprintf("unsupported version: %s", v)}
 		}
 	case map[string]interface{}:
-		// New format: "atip": {"version": "0.4"}
+		// New format: "atip": {"version": "0.6"}
 		version, ok := v["version"]
 		if !ok {
 			return &ValidationError{Field: "atip.version", Message: "field is required"}
@@ -98,7 +98,7 @@ func validateAtipField(atip interface{}) error {
 		if !ok {
 			return &ValidationError{Field: "atip.version", Message: "must be a string"}
 		}
-		if versionStr != "0.1" && versionStr != "0.2" && versionStr != "0.3" && versionStr != "0.4" {
+		if versionStr != "0.1" && versionStr != "0.2" && versionStr != "0.3" && versionStr != "0.4" && versionStr != "0.5" && versionStr != "0.6" {
 			return &ValidationError{Field: "atip.version", Message: fmt.Sprintf("unsupported version: %s", versionStr)}
 		}
 	default:

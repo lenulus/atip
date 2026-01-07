@@ -23,7 +23,7 @@ export class AtipValidator {
     addFormats(this.ajv);
 
     // Load schema
-    const defaultSchemaPath = path.join(__dirname, '../../../schema/0.4.json');
+    const defaultSchemaPath = path.join(__dirname, '../../../schema/0.6.json');
     this.schemaPath = schemaPath || defaultSchemaPath;
     this.schema = JSON.parse(fs.readFileSync(this.schemaPath, 'utf-8'));
     this.validate = this.ajv.compile(this.schema);

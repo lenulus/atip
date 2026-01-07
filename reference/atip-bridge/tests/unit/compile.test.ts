@@ -4,7 +4,7 @@ import type { AtipTool } from '../../src/index';
 
 describe('compileTools', () => {
   const ghTool: AtipTool = {
-    atip: { version: '0.4' },
+    atip: { version: '0.6' },
     name: 'gh',
     version: '2.45.0',
     description: 'GitHub CLI',
@@ -26,7 +26,7 @@ describe('compileTools', () => {
   };
 
   const kubectlTool: AtipTool = {
-    atip: { version: '0.4' },
+    atip: { version: '0.6' },
     name: 'kubectl',
     version: '1.28.0',
     description: 'Kubernetes CLI',
@@ -101,7 +101,7 @@ describe('compileTools', () => {
   describe('name deduplication', () => {
     test('should handle duplicate tool names (later overrides earlier)', () => {
       const tool1: AtipTool = {
-        atip: { version: '0.4' },
+        atip: { version: '0.6' },
         name: 'test',
         version: '1.0.0',
         description: 'First version',
@@ -114,7 +114,7 @@ describe('compileTools', () => {
       };
 
       const tool2: AtipTool = {
-        atip: { version: '0.4' },
+        atip: { version: '0.6' },
         name: 'test',
         version: '2.0.0',
         description: 'Second version',
@@ -136,7 +136,7 @@ describe('compileTools', () => {
   describe('error handling', () => {
     test('should throw if any tool is invalid', () => {
       const invalidTool = {
-        atip: { version: '0.4' },
+        atip: { version: '0.6' },
         name: 'invalid',
         // missing version and description
       } as unknown as AtipTool;
@@ -146,12 +146,12 @@ describe('compileTools', () => {
 
     test('should throw for all invalid tools', () => {
       const invalidTool1 = {
-        atip: { version: '0.4' },
+        atip: { version: '0.6' },
         name: 'invalid1',
       } as unknown as AtipTool;
 
       const invalidTool2 = {
-        atip: { version: '0.4' },
+        atip: { version: '0.6' },
         version: '1.0.0',
       } as unknown as AtipTool;
 

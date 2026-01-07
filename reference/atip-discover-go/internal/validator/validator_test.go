@@ -18,7 +18,7 @@ func TestValidate_ValidMinimalMetadata(t *testing.T) {
 	require.NoError(t, err)
 
 	validJSON := `{
-		"atip": {"version": "0.4"},
+		"atip": {"version": "0.6"},
 		"name": "test-tool",
 		"version": "1.0.0",
 		"description": "A test tool",
@@ -45,7 +45,7 @@ func TestValidate_ValidComplexMetadata(t *testing.T) {
 	require.NoError(t, err)
 
 	validJSON := `{
-		"atip": {"version": "0.4"},
+		"atip": {"version": "0.6"},
 		"name": "gh",
 		"version": "2.45.0",
 		"description": "GitHub CLI",
@@ -100,15 +100,15 @@ func TestValidate_MissingRequiredFields(t *testing.T) {
 		},
 		{
 			name: "missing name field",
-			json: `{"atip": {"version": "0.4"}, "version": "1.0.0", "description": "test"}`,
+			json: `{"atip": {"version": "0.6"}, "version": "1.0.0", "description": "test"}`,
 		},
 		{
 			name: "missing version field",
-			json: `{"atip": {"version": "0.4"}, "name": "tool", "description": "test"}`,
+			json: `{"atip": {"version": "0.6"}, "name": "tool", "description": "test"}`,
 		},
 		{
 			name: "missing description field",
-			json: `{"atip": {"version": "0.4"}, "name": "tool", "version": "1.0.0"}`,
+			json: `{"atip": {"version": "0.6"}, "name": "tool", "version": "1.0.0"}`,
 		},
 	}
 
@@ -178,7 +178,7 @@ func TestValidate_InvalidEffects(t *testing.T) {
 		{
 			name: "effects with invalid type",
 			json: `{
-				"atip": {"version": "0.4"},
+				"atip": {"version": "0.6"},
 				"name": "tool",
 				"version": "1.0.0",
 				"description": "test",
@@ -195,7 +195,7 @@ func TestValidate_InvalidEffects(t *testing.T) {
 		{
 			name: "missing effects object",
 			json: `{
-				"atip": {"version": "0.4"},
+				"atip": {"version": "0.6"},
 				"name": "tool",
 				"version": "1.0.0",
 				"description": "test",
@@ -221,7 +221,7 @@ func TestValidate_PartialDiscovery(t *testing.T) {
 	require.NoError(t, err)
 
 	partialJSON := `{
-		"atip": {"version": "0.4"},
+		"atip": {"version": "0.6"},
 		"name": "kubectl",
 		"version": "1.28.0",
 		"description": "Kubernetes CLI",
@@ -245,7 +245,7 @@ func TestValidate_PartialDiscovery(t *testing.T) {
 
 func TestParseJSON(t *testing.T) {
 	validJSON := `{
-		"atip": {"version": "0.4"},
+		"atip": {"version": "0.6"},
 		"name": "tool",
 		"version": "1.0.0",
 		"description": "test"
@@ -268,7 +268,7 @@ func TestValidateMetadata(t *testing.T) {
 
 	metadata := &AtipMetadata{
 		Atip: map[string]interface{}{
-			"version": "0.4",
+			"version": "0.6",
 		},
 		Name:        "tool",
 		Version:     "1.0.0",
@@ -313,7 +313,7 @@ func TestValidate_OptionsWithAllTypes(t *testing.T) {
 	require.NoError(t, err)
 
 	jsonWithOptions := `{
-		"atip": {"version": "0.4"},
+		"atip": {"version": "0.6"},
 		"name": "tool",
 		"version": "1.0.0",
 		"description": "test",
@@ -362,7 +362,7 @@ func TestValidate_NestedCommands(t *testing.T) {
 	require.NoError(t, err)
 
 	nestedJSON := `{
-		"atip": {"version": "0.4"},
+		"atip": {"version": "0.6"},
 		"name": "tool",
 		"version": "1.0.0",
 		"description": "test",

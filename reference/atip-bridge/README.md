@@ -25,7 +25,7 @@ import type { AtipTool } from 'atip-bridge';
 
 // Load your ATIP metadata
 const ghTool: AtipTool = {
-  atip: { version: '0.4' },
+  atip: { version: '0.6' },
   name: 'gh',
   version: '2.40.0',
   description: 'GitHub CLI tool',

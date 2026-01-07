@@ -143,7 +143,7 @@ func TestProber_Probe_ValidTool(t *testing.T) {
 if [ "$1" = "--agent" ]; then
   cat <<EOF
 {
-  "atip": {"version": "0.4"},
+  "atip": {"version": "0.6"},
   "name": "mock-tool",
   "version": "1.0.0",
   "description": "A mock tool",

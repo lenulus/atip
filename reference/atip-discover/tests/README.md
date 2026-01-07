@@ -298,7 +298,7 @@ coverage: {
 
 ```json
 {
-  "atip": { "version": "0.4" },
+  "atip": { "version": "0.6" },
   "name": "test-tool",
   "version": "1.0.0",
   "description": "Test tool",

@@ -16,7 +16,7 @@ const VERSION = '0.1.0';
  * This tool eats its own dogfood!
  */
 const ATIP_METADATA = {
-  atip: { version: '0.4', features: ['trust-v1'] },
+  atip: { version: '0.6', features: ['trust-v1'] },
   name: 'atip-gen',
   version: VERSION,
   description: 'Generate ATIP metadata from --help output',

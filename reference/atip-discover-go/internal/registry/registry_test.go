@@ -292,7 +292,7 @@ func TestLoadShims(t *testing.T) {
 
 	// Create a shim file
 	shimJSON := `{
-		"atip": {"version": "0.4"},
+		"atip": {"version": "0.6"},
 		"name": "curl",
 		"version": "8.4.0",
 		"description": "Transfer data from or to a server",

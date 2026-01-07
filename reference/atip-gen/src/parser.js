@@ -19,7 +19,7 @@ export class HelpParser {
     const version = await this.getVersion();
 
     const metadata = {
-      atip: { version: "0.4" },
+      atip: { version: "0.6" },
       name: this.toolName,
       version: version || "unknown",
       description: this.extractDescription(helpText),

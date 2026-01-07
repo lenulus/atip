@@ -30,7 +30,7 @@ var (
 // This tool eats its own dogfood!
 var atipMetadata = map[string]interface{}{
 	"atip": map[string]interface{}{
-		"version":  "0.4",
+		"version":  "0.6",
 		"features": []string{"trust-v1"},
 	},
 	"name":        "atip-discover",

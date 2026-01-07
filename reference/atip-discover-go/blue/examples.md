@@ -132,7 +132,7 @@ atip-discover get gh
 **Expected Output**:
 ```json
 {
-  "atip": {"version": "0.4"},
+  "atip": {"version": "0.6"},
   "name": "gh",
   "version": "2.45.0",
   "description": "Work seamlessly with GitHub from the command line",
@@ -203,7 +203,7 @@ atip-discover get kubectl --commands=pods,deployments --depth=1
 **Expected Output**:
 ```json
 {
-  "atip": {"version": "0.4"},
+  "atip": {"version": "0.6"},
   "name": "kubectl",
   "version": "1.28.0",
   "description": "Kubernetes CLI",
@@ -424,7 +424,7 @@ Shim files provide ATIP metadata for legacy tools:
 # First, add a shim file
 cat > ~/.local/share/agent-tools/shims/curl.json << 'EOF'
 {
-  "atip": {"version": "0.4"},
+  "atip": {"version": "0.6"},
   "name": "curl",
   "version": "8.4.0",
   "description": "Transfer data from or to a server",

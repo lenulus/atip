@@ -182,7 +182,7 @@ func TestGetCommand(t *testing.T) {
 	err = json.Unmarshal(output, &metadata)
 	require.NoError(t, err)
 
-	assert.Equal(t, "0.4", metadata.Atip.Version)
+	assert.Equal(t, "0.6", metadata.Atip.Version)
 	assert.Equal(t, "gh", metadata.Name)
 	assert.Equal(t, "2.45.0", metadata.Version)
 }
@@ -379,7 +379,7 @@ func createMockATIPTool(t *testing.T, dir, name, version, description string) st
 if [ "$1" = "--agent" ]; then
   cat <<EOF
 {
-  "atip": {"version": "0.4"},
+  "atip": {"version": "0.6"},
   "name": "` + name + `",
   "version": "` + version + `",
   "description": "` + description + `",

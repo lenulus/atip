@@ -9,14 +9,14 @@ import * as path from 'path';
 import type { ValidationResult, ValidationError } from './types';
 
 // Load the ATIP schema
-const schemaPath = path.join(__dirname, '../../../schema/0.4.json');
+const schemaPath = path.join(__dirname, '../../../schema/0.6.json');
 let schema: unknown;
 
 try {
   schema = JSON.parse(fs.readFileSync(schemaPath, 'utf-8'));
 } catch (error) {
   // Fallback: try relative to project root
-  const fallbackPath = path.join(process.cwd(), 'schema', '0.4.json');
+  const fallbackPath = path.join(process.cwd(), 'schema', '0.6.json');
   try {
     schema = JSON.parse(fs.readFileSync(fallbackPath, 'utf-8'));
   } catch {
@@ -38,7 +38,7 @@ if (schema) {
 /**
  * Validate ATIP metadata against the schema.
  *
- * Validates the provided metadata object against the ATIP v0.4 JSON schema.
+ * Validates the provided metadata object against the ATIP v0.6 JSON schema.
  * If the schema cannot be loaded, performs minimal validation of required fields.
  *
  * @param metadata - Parsed JSON object to validate (typically from tool --agent output)

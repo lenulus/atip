@@ -210,7 +210,7 @@ atip-discover get <tool-name> [flags]
 Full ATIP metadata as defined in spec section 3.2:
 ```json
 {
-  "atip": {"version": "0.4"},
+  "atip": {"version": "0.6"},
   "name": "gh",
   "version": "2.45.0",
   "description": "GitHub CLI",

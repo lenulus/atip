@@ -10,7 +10,7 @@ import type { AtipTool } from '../../src/index';
 
 describe('Round-trip Integration Tests', () => {
   const testTool: AtipTool = {
-    atip: { version: '0.4' },
+    atip: { version: '0.6' },
     name: 'calc',
     version: '1.0.0',
     description: 'Calculator',

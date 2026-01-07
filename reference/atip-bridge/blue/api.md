@@ -17,7 +17,7 @@ The library is pure TypeScript with zero runtime dependencies, designed for tree
 
 ### AtipTool
 
-The input type representing ATIP metadata. Derived from `schema/0.4.json`.
+The input type representing ATIP metadata. Derived from `schema/0.6.json`.
 
 ```typescript
 /**

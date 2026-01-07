@@ -155,7 +155,7 @@ describe('GitHub CLI Integration', () => {
   describe('batch compilation', () => {
     test('should compile gh with other tools', () => {
       const minimalTool: AtipTool = {
-        atip: { version: '0.4' },
+        atip: { version: '0.6' },
         name: 'echo',
         version: '1.0.0',
         description: 'Echo tool',

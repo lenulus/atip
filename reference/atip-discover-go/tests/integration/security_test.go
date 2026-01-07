@@ -181,7 +181,7 @@ func TestOutputSizeLimit(t *testing.T) {
 	script := `#!/bin/sh
 if [ "$1" = "--agent" ]; then
   # Output 1MB of data
-  yes '{"atip": {"version": "0.4"}, "name": "large", "version": "1.0.0", "description": "large"}' | head -c 1048576
+  yes '{"atip": {"version": "0.6"}, "name": "large", "version": "1.0.0", "description": "large"}' | head -c 1048576
 fi
 `
 	err := os.WriteFile(largeTool, []byte(script), 0755)

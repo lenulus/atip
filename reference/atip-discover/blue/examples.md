@@ -355,7 +355,7 @@ atip-discover get gh
 ```json
 {
   "atip": {
-    "version": "0.4",
+    "version": "0.6",
     "features": ["trust-v1"]
   },
   "name": "gh",
@@ -466,7 +466,7 @@ atip-discover get gh --commands=pr
 ```json
 {
   "atip": {
-    "version": "0.4"
+    "version": "0.6"
   },
   "name": "gh",
   "version": "2.45.0",
@@ -513,7 +513,7 @@ atip-discover get kubectl --depth=1
 ```json
 {
   "atip": {
-    "version": "0.4"
+    "version": "0.6"
   },
   "name": "kubectl",
   "version": "1.28.0",
