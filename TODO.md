@@ -42,6 +42,7 @@
 - [x] reference/atip-bridge/ - TypeScript compiler library
 - [x] reference/atip-discover/ - CLI tool for discovery (TypeScript, canonical)
 - [x] reference/atip-discover-go/ - CLI tool for discovery (Go, alternative)
+- [ ] reference/atip-registry/ - Content-addressable registry server (Go)
 
 ### Documentation
 - [x] docs/why-atip.md - Positioning document (why ATIP exists)
@@ -78,6 +79,7 @@
 | atip-bridge-py | Python | uv, pytest | Python port (future) - better debugging, wider adoption |
 | atip-discover | TypeScript | npm, tsup, vitest | Canonical CLI tool; matches major agent CLIs (Claude Code, etc.) |
 | atip-discover-go | Go | go test | Go port; single binary, fast startup, ideal for standalone use |
+| atip-registry | Go | go test | Registry server; single binary, good for deployment, handles hash lookups |
 
 **BRGR Agent Workflow:**
 Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`):
@@ -197,15 +199,54 @@ Make all ATIP reference tools implement the `--agent` flag themselves:
     - [x] examples/tools/atip-echo - Echo tool demonstrating effects metadata ✅
     - [x] examples/tools/README.md - Documentation: "How to add --agent to your CLI tool" ✅
 
+### Phase 4.6: atip-registry (Go) - Content-Addressable Registry Server
+
+18. reference/atip-registry/ - Go server for content-addressable shim registry (v0.6.0)
+    - [ ] 4.6.1: Project setup and Blue phase
+      - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
+      - [ ] Initialize Go module
+      - [ ] Set up test framework (go test)
+    - [ ] 4.6.2: Registry server (BRGR cycle)
+      - [ ] Blue: Document API endpoints per spec §4.4 (Remote registry protocol)
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for server tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
+      - [ ] Refactor: **Use `brgr-refactor` agent** to optimize
+      - [ ] Endpoints:
+        - [ ] `GET /shims/sha256/{hash}.json` - Fetch shim by binary hash
+        - [ ] `GET /catalog.json` - Tool/version/platform matrix
+        - [ ] `GET /registry.json` - Full registry index
+    - [ ] 4.6.3: Community crawler (BRGR cycle)
+      - [ ] Blue: Document crawler algorithm per spec §4.10
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for crawler tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
+      - [ ] Refactor: **Use `brgr-refactor` agent** to optimize
+      - [ ] Features:
+        - [ ] Auto-generate shims from `--help` parsing
+        - [ ] Binary hash computation (SHA-256)
+        - [ ] `trust.source: "inferred"` for auto-generated shims
+    - [ ] 4.6.4: Sync and integrity (BRGR cycle)
+      - [ ] Blue: Document sync protocol per spec §4.7
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for sync tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
+      - [ ] Features:
+        - [ ] Cosign signature verification (optional)
+        - [ ] Registry sync client
+        - [ ] Local cache management
+    - [ ] 4.6.5: Packaging and deployment
+      - [ ] Single binary distribution
+      - [ ] Docker image
+      - [ ] README with deployment guide
+      - [ ] Implements `--agent` flag (dogfooding!)
+
 ### Phase 5: Shims & Partial Discovery (Future)
-18. examples/kubectl-partial.json - Partial discovery example
-19. shims/README.md - Shim contribution guide
-20. shims/curl.json, jq.json, etc. - Example shims
+19. examples/kubectl-partial.json - Partial discovery example
+20. shims/README.md - Shim contribution guide
+21. shims/curl.json, jq.json, etc. - Example shims
 
 ### Phase 6: Extended (Future)
-21. More shim examples (rsync, ffmpeg, etc.)
-22. ✅ Historical spec versions (0.1.0, 0.2.0, 0.3.0)
-23. schema/atip.schema.json - Symlink to latest
+22. More shim examples (rsync, ffmpeg, etc.)
+23. ✅ Historical spec versions (0.1.0, 0.2.0, 0.3.0)
+24. schema/atip.schema.json - Symlink to latest
 
 ### Phase 7: Post v0.6.0 Update Validation
 
