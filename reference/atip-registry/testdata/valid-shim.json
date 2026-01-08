@@ -1,0 +1,45 @@
+{
+  "atip": {
+    "version": "0.6"
+  },
+  "binary": {
+    "hash": "sha256:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+    "name": "curl",
+    "version": "8.5.0",
+    "platform": "darwin-arm64"
+  },
+  "name": "curl",
+  "version": "8.5.0",
+  "description": "Transfer data from or to a server",
+  "trust": {
+    "source": "community",
+    "verified": true
+  },
+  "commands": {
+    "": {
+      "description": "Transfer a URL",
+      "options": [
+        {
+          "name": "request",
+          "flags": ["-X", "--request"],
+          "type": "enum",
+          "enum": ["GET", "POST", "PUT", "DELETE"],
+          "description": "HTTP method to use"
+        },
+        {
+          "name": "output",
+          "flags": ["-o", "--output"],
+          "type": "file",
+          "description": "Write output to file"
+        }
+      ],
+      "effects": {
+        "network": true,
+        "idempotent": false,
+        "filesystem": {
+          "write": true
+        }
+      }
+    }
+  }
+}

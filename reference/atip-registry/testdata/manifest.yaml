@@ -1,0 +1,34 @@
+name: jq
+homepage: https://jqlang.github.io/jq/
+description: Lightweight and flexible command-line JSON processor
+
+sources:
+  github:
+    repo: jqlang/jq
+    asset_patterns:
+      linux-amd64: "jq-linux-amd64"
+      linux-arm64: "jq-linux-arm64"
+      darwin-amd64: "jq-macos-amd64"
+      darwin-arm64: "jq-macos-arm64"
+    binary_path: ""
+
+template: |
+  {
+    "commands": {
+      "": {
+        "description": "Filter JSON input",
+        "arguments": [
+          {"name": "filter", "type": "string", "required": true, "description": "jq filter expression"}
+        ],
+        "options": [
+          {"name": "raw-output", "flags": ["-r", "--raw-output"], "type": "boolean", "description": "Output raw strings"},
+          {"name": "compact-output", "flags": ["-c", "--compact-output"], "type": "boolean", "description": "Compact output"}
+        ],
+        "effects": {
+          "network": false,
+          "idempotent": true,
+          "filesystem": {"read": true}
+        }
+      }
+    }
+  }

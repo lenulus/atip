@@ -1,0 +1,13 @@
+{
+  "atip": {
+    "version": "0.6"
+  },
+  "binary": {
+    "hash": "sha256:deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+    "name": "test",
+    "version": "1.0.0",
+    "platform": "linux-amd64"
+  },
+  "name": "test",
+  "description": "Missing required version field"
+}

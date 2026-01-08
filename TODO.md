@@ -42,7 +42,7 @@
 - [x] reference/atip-bridge/ - TypeScript compiler library
 - [x] reference/atip-discover/ - CLI tool for discovery (TypeScript, canonical)
 - [x] reference/atip-discover-go/ - CLI tool for discovery (Go, alternative)
-- [ ] reference/atip-registry/ - Content-addressable registry server (Go)
+- [x] reference/atip-registry/ - Content-addressable registry server (Go)
 - [ ] reference/atip-execute/ - Safe tool execution from LLM calls (TypeScript)
 - [ ] reference/atip-lint/ - Metadata quality linter (TypeScript)
 - [ ] reference/atip-diff/ - Version comparison tool (TypeScript)
@@ -207,44 +207,44 @@ Make all ATIP reference tools implement the `--agent` flag themselves:
     - [x] examples/tools/atip-echo - Echo tool demonstrating effects metadata ✅
     - [x] examples/tools/README.md - Documentation: "How to add --agent to your CLI tool" ✅
 
-### Phase 4.6: atip-registry (Go) - Content-Addressable Registry Server
+### Phase 4.6: atip-registry (Go) - Content-Addressable Registry Server ✅ COMPLETE
 
 18. reference/atip-registry/ - Go server for content-addressable shim registry (v0.6.0)
-    - [ ] 4.6.1: Project setup and Blue phase
-      - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
-      - [ ] Initialize Go module
-      - [ ] Set up test framework (go test)
-    - [ ] 4.6.2: Registry server (BRGR cycle)
-      - [ ] Blue: Document API endpoints per spec §4.4 (Remote registry protocol)
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for server tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
-      - [ ] Refactor: **Use `brgr-refactor` agent** to optimize
-      - [ ] Endpoints:
-        - [ ] `GET /shims/sha256/{hash}.json` - Fetch shim by binary hash
-        - [ ] `GET /catalog.json` - Tool/version/platform matrix
-        - [ ] `GET /registry.json` - Full registry index
-    - [ ] 4.6.3: Community crawler (BRGR cycle)
-      - [ ] Blue: Document crawler algorithm per spec §4.10
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for crawler tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
-      - [ ] Refactor: **Use `brgr-refactor` agent** to optimize
-      - [ ] Features:
-        - [ ] Auto-generate shims from `--help` parsing
-        - [ ] Binary hash computation (SHA-256)
-        - [ ] `trust.source: "inferred"` for auto-generated shims
-    - [ ] 4.6.4: Sync and integrity (BRGR cycle)
-      - [ ] Blue: Document sync protocol per spec §4.7
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for sync tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
-      - [ ] Features:
-        - [ ] Cosign signature verification (optional)
-        - [ ] Registry sync client
-        - [ ] Local cache management
-    - [ ] 4.6.5: Packaging and deployment
-      - [ ] Single binary distribution
-      - [ ] Docker image
-      - [ ] README with deployment guide
-      - [ ] Implements `--agent` flag (dogfooding!)
+    - [x] 4.6.1: Project setup and Blue phase ✅
+      - [x] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
+      - [x] Initialize Go module
+      - [x] Set up test framework (go test)
+    - [x] 4.6.2: Registry server (BRGR cycle) ✅
+      - [x] Blue: Document API endpoints per spec §4.4 (Remote registry protocol)
+      - [x] Red: **Use `brgr-red-test-writer` agent** for server tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement
+      - [x] Refactor: **Use `brgr-refactor` agent** to optimize
+      - [x] Endpoints:
+        - [x] `GET /shims/sha256/{hash}.json` - Fetch shim by binary hash
+        - [x] `GET /shims/index.json` - Browsable catalog
+        - [x] `GET /.well-known/atip-registry.json` - Registry manifest
+    - [x] 4.6.3: Community crawler (BRGR cycle) ✅
+      - [x] Blue: Document crawler algorithm per spec §4.10
+      - [x] Red: **Use `brgr-red-test-writer` agent** for crawler tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement
+      - [x] Refactor: **Use `brgr-refactor` agent** to optimize
+      - [x] Features:
+        - [x] Auto-generate shims from `--help` parsing
+        - [x] Binary hash computation (SHA-256)
+        - [x] `trust.source: "inferred"` for auto-generated shims
+    - [x] 4.6.4: Sync and integrity (BRGR cycle) ✅
+      - [x] Blue: Document sync protocol per spec §4.7
+      - [x] Red: **Use `brgr-red-test-writer` agent** for sync tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement
+      - [x] Features:
+        - [x] Cosign signature verification
+        - [x] Registry sync client with ETag support
+        - [x] Local cache management (24h TTL)
+    - [x] 4.6.5: Packaging and deployment ✅
+      - [x] Single binary distribution (`go build ./cmd/atip-registry`)
+      - [ ] Docker image (future)
+      - [x] README with deployment guide
+      - [x] Implements `--agent` flag (dogfooding!)
 
 ### Phase 4.7: atip-execute (TypeScript) - Safe Tool Execution
 

@@ -1,0 +1,20 @@
+{
+  "atip": {
+    "version": "0.6"
+  },
+  "registry": {
+    "name": "Test ATIP Registry",
+    "url": "https://test.atip.dev",
+    "type": "static",
+    "version": "2026.01.15"
+  },
+  "endpoints": {
+    "shims": "/shims/sha256/{hash}.json",
+    "signatures": "/shims/sha256/{hash}.json.bundle",
+    "catalog": "/shims/index.json"
+  },
+  "trust": {
+    "requireSignatures": false,
+    "signers": []
+  }
+}
