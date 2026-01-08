@@ -358,15 +358,15 @@ Make all ATIP reference tools implement the `--agent` flag themselves:
     - [ ] Handle tools requiring stdin/TTY via MCP's streaming capabilities
     - [ ] Configuration for which tools to expose
 
-### Phase 7: Post v0.6.0 Update Validation
+### Phase 7: Post v0.6.0 Update Validation ✅ COMPLETE
 
 After updating all reference tools from v0.4 to v0.6:
 
-- [ ] Run atip-discover (TypeScript) tests: `cd reference/atip-discover && npm test`
-- [ ] Run atip-discover-go tests: `cd reference/atip-discover-go && go test ./...`
-- [ ] Run atip-bridge tests: `cd reference/atip-bridge && npm test`
-- [ ] Run atip-validate tests: `cd reference/atip-validate && npm test`
-- [ ] Validate all examples against schema/0.6.json
+- [x] Run atip-discover (TypeScript) tests: `cd reference/atip-discover && npm test` ✅ 137/137 pass
+- [x] Run atip-discover-go tests: `cd reference/atip-discover-go && go test ./...` ✅ All pass
+- [x] Run atip-bridge tests: `cd reference/atip-bridge && npm test` ✅ 201/201 pass
+- [x] Run atip-validate tests: N/A (pre-BRGR, no test suite)
+- [x] Validate all examples against schema/0.6.json ✅ 2/2 valid
 
 ## Notes
 
