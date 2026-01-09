@@ -176,8 +176,33 @@ export type AtipVersion = string | { version: string; features?: string[]; minAg
  * ATIP trust metadata
  */
 export interface AtipTrust {
-  source: 'native' | 'community' | 'vendor' | 'unknown';
+  source: 'native' | 'community' | 'vendor' | 'org' | 'user' | 'inferred' | 'unknown';
   verified: boolean;
+
+  /**
+   * Integrity verification via Sigstore.
+   */
+  integrity?: {
+    checksum: string;
+    signature?: {
+      type: 'cosign' | 'gpg' | 'minisign';
+      identity: string;
+      issuer?: string;
+      bundle?: string;
+    };
+  };
+
+  /**
+   * SLSA provenance verification.
+   */
+  provenance?: {
+    url: string;
+    format: 'slsa-provenance-v1' | 'in-toto';
+    slsaLevel: number;
+    builder?: string;
+  };
+
+  // Legacy fields
   verifiedBy?: string;
   signedBy?: string;
   signature?: string;
