@@ -58,9 +58,20 @@ describe('Tool Probing', () => {
       };
 
       const toolPath = path.join(tmpDir, 'atip-tool');
+      // Two-phase prober requires --help to document --agent
       await fs.writeFile(
         toolPath,
-        `#!/bin/sh\necho '${JSON.stringify(metadata)}'`,
+        `#!/bin/sh
+if [ "$1" = "--help" ]; then
+  echo "Usage: mock-tool [--agent] [command]"
+  echo "  --agent    Output ATIP metadata as JSON"
+  exit 0
+fi
+if [ "$1" = "--agent" ]; then
+  echo '${JSON.stringify(metadata)}'
+  exit 0
+fi
+exit 1`,
         { mode: 0o755 }
       );
 
@@ -74,9 +85,21 @@ describe('Tool Probing', () => {
 
     it('should throw ProbeTimeoutError on timeout', async () => {
       const toolPath = path.join(tmpDir, 'slow-tool');
+      // Tool that documents --agent but is slow to respond
       await fs.writeFile(
         toolPath,
-        '#!/bin/sh\nsleep 10\necho "{}"',
+        `#!/bin/sh
+if [ "$1" = "--help" ]; then
+  echo "Usage: slow-tool [--agent]"
+  echo "  --agent    Output ATIP metadata"
+  exit 0
+fi
+if [ "$1" = "--agent" ]; then
+  sleep 10
+  echo "{}"
+  exit 0
+fi
+exit 1`,
         { mode: 0o755 }
       );
 
@@ -87,9 +110,20 @@ describe('Tool Probing', () => {
 
     it('should throw ProbeError on invalid JSON', async () => {
       const toolPath = path.join(tmpDir, 'broken-tool');
+      // Tool that documents --agent but returns invalid JSON
       await fs.writeFile(
         toolPath,
-        '#!/bin/sh\necho "{ invalid json }"',
+        `#!/bin/sh
+if [ "$1" = "--help" ]; then
+  echo "Usage: broken-tool [--agent]"
+  echo "  --agent    Output ATIP metadata"
+  exit 0
+fi
+if [ "$1" = "--agent" ]; then
+  echo "{ invalid json }"
+  exit 0
+fi
+exit 1`,
         { mode: 0o755 }
       );
 
@@ -100,7 +134,18 @@ describe('Tool Probing', () => {
       const toolPath = path.join(tmpDir, 'quick-tool');
       await fs.writeFile(
         toolPath,
-        '#!/bin/sh\nsleep 0.5\necho \'{"atip":"0.4","name":"test","version":"1.0.0","description":"test"}\'',
+        `#!/bin/sh
+if [ "$1" = "--help" ]; then
+  echo "Usage: quick-tool [--agent]"
+  echo "  --agent    Output ATIP metadata"
+  exit 0
+fi
+if [ "$1" = "--agent" ]; then
+  sleep 0.5
+  echo '{"atip":"0.4","name":"test","version":"1.0.0","description":"test"}'
+  exit 0
+fi
+exit 1`,
         { mode: 0o755 }
       );
 
@@ -129,7 +174,17 @@ describe('Tool Probing', () => {
       const toolPath = path.join(tmpDir, 'large-tool');
       await fs.writeFile(
         toolPath,
-        `#!/bin/sh\necho '${JSON.stringify(metadata)}'`,
+        `#!/bin/sh
+if [ "$1" = "--help" ]; then
+  echo "Usage: large-tool [--agent]"
+  echo "  --agent    Output ATIP metadata"
+  exit 0
+fi
+if [ "$1" = "--agent" ]; then
+  echo '${JSON.stringify(metadata)}'
+  exit 0
+fi
+exit 1`,
         { mode: 0o755 }
       );
 
@@ -150,7 +205,18 @@ describe('Tool Probing', () => {
       const toolPath = path.join(tmpDir, 'verbose-tool');
       await fs.writeFile(
         toolPath,
-        `#!/bin/sh\necho "Warning: something" >&2\necho '${JSON.stringify(metadata)}'`,
+        `#!/bin/sh
+if [ "$1" = "--help" ]; then
+  echo "Usage: verbose-tool [--agent]"
+  echo "  --agent    Output ATIP metadata"
+  exit 0
+fi
+if [ "$1" = "--agent" ]; then
+  echo "Warning: something" >&2
+  echo '${JSON.stringify(metadata)}'
+  exit 0
+fi
+exit 1`,
         { mode: 0o755 }
       );
 
@@ -183,7 +249,17 @@ describe('Tool Probing', () => {
       const toolPath = path.join(tmpDir, 'invalid-tool');
       await fs.writeFile(
         toolPath,
-        `#!/bin/sh\necho '${JSON.stringify(invalidMetadata)}'`,
+        `#!/bin/sh
+if [ "$1" = "--help" ]; then
+  echo "Usage: invalid-tool [--agent]"
+  echo "  --agent    Output ATIP metadata"
+  exit 0
+fi
+if [ "$1" = "--agent" ]; then
+  echo '${JSON.stringify(invalidMetadata)}'
+  exit 0
+fi
+exit 1`,
         { mode: 0o755 }
       );
 
@@ -191,18 +267,28 @@ describe('Tool Probing', () => {
     });
 
     it('should not execute tool with any flags other than --agent', async () => {
-      // This is a security requirement
+      // This is a security requirement - tool should only receive --help and --agent
       const toolPath = path.join(tmpDir, 'test-tool');
       await fs.writeFile(
         toolPath,
-        '#!/bin/sh\nif [ "$1" = "--agent" ]; then echo \'{"atip":"0.4","name":"test","version":"1.0.0","description":"test"}\'; else exit 1; fi',
+        `#!/bin/sh
+if [ "$1" = "--help" ]; then
+  echo "Usage: test-tool [--agent]"
+  echo "  --agent    Output ATIP metadata"
+  exit 0
+fi
+if [ "$1" = "--agent" ]; then
+  echo '{"atip":"0.4","name":"test","version":"1.0.0","description":"test"}'
+  exit 0
+fi
+exit 1`,
         { mode: 0o755 }
       );
 
       const result = await probe(toolPath);
 
       expect(result).not.toBeNull();
-      // The test ensures only --agent flag is passed
+      // The test ensures only --help and --agent flags are passed
     });
 
     it('should handle non-executable files', async () => {

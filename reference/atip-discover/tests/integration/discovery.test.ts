@@ -4,6 +4,28 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
 
+/**
+ * Create a two-phase compliant mock ATIP tool.
+ * The tool responds to --help with --agent documented, and --agent with JSON metadata.
+ */
+async function createMockAtipTool(
+  toolPath: string,
+  metadata: Record<string, unknown>
+): Promise<void> {
+  const script = `#!/bin/sh
+if [ "$1" = "--help" ]; then
+  echo "Usage: ${path.basename(toolPath)} [--agent] [command]"
+  echo "  --agent    Output ATIP metadata as JSON"
+  exit 0
+fi
+if [ "$1" = "--agent" ]; then
+  echo '${JSON.stringify(metadata)}'
+  exit 0
+fi
+exit 1`;
+  await fs.writeFile(toolPath, script, { mode: 0o755 });
+}
+
 describe('Discovery Workflow (Integration)', () => {
   let tmpDir: string;
   let toolDir: string;
@@ -63,11 +85,7 @@ describe('Discovery Workflow (Integration)', () => {
       };
 
       const toolPath = path.join(toolDir, 'example-tool');
-      await fs.writeFile(
-        toolPath,
-        `#!/bin/sh\necho '${JSON.stringify(metadata)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(toolPath, metadata);
 
       // Step 1: Scan for tools
       const scanResult = await scan(
@@ -111,11 +129,7 @@ describe('Discovery Workflow (Integration)', () => {
       };
 
       const nativePath = path.join(toolDir, 'native-tool');
-      await fs.writeFile(
-        nativePath,
-        `#!/bin/sh\necho '${JSON.stringify(nativeTool)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(nativePath, nativeTool);
 
       // Create shim tool metadata
       const shimTool = {
@@ -167,11 +181,7 @@ describe('Discovery Workflow (Integration)', () => {
       };
 
       const tool1Path = path.join(toolDir, 'tool-1');
-      await fs.writeFile(
-        tool1Path,
-        `#!/bin/sh\necho '${JSON.stringify(tool1)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(tool1Path, tool1);
 
       // First scan
       const scan1 = await scan(
@@ -194,11 +204,7 @@ describe('Discovery Workflow (Integration)', () => {
       };
 
       const tool2Path = path.join(toolDir, 'tool-2');
-      await fs.writeFile(
-        tool2Path,
-        `#!/bin/sh\necho '${JSON.stringify(tool2)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(tool2Path, tool2);
 
       // Wait a bit to ensure mtime differs
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -231,11 +237,7 @@ describe('Discovery Workflow (Integration)', () => {
       };
 
       const toolPath = path.join(toolDir, 'updating-tool');
-      await fs.writeFile(
-        toolPath,
-        `#!/bin/sh\necho '${JSON.stringify(toolV1)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(toolPath, toolV1);
 
       // First scan
       await scan(
@@ -254,11 +256,7 @@ describe('Discovery Workflow (Integration)', () => {
         description: 'Tool that updated',
       };
 
-      await fs.writeFile(
-        toolPath,
-        `#!/bin/sh\necho '${JSON.stringify(toolV2)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(toolPath, toolV2);
 
       // Wait to ensure mtime changes
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -289,15 +287,22 @@ describe('Discovery Workflow (Integration)', () => {
         description: 'Good tool',
       };
 
-      await fs.writeFile(
-        path.join(toolDir, 'good-tool'),
-        `#!/bin/sh\necho '${JSON.stringify(goodTool)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(path.join(toolDir, 'good-tool'), goodTool);
 
+      // Create broken tool that returns invalid JSON (but still supports --agent in help)
       await fs.writeFile(
         path.join(toolDir, 'broken-tool'),
-        '#!/bin/sh\necho "{ invalid json }"',
+        `#!/bin/sh
+if [ "$1" = "--help" ]; then
+  echo "Usage: broken-tool [--agent]"
+  echo "  --agent    Output ATIP metadata"
+  exit 0
+fi
+if [ "$1" = "--agent" ]; then
+  echo "{ invalid json }"
+  exit 0
+fi
+exit 1`,
         { mode: 0o755 }
       );
 
@@ -326,11 +331,7 @@ describe('Discovery Workflow (Integration)', () => {
       };
 
       const toolPath = path.join(toolDir, 'persistent-tool');
-      await fs.writeFile(
-        toolPath,
-        `#!/bin/sh\necho '${JSON.stringify(metadata)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(toolPath, metadata);
 
       // Scan
       await scan(
@@ -359,11 +360,7 @@ describe('Discovery Workflow (Integration)', () => {
           description: name,
         };
 
-        await fs.writeFile(
-          path.join(toolDir, name),
-          `#!/bin/sh\necho '${JSON.stringify(metadata)}'`,
-          { mode: 0o755 }
-        );
+        await createMockAtipTool(path.join(toolDir, name), metadata);
       }
 
       // Scan all
@@ -421,11 +418,7 @@ describe('Discovery Workflow (Integration)', () => {
       };
 
       const toolPath = path.join(toolDir, 'rich-tool');
-      await fs.writeFile(
-        toolPath,
-        `#!/bin/sh\necho '${JSON.stringify(richMetadata)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(toolPath, richMetadata);
 
       // Scan
       await scan(

@@ -7,7 +7,7 @@
 export { getAtipPaths } from './xdg';
 export { loadRegistry, saveRegistry, REGISTRY_VERSION } from './registry';
 export { scan } from './discovery/scanner';
-export { probe } from './discovery/prober';
+export { probe, checkHelpForAgent } from './discovery/prober';
 export { list, get } from './query';
 export {
   loadConfig,
@@ -60,3 +60,29 @@ export {
   ProbeTimeoutError,
   ConfigError,
 } from './errors';
+
+// Trust verification (Phase 4.4.5)
+export {
+  TrustLevelEnum as TrustLevel,
+  verifyTrust,
+  computeBinaryHash,
+  verifyCosignSignature,
+  verifySLSAProvenance,
+  evaluateTrustLevel,
+  TrustError,
+} from './trust';
+
+// Trust types
+export type {
+  TrustSignature,
+  TrustIntegrity,
+  TrustProvenance,
+  AtipTrustFull,
+  TrustVerificationResult,
+  TrustVerificationOptions,
+  HashResult,
+  SignatureVerificationResult,
+  ProvenanceVerificationResult,
+  TrustEvaluationResult,
+  TrustErrorCode,
+} from './trust';

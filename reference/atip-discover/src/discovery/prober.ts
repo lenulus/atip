@@ -3,12 +3,88 @@
  */
 
 import { spawn } from 'child_process';
+import { access, constants } from 'fs/promises';
 import type { AtipMetadata } from '../types';
 import { ProbeError, ProbeTimeoutError } from '../errors';
 import { validateMetadata } from '../validator';
 
 /**
- * Probe a single executable for ATIP support.
+ * Check if a tool's --help output documents an --agent flag.
+ *
+ * @param executablePath - Absolute path to the executable
+ * @param options - Check options
+ * @returns True if --agent appears to be a supported option
+ *
+ * @remarks
+ * This is the first phase of safe probing. Running `--help` is universally
+ * safe and allows us to verify --agent support before executing it.
+ */
+export async function checkHelpForAgent(
+  executablePath: string,
+  options?: { timeoutMs?: number }
+): Promise<boolean> {
+  const timeoutMs = options?.timeoutMs || 2000;
+
+  return new Promise((resolve, reject) => {
+    let stdout = '';
+    let stderr = '';
+    let timedOut = false;
+    let errorOccurred = false;
+    let spawnError: Error | null = null;
+
+    const child = spawn(executablePath, ['--help'], {
+      timeout: timeoutMs,
+      windowsHide: true,
+    });
+
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill('SIGTERM');
+      // Timeout = cannot verify --agent support
+      resolve(false);
+    }, timeoutMs);
+
+    child.stdout.on('data', (data) => {
+      stdout += data.toString();
+    });
+
+    child.stderr.on('data', (data) => {
+      stderr += data.toString();
+    });
+
+    child.on('error', (err) => {
+      errorOccurred = true;
+      spawnError = err;
+      clearTimeout(timer);
+      if (!timedOut) {
+        // Execution error = cannot verify --agent support
+        resolve(false);
+      }
+    });
+
+    child.on('close', (code) => {
+      clearTimeout(timer);
+
+      if (timedOut || errorOccurred) {
+        return; // Already handled
+      }
+
+      // Combine stdout and stderr (some tools output help to stderr)
+      const helpText = (stdout + stderr).toLowerCase();
+
+      // Check if --agent appears as a documented option
+      const hasAgentOption =
+        /--agent\b/.test(helpText) ||
+        /\s-agent\b/.test(helpText) ||
+        /\batip\b.*\bagent\b/.test(helpText);
+
+      resolve(hasAgentOption);
+    });
+  });
+}
+
+/**
+ * Probe a single executable for ATIP support using two-phase detection.
  *
  * @param executablePath - Absolute path to the executable
  * @param options - Probe options
@@ -16,6 +92,11 @@ import { validateMetadata } from '../validator';
  *
  * @throws {ProbeTimeoutError} If timeout exceeded
  * @throws {ProbeError} If invalid JSON or validation fails
+ *
+ * @remarks
+ * Uses a two-phase approach:
+ * 1. Check --help for --agent support (safe)
+ * 2. Execute --agent only if Phase 1 passes
  */
 export async function probe(
   executablePath: string,
@@ -23,6 +104,35 @@ export async function probe(
 ): Promise<AtipMetadata | null> {
   const timeoutMs = options?.timeoutMs || 2000;
 
+  // Pre-check: Verify file exists and is executable
+  try {
+    await access(executablePath, constants.F_OK | constants.X_OK);
+  } catch (error) {
+    const nodeError = error as NodeJS.ErrnoException;
+    throw new ProbeError(
+      `File is not executable or doesn't exist: ${nodeError.message}`,
+      executablePath,
+      error as Error
+    );
+  }
+
+  // Phase 1: Check --help for --agent support
+  // Use a reasonable timeout for --help (at least 1 second, or the full timeout if longer)
+  const helpTimeoutMs = Math.max(1000, timeoutMs);
+
+  let supportsAgent: boolean;
+  try {
+    supportsAgent = await checkHelpForAgent(executablePath, { timeoutMs: helpTimeoutMs });
+  } catch (error) {
+    // checkHelpForAgent doesn't throw, but if it did, propagate
+    throw error;
+  }
+
+  if (!supportsAgent) {
+    return null; // Tool doesn't support --agent
+  }
+
+  // Phase 2: Execute --agent (now safe)
   return new Promise((resolve, reject) => {
     let stdout = '';
     let stderr = '';

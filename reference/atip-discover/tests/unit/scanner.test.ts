@@ -5,6 +5,27 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
 
+/**
+ * Create a two-phase compliant mock ATIP tool.
+ */
+async function createMockAtipTool(
+  toolPath: string,
+  metadata: Record<string, unknown>
+): Promise<void> {
+  const script = `#!/bin/sh
+if [ "$1" = "--help" ]; then
+  echo "Usage: ${path.basename(toolPath)} [--agent] [command]"
+  echo "  --agent    Output ATIP metadata as JSON"
+  exit 0
+fi
+if [ "$1" = "--agent" ]; then
+  echo '${JSON.stringify(metadata)}'
+  exit 0
+fi
+exit 1`;
+  await fs.writeFile(toolPath, script, { mode: 0o755 });
+}
+
 describe('Discovery Scanner', () => {
   let tmpDir: string;
 
@@ -30,11 +51,7 @@ describe('Discovery Scanner', () => {
       };
 
       const toolPath = path.join(toolDir, 'mock-tool');
-      await fs.writeFile(
-        toolPath,
-        `#!/bin/sh\necho '${JSON.stringify(metadata)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(toolPath, metadata);
 
       const options: ScanOptions = {
         safePathsOnly: false,
@@ -71,11 +88,7 @@ describe('Discovery Scanner', () => {
         };
 
         const toolPath = path.join(toolDir, name);
-        await fs.writeFile(
-          toolPath,
-          `#!/bin/sh\necho '${JSON.stringify(metadata)}'`,
-          { mode: 0o755 }
-        );
+        await createMockAtipTool(toolPath, metadata);
       }
 
       const options: ScanOptions = {
@@ -112,11 +125,7 @@ describe('Discovery Scanner', () => {
         };
 
         const toolPath = path.join(toolDir, name);
-        await fs.writeFile(
-          toolPath,
-          `#!/bin/sh\necho '${JSON.stringify(metadata)}'`,
-          { mode: 0o755 }
-        );
+        await createMockAtipTool(toolPath, metadata);
       }
 
       const options: ScanOptions = {
@@ -143,11 +152,21 @@ describe('Discovery Scanner', () => {
       const toolDir = path.join(tmpDir, 'bin');
       await fs.mkdir(toolDir);
 
-      // Create broken tool
+      // Create broken tool that advertises --agent but returns invalid JSON
       const brokenPath = path.join(toolDir, 'broken-tool');
       await fs.writeFile(
         brokenPath,
-        '#!/bin/sh\necho "{ invalid json }"',
+        `#!/bin/sh
+if [ "$1" = "--help" ]; then
+  echo "Usage: broken-tool [--agent]"
+  echo "  --agent    Output ATIP metadata"
+  exit 0
+fi
+if [ "$1" = "--agent" ]; then
+  echo "{ invalid json }"
+  exit 0
+fi
+exit 1`,
         { mode: 0o755 }
       );
 
@@ -185,11 +204,7 @@ describe('Discovery Scanner', () => {
         };
 
         const toolPath = path.join(toolDir, `tool-${i}`);
-        await fs.writeFile(
-          toolPath,
-          `#!/bin/sh\necho '${JSON.stringify(metadata)}'`,
-          { mode: 0o755 }
-        );
+        await createMockAtipTool(toolPath, metadata);
       }
 
       const options: ScanOptions = {
@@ -223,11 +238,7 @@ describe('Discovery Scanner', () => {
       };
 
       const toolPath = path.join(toolDir, 'test-tool');
-      await fs.writeFile(
-        toolPath,
-        `#!/bin/sh\necho '${JSON.stringify(metadata)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(toolPath, metadata);
 
       const progressUpdates: any[] = [];
       const options: ScanOptions = {
@@ -264,11 +275,7 @@ describe('Discovery Scanner', () => {
       };
 
       const toolPath = path.join(toolDir, 'new-tool');
-      await fs.writeFile(
-        toolPath,
-        `#!/bin/sh\necho '${JSON.stringify(metadata)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(toolPath, metadata);
 
       const options: ScanOptions = {
         safePathsOnly: false,
@@ -312,11 +319,7 @@ describe('Discovery Scanner', () => {
       };
 
       const toolPath = path.join(toolDir, 'cached-tool');
-      await fs.writeFile(
-        toolPath,
-        `#!/bin/sh\necho '${JSON.stringify(metadata)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(toolPath, metadata);
 
       const options: ScanOptions = {
         safePathsOnly: false,
@@ -355,11 +358,7 @@ describe('Discovery Scanner', () => {
       };
 
       const toolPath = path.join(toolDir, 'existing-tool');
-      await fs.writeFile(
-        toolPath,
-        `#!/bin/sh\necho '${JSON.stringify(metadata)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(toolPath, metadata);
 
       const options: ScanOptions = {
         safePathsOnly: false,
@@ -398,11 +397,7 @@ describe('Discovery Scanner', () => {
       };
 
       const toolPath = path.join(toolDir, 'tool');
-      await fs.writeFile(
-        toolPath,
-        `#!/bin/sh\necho '${JSON.stringify(metadata)}'`,
-        { mode: 0o755 }
-      );
+      await createMockAtipTool(toolPath, metadata);
 
       const paths = {
         dataDir: tmpDir,
