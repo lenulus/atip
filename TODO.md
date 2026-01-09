@@ -192,24 +192,28 @@ Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`
       - [x] CLI binary via npm link / npx
       - [x] README with installation and usage guide
       - [x] Implements `--agent` flag (dogfooding!)
-    - [ ] 4.4.5: Trust verification enhancement (BRGR cycle)
-      - [ ] Blue: Update `blue/design.md` with trust architecture per spec §3.2.2
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for trust verification tests (~50 tests)
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement trust module
-      - [ ] Refactor: **Use `brgr-refactor` agent** to integrate with existing code
-      - [ ] Features:
-        - [ ] Update `AtipTrust` interface with `integrity`, `provenance` objects
-        - [ ] SHA-256 hash computation for binary verification
-        - [ ] Cosign signature verification (Sigstore)
-        - [ ] SLSA attestation verification
-        - [ ] Trust level evaluation (COMPROMISED → VERIFIED)
-        - [ ] Integration with prober (verify after discovery)
-      - [ ] New module structure:
-        - [ ] `src/trust/types.ts` - Full trust types per spec
-        - [ ] `src/trust/hash.ts` - SHA-256 computation
-        - [ ] `src/trust/cosign.ts` - Sigstore verification
-        - [ ] `src/trust/slsa.ts` - SLSA attestation checking
-        - [ ] `src/trust/evaluator.ts` - Trust level evaluation
+    - [x] 4.4.5: Trust verification enhancement (BRGR cycle) ✅ COMPLETE
+      - [x] Blue: Update `blue/design.md` with trust architecture per spec §3.2.2
+      - [x] Blue: Add two-phase safe probing design (--help check before --agent)
+      - [x] Red: **Use `brgr-red-test-writer` agent** for trust verification tests (~73 tests)
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement trust module
+      - [x] Refactor: **Use `brgr-refactor` agent** to integrate with existing code
+      - [x] Features:
+        - [x] Update `AtipTrust` interface with `integrity`, `provenance` objects
+        - [x] SHA-256 hash computation for binary verification
+        - [x] Cosign signature verification (Sigstore) - keyless + key-based
+        - [x] SLSA attestation verification (with mocked fetch for tests)
+        - [x] Trust level evaluation (COMPROMISED → VERIFIED)
+        - [x] Integration with prober (verify after discovery)
+        - [x] Two-phase safe probing: checkHelpForAgent() → probe()
+      - [x] New module structure:
+        - [x] `src/trust/types.ts` - Full trust types per spec
+        - [x] `src/trust/hash.ts` - SHA-256 computation
+        - [x] `src/trust/cosign.ts` - Sigstore verification
+        - [x] `src/trust/slsa.ts` - SLSA attestation checking
+        - [x] `src/trust/evaluator.ts` - Trust level evaluation
+        - [x] `tests/helpers/trust-test-utils.ts` - Shared test utilities
+      - [x] Test coverage: 210 tests passing (73 new for trust + prober)
 
 ### Phase 4.5: Dogfooding - ATIP Tools Implement --agent ✅ COMPLETE
 
