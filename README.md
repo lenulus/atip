@@ -1,6 +1,6 @@
 # ATIP (Agent Tool Introspection Protocol)
 
-## A lightweight, CLI-first protocol that allows AI agents to safely introspect local tools via a simple --agent contract, without requiring MCP servers or additional infrastructure.
+## A lightweight, CLI-first protocol that allows AI agents to safely introspect and cryptographically verify local tools via a simple --agent contract, without requiring MCP servers or additional infrastructure.
 
 [![Version](https://img.shields.io/badge/version-0.6.0-blue)](./spec/rfc.md)
 [![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
@@ -43,6 +43,7 @@ AI agents need to know:
 - **How do I use this tool?** (parameters, types)
 - **What are the side effects?** (destructive? network? cost?)
 - **Is it safe to retry?** (idempotent? reversible?)
+- **Can I trust this binary?** (signatures, provenance, supply chain)
 
 Current solutions fall short:
 - **Parsing `--help`** — Inconsistent, unreliable
@@ -51,15 +52,16 @@ Current solutions fall short:
 
 ### The Solution
 
-**ATIP separates introspection from execution:**
+**ATIP separates introspection from execution—with cryptographic trust:**
 
 | Concern | Solution |
 |---------|----------|
 | **Discovery** | `tool --agent` outputs metadata (ATIP) |
+| **Trust** | Sigstore signatures + SLSA attestations |
 | **Execution** | Direct subprocess invocation |
 | **Stateful tools** | MCP (when genuinely needed) |
 
-For 95% of CLI tools (git, kubectl, terraform, gh), ATIP provides everything agents need without infrastructure overhead.
+For 95% of CLI tools (git, kubectl, terraform, gh), ATIP provides everything agents need—including enterprise-grade supply chain security—without infrastructure overhead.
 
 ---
 
@@ -179,6 +181,38 @@ Tools declare effects (destructive, idempotent, reversible, cost) so agents can 
   }
 }
 ```
+
+### 🛡️ Trust & Supply Chain Security
+Cryptographically verify tool binaries and control what capabilities agents can use—down to the parameter level:
+
+```json
+{
+  "trust": {
+    "source": "native",
+    "verified": true,
+    "integrity": {
+      "checksum": "sha256:e3b0c44298fc1c14...",
+      "signature": {
+        "type": "cosign",
+        "identity": "https://github.com/cli/cli/.github/workflows/release.yml@refs/tags/v2.45.0",
+        "issuer": "https://token.actions.githubusercontent.com"
+      }
+    },
+    "provenance": {
+      "url": "https://github.com/cli/cli/attestations/...",
+      "format": "slsa-provenance-v1",
+      "slsaLevel": 3
+    }
+  }
+}
+```
+
+**Enterprise-grade controls:**
+- **Binary verification** — SHA-256 hash + Sigstore/Cosign signatures
+- **Supply chain attestation** — SLSA provenance verification
+- **Trust levels** — COMPROMISED → UNSIGNED → UNVERIFIED → VERIFIED
+- **Policy enforcement** — Allowlist signers, builders, minimum trust levels
+- **Capability gating** — Restrict destructive operations to verified tools only
 
 ### 📦 Partial Discovery
 Large tools (kubectl, aws-cli) support filtered discovery to avoid context bloat:
