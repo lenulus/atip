@@ -680,20 +680,31 @@ export function scan(
 
 ```typescript
 /**
- * Probe a single executable for ATIP support.
+ * Safely probe a single executable for ATIP support using two-phase detection.
  *
  * @param executablePath - Absolute path to the executable
  * @param options - Probe options
  * @returns Parsed ATIP metadata if tool supports --agent
  *
  * @remarks
- * - Executes the tool with --agent flag
- * - Parses and validates JSON output
- * - Respects timeout
+ * Uses a two-phase approach for safety:
+ *
+ * **Phase 1: --help check**
+ * - Executes `tool --help` (universally safe)
+ * - Parses output to check if `--agent` is a documented option
+ * - If `--agent` not found, returns null immediately (no further execution)
+ *
+ * **Phase 2: --agent execution**
+ * - Only runs if Phase 1 confirmed `--agent` is supported
+ * - Executes `tool --agent` and parses JSON output
+ * - Validates against ATIP schema
+ *
+ * This prevents blindly executing unknown flags on tools that don't support ATIP,
+ * avoiding unexpected behavior, permission prompts, or errors.
  *
  * @example
  * ```typescript
- * const metadata = await probe('/usr/local/bin/gh', { timeoutMs: 2000 });
+ * const metadata = await probe('/opt/homebrew/bin/gh', { timeoutMs: 2000 });
  * if (metadata) {
  *   console.log(`Found ${metadata.name} v${metadata.version}`);
  * }
@@ -708,9 +719,50 @@ export function probe(
 ```
 
 **Contract**:
-- Returns `null` if tool doesn't support `--agent` (non-zero exit, no JSON)
+- Returns `null` if tool doesn't document `--agent` in `--help` output
+- Returns `null` if `--agent` execution fails (non-zero exit, no JSON)
 - Throws `ProbeError` with details on timeout or invalid JSON
-- Never executes with any other flags
+- Phase 1 (`--help`) timeout and Phase 2 (`--agent`) timeout are both controlled by `timeoutMs`
+
+---
+
+### checkHelpForAgent
+
+```typescript
+/**
+ * Check if a tool's --help output documents an --agent flag.
+ *
+ * @param executablePath - Absolute path to the executable
+ * @param options - Check options
+ * @returns True if --agent appears to be a supported option
+ *
+ * @remarks
+ * This is the first phase of safe probing. Running `--help` is universally
+ * safe and allows us to verify --agent support before executing it.
+ *
+ * Checks for patterns like:
+ * - `--agent` as a standalone flag
+ * - `-agent` short form
+ * - References to ATIP/agent functionality
+ *
+ * @example
+ * ```typescript
+ * const supportsAgent = await checkHelpForAgent('/opt/homebrew/bin/gh');
+ * if (supportsAgent) {
+ *   const metadata = await probe('/opt/homebrew/bin/gh');
+ * }
+ * ```
+ */
+export function checkHelpForAgent(
+  executablePath: string,
+  options?: { timeoutMs?: number }
+): Promise<boolean>;
+```
+
+**Contract**:
+- Returns `true` if `--agent` appears in help output
+- Returns `false` if `--help` fails or `--agent` not found
+- Never throws - returns `false` on any error (safe default)
 
 ---
 
@@ -1087,7 +1139,7 @@ Located at `$XDG_CONFIG_HOME/agent-tools/config.json`:
 // Core functions
 export { getAtipPaths } from './xdg';
 export { loadRegistry, saveRegistry } from './registry';
-export { scan, probe } from './discovery';
+export { scan, probe, checkHelpForAgent } from './discovery';
 export { list, get, refresh } from './query';
 export { loadConfig } from './config';
 

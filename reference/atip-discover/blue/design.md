@@ -94,7 +94,7 @@ All layers share common core modules for consistent behavior.
 | File | Purpose |
 |------|---------|
 | `scanner.ts` | Orchestrates full scan workflow |
-| `prober.ts` | Probes individual tools with --agent |
+| `prober.ts` | Safely probes tools (--help check, then --agent) |
 | `enumerate.ts` | Enumerates executables in directories |
 | `types.ts` | Discovery-related type definitions |
 
@@ -474,18 +474,33 @@ User runs: atip-discover scan
                                         │
                                         ▼
                              ┌──────────────────────┐
-                             │  Parallel probe      │
-                             │  with --agent        │
+                             │  Parallel safe probe │
+                             │  (two-phase)         │
                              └──────────┬───────────┘
                                         │
-              ┌─────────────────────────┴─────────────────────────┐
-              │                                                   │
-              ▼                                                   ▼
-┌──────────────────────┐                            ┌──────────────────────┐
-│  Success:            │                            │  Failure:            │
-│  Parse JSON          │                            │  Record error        │
-│  Validate schema     │                            │  Continue            │
-│  Cache metadata      │                            └──────────────────────┘
+                                        ▼
+                             ┌──────────────────────┐
+                             │  Phase 1: --help     │
+                             │  Check if --agent    │
+                             │  appears in output   │
+                             └──────────┬───────────┘
+                                        │
+                       ┌────────────────┴────────────────┐
+                       │ --agent found                   │ --agent not found
+                       ▼                                 ▼
+            ┌──────────────────────┐         ┌──────────────────────┐
+            │  Phase 2: --agent    │         │  Skip tool           │
+            │  Execute and parse   │         │  (not ATIP-aware)    │
+            └──────────┬───────────┘         └──────────────────────┘
+                       │
+              ┌────────┴─────────────────────────────────┐
+              │                                          │
+              ▼                                          ▼
+┌──────────────────────┐                   ┌──────────────────────┐
+│  Success:            │                   │  Failure:            │
+│  Parse JSON          │                   │  Record error        │
+│  Validate schema     │                   │  Continue            │
+│  Cache metadata      │                   └──────────────────────┘
 │  Update registry     │
 └──────────┬───────────┘
            │
@@ -636,17 +651,51 @@ async function isSafePath(dirPath: string): Promise<{ safe: boolean; reason?: st
 
 ### Subprocess Execution Safety
 
-When probing tools with `--agent`:
+**CRITICAL**: Probing uses a two-phase approach to avoid blindly executing unknown flags.
 
-1. **Timeout enforcement**: Always use timeout to prevent hanging
-2. **No shell**: Use `execFile` not `exec` to prevent shell injection
-3. **Stderr capture**: Log but don't expose tool stderr to output
-4. **Exit code handling**: Non-zero exit means no ATIP support (not an error)
+#### Two-Phase Safe Probing
+
+**Phase 1: Check --help for --agent support**
+
+Running `--help` is universally safe. We parse its output to check if `--agent` is a recognized option before executing it.
+
+```typescript
+async function checkHelpForAgent(path: string, timeoutMs: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    execFile(path, ['--help'], {
+      timeout: timeoutMs,
+      maxBuffer: 1024 * 1024, // 1MB max for help text
+    }, (error, stdout, stderr) => {
+      // Combine stdout and stderr - some tools output help to stderr
+      const helpText = (stdout + stderr).toLowerCase();
+
+      // Check if --agent appears as a documented option
+      // Look for patterns like "--agent", "-agent", "agent flag", etc.
+      const hasAgentOption = /--agent\b/.test(helpText) ||
+                            /\s-agent\b/.test(helpText) ||
+                            /\batip\b.*\bagent\b/.test(helpText);
+
+      resolve(hasAgentOption);
+    });
+  });
+}
+```
+
+**Phase 2: Execute --agent only if found in help**
+
+Only after confirming `--agent` is a documented option do we execute it:
 
 ```typescript
 async function probe(path: string, timeoutMs: number): Promise<AtipMetadata | null> {
+  // Phase 1: Safe check via --help
+  const supportsAgent = await checkHelpForAgent(path, timeoutMs);
+  if (!supportsAgent) {
+    return null; // Tool doesn't support --agent, skip it
+  }
+
+  // Phase 2: Execute --agent (now safe - we know the tool recognizes it)
   return new Promise((resolve, reject) => {
-    const child = execFile(path, ['--agent'], {
+    execFile(path, ['--agent'], {
       timeout: timeoutMs,
       maxBuffer: 10 * 1024 * 1024, // 10MB max
     }, (error, stdout, stderr) => {
@@ -654,7 +703,7 @@ async function probe(path: string, timeoutMs: number): Promise<AtipMetadata | nu
         if (error.killed) {
           reject(new ProbeTimeoutError(path, timeoutMs));
         }
-        // Non-zero exit just means no ATIP support
+        // Non-zero exit means --agent failed (unexpected given help check)
         resolve(null);
         return;
       }
@@ -663,6 +712,26 @@ async function probe(path: string, timeoutMs: number): Promise<AtipMetadata | nu
   });
 }
 ```
+
+#### Safety Guarantees
+
+1. **--help is universally safe**: Virtually all CLI tools support `--help` without side effects
+2. **No blind flag execution**: We never execute `--agent` on tools that don't document it
+3. **Timeout enforcement**: Both phases use timeouts to prevent hanging
+4. **No shell**: Use `execFile` not `exec` to prevent shell injection
+5. **Stderr capture**: Log but don't expose tool stderr to output
+6. **Exit code handling**: Non-zero exit means no ATIP support (not an error)
+
+#### Trade-offs
+
+| Aspect | Two-Phase | Single-Phase (old) |
+|--------|-----------|-------------------|
+| Safety | High - no unknown flag execution | Low - blindly runs --agent |
+| Speed | 2 executions for ATIP tools | 1 execution |
+| Compatibility | Works with all tools | May trigger errors/prompts |
+| False negatives | Possible if --help doesn't list --agent | None |
+
+The safety improvement is worth the extra execution for ATIP tools.
 
 ### Cache Security
 
