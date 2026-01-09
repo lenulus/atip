@@ -1,0 +1,50 @@
+{
+  "atip": { "version": "0.6" },
+  "name": "testtool",
+  "version": "3.0.0",
+  "description": "A complete test tool with all features",
+  "homepage": "https://example.com/testtool",
+  "trust": {
+    "source": "native",
+    "verified": true
+  },
+  "commands": {
+    "build": {
+      "description": "Build the project",
+      "arguments": [
+        {
+          "name": "target",
+          "type": "string",
+          "description": "Build target",
+          "required": false,
+          "default": "all"
+        }
+      ],
+      "options": [
+        {
+          "name": "verbose",
+          "flags": ["-v", "--verbose"],
+          "type": "boolean",
+          "description": "Verbose output"
+        }
+      ],
+      "effects": {
+        "filesystem": {
+          "read": true,
+          "write": true
+        },
+        "network": false,
+        "idempotent": false,
+        "destructive": false
+      }
+    }
+  },
+  "globalOptions": [
+    {
+      "name": "config",
+      "flags": ["-c", "--config"],
+      "type": "file",
+      "description": "Configuration file path"
+    }
+  ]
+}

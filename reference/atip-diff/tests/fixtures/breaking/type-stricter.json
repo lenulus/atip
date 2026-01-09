@@ -1,0 +1,23 @@
+{
+  "atip": { "version": "0.6" },
+  "name": "testtool",
+  "version": "3.0.0",
+  "description": "A complete test tool with all features",
+  "commands": {
+    "deploy": {
+      "description": "Deploy the application",
+      "arguments": [
+        {
+          "name": "environment",
+          "type": "enum",
+          "enum": ["dev", "prod"],
+          "description": "Deployment environment",
+          "required": true
+        }
+      ],
+      "effects": {
+        "network": true
+      }
+    }
+  }
+}

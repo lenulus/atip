@@ -1,0 +1,15 @@
+{
+  "atip": { "version": "0.6" },
+  "name": "mytool",
+  "version": "1.0.0",
+  "description": "A minimal test tool",
+  "commands": {
+    "run": {
+      "description": "Run the tool",
+      "effects": {
+        "network": false,
+        "destructive": false
+      }
+    }
+  }
+}

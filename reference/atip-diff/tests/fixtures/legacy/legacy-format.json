@@ -1,0 +1,14 @@
+{
+  "atip": "0.4",
+  "name": "legacy-tool",
+  "version": "1.0.0",
+  "description": "Tool using legacy ATIP format",
+  "commands": {
+    "run": {
+      "description": "Run the tool",
+      "effects": {
+        "network": false
+      }
+    }
+  }
+}

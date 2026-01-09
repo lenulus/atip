@@ -45,7 +45,7 @@
 - [x] reference/atip-registry/ - Content-addressable registry server (Go)
 - [x] reference/atip-execute/ - Safe tool execution from LLM calls (TypeScript)
 - [x] reference/atip-lint/ - Metadata quality linter (TypeScript)
-- [ ] reference/atip-diff/ - Version comparison tool (TypeScript)
+- [x] reference/atip-diff/ - Version comparison tool (TypeScript)
 - [ ] reference/atip-mcp/ - MCP adapter for ATIP tools (Future)
 
 ### Documentation
@@ -314,33 +314,34 @@ Make all ATIP reference tools implement the `--agent` flag themselves:
       - [x] CI/CD integration (exit codes, JSON output)
       - [x] Implements `--agent` flag (dogfooding!)
 
-### Phase 4.9: atip-diff (TypeScript) - Version Comparison
+### Phase 4.9: atip-diff (TypeScript) - Version Comparison ✅ COMPLETE
 
 21. reference/atip-diff/ - Compare ATIP metadata versions
-    - [ ] 4.9.1: Project setup and Blue phase
-      - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
-      - [ ] Initialize npm package with TypeScript
-      - [ ] Set up test framework (vitest)
-    - [ ] 4.9.2: Diff engine (BRGR cycle)
-      - [ ] Blue: Document diff algorithm and change categories
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for diff tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
-      - [ ] Change categories:
-        - [ ] Breaking: removed commands, changed required args, stricter types
-        - [ ] Non-breaking: new commands, new optional args, relaxed types
-        - [ ] Effects changes: destructive flag added/removed
-    - [ ] 4.9.3: Output formats (BRGR cycle)
-      - [ ] Blue: Document output format options
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for output tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
-      - [ ] Formats:
-        - [ ] Human-readable summary
-        - [ ] JSON for programmatic use
-        - [ ] Markdown for changelogs
-    - [ ] 4.9.4: Packaging
-      - [ ] CLI: `atip-diff old.json new.json`
-      - [ ] Library API for CI integration
-      - [ ] Implements `--agent` flag (dogfooding!)
+    - [x] 4.9.1: Project setup and Blue phase ✅
+      - [x] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
+      - [x] Initialize npm package with TypeScript
+      - [x] Set up test framework (vitest)
+    - [x] 4.9.2: Diff engine (BRGR cycle) ✅
+      - [x] Blue: Document diff algorithm and change categories
+      - [x] Red: **Use `brgr-red-test-writer` agent** for diff tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement
+      - [x] Refactor: **Use `brgr-refactor` agent** to improve code quality
+      - [x] Change categories:
+        - [x] Breaking: removed commands, changed required args, stricter types
+        - [x] Non-breaking: new commands, new optional args, relaxed types
+        - [x] Effects changes: destructive flag added/removed
+    - [x] 4.9.3: Output formats (BRGR cycle) ✅
+      - [x] Blue: Document output format options
+      - [x] Red: **Use `brgr-red-test-writer` agent** for output tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement
+      - [x] Formats:
+        - [x] Human-readable summary
+        - [x] JSON for programmatic use
+        - [x] Markdown for changelogs
+    - [x] 4.9.4: Packaging ✅
+      - [x] CLI: `atip-diff old.json new.json`
+      - [x] Library API for CI integration
+      - [x] Implements `--agent` flag (dogfooding!)
 
 ### Phase 5: Shims & Partial Discovery (Future)
 22. examples/kubectl-partial.json - Partial discovery example

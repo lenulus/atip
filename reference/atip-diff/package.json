@@ -1,0 +1,53 @@
+{
+  "name": "atip-diff",
+  "version": "0.1.0",
+  "description": "Compare ATIP metadata versions and categorize breaking changes",
+  "type": "module",
+  "bin": {
+    "atip-diff": "./dist/cli.js"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest",
+    "test:unit": "vitest run --dir tests/unit",
+    "test:integration": "vitest run --dir tests/integration",
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc --noEmit",
+    "validate": "node scripts/validate-examples.js"
+  },
+  "keywords": [
+    "atip",
+    "diff",
+    "breaking-changes",
+    "semver",
+    "metadata",
+    "cli"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "ajv-formats": "^3.0.1",
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}
