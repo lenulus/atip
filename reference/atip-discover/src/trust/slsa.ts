@@ -7,20 +7,69 @@ import { TrustError } from './errors';
 import { computeBinaryHash } from './hash';
 
 /**
- * Verify SLSA provenance attestation for a binary.
+ * Verify SLSA provenance attestation for a binary to establish build integrity.
  *
- * @param binaryPath - Path to the binary being verified
+ * @param binaryPath - Absolute path to the binary being verified
  * @param provenance - Provenance block from trust metadata
  * @param options - Optional verification options
- * @returns Verification result with SLSA level and builder info
+ * @param options.timeoutMs - Network timeout in milliseconds (default: 10000)
+ * @param options.minimumLevel - Minimum acceptable SLSA level (default: 1)
+ * @param options.allowedBuilders - Whitelist of trusted builder identities (default: any)
+ * @returns Verification result with SLSA level, builder identity, and attestation details
+ *
+ * @throws {TrustError} With code ATTESTATION_FETCH_TIMEOUT if fetch times out
+ * @throws {TrustError} With code ATTESTATION_PARSE_FAILED if attestation format is invalid
  *
  * @remarks
- * - Fetches attestation from provenance.url
- * - Verifies attestation signature
- * - Checks that attestation subject matches binary hash
- * - Validates claimed SLSA level against attestation contents
+ * Implements SLSA provenance verification flow:
  *
- * @throws {TrustError} If attestation cannot be fetched or parsed
+ * **Step 1: Compute Binary Hash**
+ * - Computes SHA-256 hash of the binary using {@link computeBinaryHash}
+ * - Used to verify attestation subject matches the actual binary
+ *
+ * **Step 2: Fetch Attestation**
+ * - Downloads attestation from `provenance.url`
+ * - Supports both DSSE envelope and raw in-toto formats
+ * - Respects timeout option (default: 10 seconds)
+ *
+ * **Step 3: Parse Attestation**
+ * - Decodes base64 payload if DSSE envelope format
+ * - Extracts in-toto statement with subject and predicate
+ * - Supports `slsa-provenance-v1` and `in-toto` formats
+ *
+ * **Step 4: Verify Subject**
+ * - Checks that attestation subject digest matches binary hash
+ * - Returns `verified: false` if no matching subject found
+ * - Critical security check - ensures attestation is for this binary
+ *
+ * **Step 5: Validate SLSA Level**
+ * - Extracts actual SLSA level from attestation predicate
+ * - Compares against `minimumLevel` option (default: 1)
+ * - Returns `verified: false` if below minimum
+ *
+ * **Step 6: Verify Builder (Optional)**
+ * - If `allowedBuilders` is set, validates builder identity
+ * - Returns `verified: false` if builder not in whitelist
+ * - Useful for enforcing organizational policies
+ *
+ * Network errors return `verified: false` rather than throwing, allowing
+ * graceful degradation in offline scenarios.
+ *
+ * @example
+ * ```typescript
+ * const result = await verifySLSAProvenance('/usr/local/bin/gh', {
+ *   url: 'https://github.com/cli/cli/attestations/sha256:abc',
+ *   format: 'slsa-provenance-v1',
+ *   slsaLevel: 3,
+ * }, {
+ *   minimumLevel: 3,
+ *   allowedBuilders: ['https://github.com/actions/runner'],
+ * });
+ *
+ * if (result.verified) {
+ *   console.log(`SLSA Level ${result.slsaLevel} verified`);
+ * }
+ * ```
  */
 export async function verifySLSAProvenance(
   binaryPath: string,

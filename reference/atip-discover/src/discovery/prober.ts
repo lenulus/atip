@@ -9,15 +9,31 @@ import { ProbeError, ProbeTimeoutError } from '../errors';
 import { validateMetadata } from '../validator';
 
 /**
- * Check if a tool's --help output documents an --agent flag.
+ * Check if a tool's --help output documents an --agent flag (Phase 1 of safe probing).
  *
  * @param executablePath - Absolute path to the executable
  * @param options - Check options
- * @returns True if --agent appears to be a supported option
+ * @param options.timeoutMs - Timeout in milliseconds (default: 2000)
+ * @returns True if --agent appears to be a supported option, false otherwise
  *
  * @remarks
- * This is the first phase of safe probing. Running `--help` is universally
- * safe and allows us to verify --agent support before executing it.
+ * This is Phase 1 of the two-phase safe probing approach. Running `--help` is
+ * universally safe and allows us to verify --agent support before executing it.
+ *
+ * The function searches for patterns like:
+ * - `--agent` as a documented flag
+ * - `-agent` as a short flag variant
+ * - "atip" and "agent" appearing together in help text
+ *
+ * Returns false on timeout or execution errors rather than throwing, since
+ * these indicate the tool doesn't support --agent in a verifiable way.
+ *
+ * @example
+ * ```typescript
+ * if (await checkHelpForAgent('/usr/local/bin/gh')) {
+ *   // Safe to execute --agent
+ * }
+ * ```
  */
 export async function checkHelpForAgent(
   executablePath: string,
@@ -84,19 +100,45 @@ export async function checkHelpForAgent(
 }
 
 /**
- * Probe a single executable for ATIP support using two-phase detection.
+ * Probe a single executable for ATIP support using two-phase safe detection.
  *
  * @param executablePath - Absolute path to the executable
  * @param options - Probe options
- * @returns Parsed ATIP metadata if tool supports --agent, null otherwise
+ * @param options.timeoutMs - Timeout in milliseconds (default: 2000)
+ * @returns Parsed and validated ATIP metadata if tool supports --agent, null otherwise
  *
- * @throws {ProbeTimeoutError} If timeout exceeded
- * @throws {ProbeError} If invalid JSON or validation fails
+ * @throws {ProbeError} If file is not executable or doesn't exist
+ * @throws {ProbeTimeoutError} If Phase 2 (--agent execution) times out
+ * @throws {ProbeError} If --agent outputs invalid JSON or fails schema validation
  *
  * @remarks
- * Uses a two-phase approach:
- * 1. Check --help for --agent support (safe)
- * 2. Execute --agent only if Phase 1 passes
+ * Implements a two-phase safe probing approach to avoid executing unknown flags:
+ *
+ * **Phase 1 (Safe):** Check if `--help` documents `--agent` support
+ * - Uses {@link checkHelpForAgent} to verify flag is documented
+ * - Returns null immediately if --agent is not documented
+ * - Prevents executing arbitrary unknown flags
+ *
+ * **Phase 2 (Verified):** Execute `--agent` to get metadata
+ * - Only runs if Phase 1 confirms support
+ * - Parses JSON output and validates against ATIP schema
+ * - Returns null on non-zero exit code or empty output
+ * - Throws on invalid JSON (if output starts with `{`)
+ * - Throws on schema validation failures
+ *
+ * This approach ensures we never execute `--agent` on tools that don't
+ * explicitly support it, preventing potential side effects.
+ *
+ * @example
+ * ```typescript
+ * // Probe GitHub CLI
+ * const metadata = await probe('/usr/local/bin/gh');
+ * if (metadata) {
+ *   console.log(`Found ${metadata.name} v${metadata.version}`);
+ * } else {
+ *   console.log('Tool does not support ATIP');
+ * }
+ * ```
  */
 export async function probe(
   executablePath: string,

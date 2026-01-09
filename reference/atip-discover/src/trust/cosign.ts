@@ -12,9 +12,13 @@ import { TrustError } from './errors';
 const execFileAsync = promisify(execFile);
 
 /**
- * Check if cosign CLI is installed.
+ * Check if cosign CLI is installed and available in PATH.
  *
- * @returns True if cosign is available in PATH
+ * @returns True if cosign is available in PATH, false otherwise
+ *
+ * @remarks
+ * Attempts to locate cosign using `which` (Unix/macOS) or `where` (Windows).
+ * This is a lightweight check that doesn't execute cosign itself.
  */
 async function isCosignInstalled(): Promise<boolean> {
   try {

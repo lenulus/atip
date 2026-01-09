@@ -4,55 +4,7 @@ import type { TrustProvenance } from '../../../src/trust/types';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
-import * as crypto from 'crypto';
-
-/**
- * Helper to compute SHA256 hash of content (without sha256: prefix).
- */
-function computeHash(content: string): string {
-  return crypto.createHash('sha256').update(content).digest('hex');
-}
-
-/**
- * Helper to create a mock SLSA attestation (DSSE envelope format).
- */
-function createMockSLSAAttestation(binaryHash: string, slsaLevel: number, builder?: string): any {
-  const statement = {
-    _type: 'https://in-toto.io/Statement/v0.1',
-    subject: [
-      {
-        name: 'binary',
-        digest: {
-          sha256: binaryHash,
-        },
-      },
-    ],
-    predicateType: 'https://slsa.dev/provenance/v1',
-    predicate: {
-      buildDefinition: {
-        buildType: 'https://slsa.dev/slsaBuildType/v1',
-      },
-      runDetails: {
-        builder: {
-          id: builder || 'https://github.com/actions/runner',
-        },
-      },
-      slsaLevel,
-    },
-  };
-
-  const payloadBase64 = Buffer.from(JSON.stringify(statement)).toString('base64');
-
-  return {
-    payloadType: 'application/vnd.in-toto+json',
-    payload: payloadBase64,
-    signatures: [
-      {
-        sig: 'mock-signature',
-      },
-    ],
-  };
-}
+import { computeHash, createMockSLSAAttestation } from '../../helpers/trust-test-utils';
 
 describe('verifySLSAProvenance', () => {
   let tmpDir: string;

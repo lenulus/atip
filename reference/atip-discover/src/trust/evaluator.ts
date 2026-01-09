@@ -16,20 +16,57 @@ import { verifySLSAProvenance } from './slsa';
 export { TrustLevel } from './types';
 
 /**
- * Evaluate trust level for a tool based on its metadata and binary.
+ * Evaluate trust level for a tool based on its metadata and binary integrity.
  *
- * @param binaryPath - Path to the tool binary
- * @param trust - Trust metadata from ATIP metadata
+ * @param binaryPath - Absolute path to the tool binary
+ * @param trust - Trust metadata from ATIP metadata (optional)
  * @param options - Evaluation options
- * @returns Complete trust evaluation with level and recommendations
+ * @returns Complete trust evaluation with level, reason, checks, and recommendation
+ *
+ * @throws {TrustError} If binary cannot be read or hash computation fails
+ * @throws {TrustError} If signature/provenance verification encounters fatal errors
  *
  * @remarks
- * Implements the verification flow from spec section 3.2.2:
+ * Implements the trust verification flow from ATIP spec section 3.2.2:
  *
- * 1. Binary integrity check (if checksum provided)
- * 2. Signature verification (if signature provided)
- * 3. SLSA provenance (if provenance provided)
- * 4. All checks pass: VERIFIED
+ * **Step 1: Binary Hash (Always)**
+ * - Computes SHA-256 hash of binary for integrity verification
+ * - Always performed regardless of trust metadata
+ *
+ * **Step 2: Integrity Check (If checksum provided)**
+ * - Compares computed hash against expected checksum
+ * - Returns {@link TrustLevel.COMPROMISED} immediately if mismatch detected
+ * - This is the highest priority check (security critical)
+ *
+ * **Step 3: Signature Verification (If enabled and signature provided)**
+ * - Verifies cryptographic signature using cosign/gpg/minisign
+ * - Returns {@link TrustLevel.UNSIGNED} if verification fails
+ * - Returns {@link TrustLevel.UNVERIFIED} if disabled or offline
+ *
+ * **Step 4: SLSA Provenance (If enabled and provenance provided)**
+ * - Verifies SLSA build provenance attestation
+ * - Returns {@link TrustLevel.PROVENANCE_FAIL} if verification fails
+ * - Validates minimum SLSA level and builder identity
+ *
+ * **Step 5: Final Level**
+ * - {@link TrustLevel.VERIFIED} if all enabled checks pass
+ * - Includes recommendation: execute | sandbox | confirm | block
+ *
+ * @example
+ * ```typescript
+ * const evaluation = await evaluateTrustLevel('/usr/local/bin/gh', metadata.trust, {
+ *   verifySignatures: true,
+ *   verifyProvenance: true,
+ *   minimumSlsaLevel: 3,
+ * });
+ *
+ * if (evaluation.level === TrustLevel.VERIFIED) {
+ *   console.log('Tool is fully verified and safe to execute');
+ * } else {
+ *   console.warn(`Trust level: ${evaluation.reason}`);
+ *   console.log(`Recommendation: ${evaluation.recommendation}`);
+ * }
+ * ```
  */
 export async function evaluateTrustLevel(
   binaryPath: string,

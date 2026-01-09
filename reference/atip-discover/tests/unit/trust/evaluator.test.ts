@@ -4,91 +4,12 @@ import type { AtipTrustFull, TrustVerificationOptions } from '../../../src/trust
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
-import { execFile } from 'child_process';
-import { promisify } from 'util';
-import * as crypto from 'crypto';
-
-const execFileAsync = promisify(execFile);
-
-/**
- * Helper to generate cosign key pair for testing.
- */
-async function generateTestKeyPair(tmpDir: string): Promise<{ privateKey: string; publicKey: string }> {
-  const prefix = path.join(tmpDir, 'test');
-  await execFileAsync('cosign', ['generate-key-pair', `--output-key-prefix=${prefix}`], {
-    env: { ...process.env, COSIGN_PASSWORD: '' },
-  });
-  return {
-    privateKey: `${prefix}.key`,
-    publicKey: `${prefix}.pub`,
-  };
-}
-
-/**
- * Helper to sign a file with cosign.
- */
-async function signFile(filePath: string, privateKey: string, tmpDir: string): Promise<string> {
-  const bundlePath = path.join(tmpDir, 'test.bundle');
-  await execFileAsync('cosign', [
-    'sign-blob',
-    '--key', privateKey,
-    '--bundle', bundlePath,
-    '--yes',
-    filePath,
-  ], {
-    env: { ...process.env, COSIGN_PASSWORD: '' },
-  });
-  return bundlePath;
-}
-
-/**
- * Helper to compute SHA256 hash of content.
- */
-function computeHash(content: string): string {
-  const hash = crypto.createHash('sha256').update(content).digest('hex');
-  return `sha256:${hash}`;
-}
-
-/**
- * Helper to create a mock SLSA attestation for testing.
- */
-function createMockSLSAAttestation(binaryHash: string, slsaLevel: number, builder?: string): any {
-  const statement = {
-    _type: 'https://in-toto.io/Statement/v0.1',
-    subject: [
-      {
-        name: 'binary',
-        digest: {
-          sha256: binaryHash,
-        },
-      },
-    ],
-    predicateType: 'https://slsa.dev/provenance/v1',
-    predicate: {
-      buildDefinition: {
-        buildType: 'https://slsa.dev/slsaBuildType/v1',
-      },
-      runDetails: {
-        builder: {
-          id: builder || 'https://github.com/actions/runner',
-        },
-      },
-      slsaLevel,
-    },
-  };
-
-  const payloadBase64 = Buffer.from(JSON.stringify(statement)).toString('base64');
-
-  return {
-    payloadType: 'application/vnd.in-toto+json',
-    payload: payloadBase64,
-    signatures: [
-      {
-        sig: 'mock-signature',
-      },
-    ],
-  };
-}
+import {
+  generateTestKeyPair,
+  signFile,
+  computeHash,
+  createMockSLSAAttestation,
+} from '../../helpers/trust-test-utils';
 
 describe('evaluateTrustLevel', () => {
   let tmpDir: string;
@@ -206,8 +127,8 @@ describe('evaluateTrustLevel', () => {
     // Sign the file
     const bundlePath = await signFile(binaryPath, privateKey, tmpDir);
 
-    // Compute hash
-    const checksum = computeHash(content);
+    // Compute hash with sha256: prefix
+    const checksum = computeHash(content, true);
 
     // Mock fetch to return a network error for the provenance URL
     global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
@@ -251,8 +172,8 @@ describe('evaluateTrustLevel', () => {
     // Sign the file
     const bundlePath = await signFile(binaryPath, privateKey, tmpDir);
 
-    // Compute hash
-    const checksum = computeHash(content);
+    // Compute hash with sha256: prefix
+    const checksum = computeHash(content, true);
 
     const trust: AtipTrustFull = {
       source: 'native',
@@ -335,8 +256,8 @@ describe('evaluateTrustLevel', () => {
     // Sign the file
     const bundlePath = await signFile(binaryPath, privateKey, tmpDir);
 
-    // Compute hash
-    const checksum = computeHash(content);
+    // Compute hash with sha256: prefix
+    const checksum = computeHash(content, true);
 
     const trust: AtipTrustFull = {
       source: 'native',

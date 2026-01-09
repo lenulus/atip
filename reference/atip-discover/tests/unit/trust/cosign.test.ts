@@ -4,48 +4,7 @@ import type { TrustSignature } from '../../../src/trust/types';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
-import { execFile } from 'child_process';
-import { promisify } from 'util';
-
-const execFileAsync = promisify(execFile);
-
-/**
- * Helper to generate cosign key pair for testing.
- * Returns paths to private and public keys.
- */
-async function generateTestKeyPair(tmpDir: string): Promise<{ privateKey: string; publicKey: string }> {
-  const prefix = path.join(tmpDir, 'test');
-
-  // Generate key pair with no password (for tests)
-  await execFileAsync('cosign', ['generate-key-pair', `--output-key-prefix=${prefix}`], {
-    env: { ...process.env, COSIGN_PASSWORD: '' },
-  });
-
-  return {
-    privateKey: `${prefix}.key`,
-    publicKey: `${prefix}.pub`,
-  };
-}
-
-/**
- * Helper to sign a file with cosign.
- * Returns path to bundle file (new format in cosign v3.x).
- */
-async function signFile(filePath: string, privateKey: string, tmpDir: string): Promise<string> {
-  const bundlePath = path.join(tmpDir, 'test.bundle');
-
-  await execFileAsync('cosign', [
-    'sign-blob',
-    '--key', privateKey,
-    '--bundle', bundlePath,
-    '--yes',
-    filePath,
-  ], {
-    env: { ...process.env, COSIGN_PASSWORD: '' },
-  });
-
-  return bundlePath;
-}
+import { generateTestKeyPair, signFile } from '../../helpers/trust-test-utils';
 
 describe('verifyCosignSignature', () => {
   let tmpDir: string;

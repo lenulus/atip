@@ -8,17 +8,26 @@ import type { HashResult } from './types';
 import { TrustError } from './errors';
 
 /**
- * Compute SHA-256 hash of a binary file.
+ * Compute SHA-256 hash of a binary file for integrity verification.
  *
  * @param binaryPath - Absolute path to the binary file
  * @returns Hash result with algorithm, raw hash, and formatted string
  *
  * @remarks
- * - Reads file in chunks for memory efficiency (8KB chunks)
+ * - Reads file in streaming chunks for memory efficiency (8KB chunks)
  * - Uses Node.js crypto module (no external dependencies)
- * - Returns lowercase hex encoding
+ * - Returns lowercase hex encoding for consistency
+ * - Formatted output is suitable for content-addressable storage (e.g., "sha256:abc123...")
  *
- * @throws {TrustError} If file cannot be read or hash computation fails
+ * @throws {TrustError} With code BINARY_NOT_FOUND if file does not exist
+ * @throws {TrustError} With code PERMISSION_DENIED if file cannot be read
+ * @throws {TrustError} With code HASH_COMPUTATION_FAILED for other errors
+ *
+ * @example
+ * ```typescript
+ * const result = await computeBinaryHash('/usr/local/bin/gh');
+ * console.log(result.formatted); // "sha256:a1b2c3d4..."
+ * ```
  */
 export async function computeBinaryHash(
   binaryPath: string

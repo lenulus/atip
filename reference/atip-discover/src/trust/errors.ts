@@ -12,10 +12,16 @@ export type TrustErrorCode =
   | 'COSIGN_NOT_INSTALLED' // cosign CLI not found
   | 'VERIFICATION_TIMEOUT' // Verification operation timed out
   | 'ATTESTATION_FETCH_FAILED' // Could not fetch SLSA attestation
+  | 'ATTESTATION_FETCH_TIMEOUT' // Attestation fetch timed out
   | 'ATTESTATION_PARSE_FAILED' // Invalid attestation format
   | 'SIGNATURE_INVALID' // Signature verification failed
   | 'BINARY_NOT_FOUND' // Binary file does not exist
-  | 'PERMISSION_DENIED'; // Cannot read binary file
+  | 'PERMISSION_DENIED' // Cannot read binary file
+  | 'UNSUPPORTED_SIGNATURE_TYPE' // Signature type not supported
+  | 'PUBLIC_KEY_NOT_FOUND' // Public key file not found
+  | 'BUNDLE_NOT_FOUND' // Bundle file not found
+  | 'SIGNATURE_FILE_NOT_FOUND' // Signature file not found
+  | 'INVALID_SIGNATURE_CONFIG'; // Invalid signature configuration
 
 /**
  * Error during trust verification operations.

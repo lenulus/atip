@@ -42,15 +42,49 @@ export { verifySLSAProvenance } from './slsa';
 export { evaluateTrustLevel } from './evaluator';
 
 /**
- * Verify trust for a discovered tool.
+ * Verify trust for a discovered tool (main entry point for trust verification).
  *
- * This is the main entry point for trust verification after discovery.
- * It performs all relevant checks based on available trust metadata.
+ * This is the primary function for verifying tool integrity after discovery.
+ * It orchestrates all trust verification checks based on available metadata.
  *
- * @param binaryPath - Path to the tool binary
- * @param metadata - ATIP metadata from discovery (may have trust field)
- * @param options - Verification options
- * @returns Complete verification result with trust level
+ * @param binaryPath - Absolute path to the tool binary
+ * @param metadata - ATIP metadata from discovery (may include trust field)
+ * @param options - Verification options (signatures, provenance, SLSA level, etc.)
+ * @returns Complete verification result with trust level, evaluation, and binary hash
+ *
+ * @throws {TrustError} If binary cannot be read or verification encounters fatal errors
+ *
+ * @remarks
+ * This function combines:
+ * 1. Binary hash computation ({@link computeBinaryHash})
+ * 2. Trust level evaluation ({@link evaluateTrustLevel})
+ * 3. Final trusted/untrusted determination
+ *
+ * The result includes:
+ * - `level`: Trust level from {@link TrustLevel} enum
+ * - `trusted`: Boolean flag (true only if VERIFIED)
+ * - `evaluation`: Detailed evaluation with checks and recommendation
+ * - `source`: Origin of metadata (native, vendor, community, etc.)
+ * - `binaryHash`: SHA-256 hash of the binary (always computed)
+ *
+ * @example
+ * ```typescript
+ * const metadata = await probe('/usr/local/bin/gh');
+ * if (metadata) {
+ *   const result = await verifyTrust('/usr/local/bin/gh', metadata, {
+ *     verifySignatures: true,
+ *     verifyProvenance: true,
+ *     minimumSlsaLevel: 3,
+ *   });
+ *
+ *   if (result.trusted) {
+ *     console.log('✓ Tool is fully verified');
+ *   } else {
+ *     console.warn(`⚠ Trust level: ${result.evaluation.reason}`);
+ *     console.log(`  Recommendation: ${result.evaluation.recommendation}`);
+ *   }
+ * }
+ * ```
  */
 export async function verifyTrust(
   binaryPath: string,
