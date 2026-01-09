@@ -46,6 +46,7 @@
 - [x] reference/atip-execute/ - Safe tool execution from LLM calls (TypeScript)
 - [x] reference/atip-lint/ - Metadata quality linter (TypeScript)
 - [x] reference/atip-diff/ - Version comparison tool (TypeScript)
+- [ ] reference/atip-agent/ - E2E reference client (TypeScript)
 - [ ] reference/atip-mcp/ - MCP adapter for ATIP tools (Future)
 
 ### Documentation
@@ -88,6 +89,7 @@
 | atip-lint | TypeScript | npm, tsup, vitest | Extends atip-validate; shares validation infrastructure |
 | atip-diff | TypeScript | npm, tsup, vitest | CLI tool; TypeScript for JSON manipulation and rich output |
 | atip-mcp | TypeScript | npm, MCP SDK | MCP servers typically TypeScript; uses official MCP SDK |
+| atip-agent | TypeScript | npm, tsup, vitest | E2E reference client; demonstrates full ATIP lifecycle |
 
 **BRGR Agent Workflow:**
 Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`):
@@ -342,6 +344,49 @@ Make all ATIP reference tools implement the `--agent` flag themselves:
       - [x] CLI: `atip-diff old.json new.json`
       - [x] Library API for CI integration
       - [x] Implements `--agent` flag (dogfooding!)
+
+### Phase 4.10: atip-agent (TypeScript) - E2E Reference Client
+
+22. reference/atip-agent/ - End-to-end reference client demonstrating full ATIP lifecycle
+    - [ ] 4.10.1: Project setup and Blue phase
+      - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
+      - [ ] Initialize npm package with TypeScript
+      - [ ] Set up test framework (vitest)
+    - [ ] 4.10.2: Discovery and trust verification (BRGR cycle)
+      - [ ] Blue: Document discovery flow and trust verification per spec §3.2.2
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for discovery/trust tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
+      - [ ] Features:
+        - [ ] Integrate atip-discover for tool discovery
+        - [ ] Cosign signature verification (Sigstore)
+        - [ ] SLSA attestation verification
+        - [ ] Trust level evaluation (COMPROMISED → VERIFIED)
+    - [ ] 4.10.3: Capability restriction and policy (BRGR cycle)
+      - [ ] Blue: Document policy engine per spec §10.2, §11.2
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for policy tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
+      - [ ] Features:
+        - [ ] Tool allowlist/denylist (`--allow-tools`, `--deny-tools`)
+        - [ ] Effects-based restrictions (`--deny-destructive`, `--require-idempotent`)
+        - [ ] Trust-level policies (sandbox untrusted, confirm unsigned)
+        - [ ] Subagent delegation context
+    - [ ] 4.10.4: Execution lifecycle (BRGR cycle)
+      - [ ] Blue: Document full lifecycle per spec §7
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for lifecycle tests
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
+      - [ ] Features:
+        - [ ] Integrate atip-bridge for provider compilation
+        - [ ] Integrate atip-execute for safe subprocess invocation
+        - [ ] Pre-execution validation (effects checks, confirmations)
+        - [ ] Post-execution filtering (secret redaction per §11.3)
+    - [ ] 4.10.5: CLI and packaging
+      - [ ] CLI commands:
+        - [ ] `atip-agent discover` - List tools with trust info
+        - [ ] `atip-agent exec <command>` - Execute with policy
+        - [ ] `atip-agent delegate` - Generate subagent context
+        - [ ] `atip-agent verify <tool>` - Verify trust chain
+      - [ ] Library API for programmatic use
+      - [ ] Implements `--agent` flag (dogfooding!)
 
 ### Phase 5: Shims & Partial Discovery (Future)
 22. examples/kubectl-partial.json - Partial discovery example
