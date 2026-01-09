@@ -14,7 +14,10 @@ export type AtipFeature =
   | 'partial-discovery'
   | 'interactive-effects'
   | 'trust-v1'
-  | 'patterns-v1';
+  | 'trust-integrity'
+  | 'trust-provenance'
+  | 'patterns-v1'
+  | 'content-addressable';
 
 /**
  * Trust and provenance information for ATIP metadata.
@@ -22,6 +25,33 @@ export type AtipFeature =
 export interface AtipTrust {
   source: 'native' | 'vendor' | 'org' | 'community' | 'user' | 'inferred';
   verified?: boolean;
+
+  /**
+   * Integrity verification via Sigstore.
+   */
+  integrity?: {
+    checksum: string;
+    signature?: {
+      type: 'cosign' | 'gpg' | 'minisign';
+      identity: string;
+      issuer?: string;
+      bundle?: string;
+    };
+  };
+
+  /**
+   * SLSA provenance verification.
+   */
+  provenance?: {
+    url: string;
+    format: 'slsa-provenance-v1' | 'in-toto';
+    slsaLevel: number;
+    builder?: string;
+  };
+
+  /**
+   * Legacy fields for backwards compatibility with v0.4
+   */
   checksum?: string;
   signedBy?: string;
   attestation?: string;

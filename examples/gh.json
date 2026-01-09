@@ -1,13 +1,41 @@
 {
   "atip": {
-    "version": "0.4"
+    "version": "0.6",
+    "features": [
+      "trust-v1",
+      "trust-integrity",
+      "trust-provenance"
+    ]
   },
   "name": "gh",
   "version": "2.76.2",
   "description": "Work seamlessly with GitHub from the command line.",
   "trust": {
-    "source": "inferred",
-    "verified": false
+    "source": "native",
+    "verified": true,
+    "integrity": {
+      "checksum": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": {
+        "type": "cosign",
+        "identity": "https://github.com/cli/cli/.github/workflows/release.yml@refs/tags/v2.76.2",
+        "issuer": "https://token.actions.githubusercontent.com"
+      }
+    },
+    "provenance": {
+      "url": "https://github.com/cli/cli/attestations/sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "format": "slsa-provenance-v1",
+      "slsaLevel": 3
+    }
+  },
+  "authentication": {
+    "required": true,
+    "methods": [
+      {
+        "type": "oauth",
+        "setupCommand": "gh auth login"
+      }
+    ],
+    "checkCommand": "gh auth status"
   },
   "commands": {
     "auth": {

@@ -14,7 +14,38 @@ type AtipMetadata struct {
 	Name        string                 `json:"name"`
 	Version     string                 `json:"version"`
 	Description string                 `json:"description"`
+	Trust       *Trust                 `json:"trust,omitempty"`
 	Commands    map[string]interface{} `json:"commands,omitempty"`
+}
+
+// Trust represents the trust and provenance information.
+type Trust struct {
+	Source     string      `json:"source"`
+	Verified   bool        `json:"verified,omitempty"`
+	Integrity  *Integrity  `json:"integrity,omitempty"`
+	Provenance *Provenance `json:"provenance,omitempty"`
+}
+
+// Integrity represents Sigstore integrity information.
+type Integrity struct {
+	Checksum  string           `json:"checksum"`
+	Signature *IntegritySignal `json:"signature,omitempty"`
+}
+
+// IntegritySignal represents a Sigstore signature.
+type IntegritySignal struct {
+	Type     string `json:"type"`
+	Identity string `json:"identity"`
+	Issuer   string `json:"issuer,omitempty"`
+	Bundle   string `json:"bundle,omitempty"`
+}
+
+// Provenance represents SLSA provenance information.
+type Provenance struct {
+	URL       string `json:"url"`
+	Format    string `json:"format"`
+	SLSALevel int    `json:"slsaLevel"`
+	Builder   string `json:"builder,omitempty"`
 }
 
 // Validator validates ATIP metadata against the schema.

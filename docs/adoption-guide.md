@@ -11,11 +11,22 @@ import json
 import sys
 
 ATIP_METADATA = {
-    "atip": {"version": "0.4"},
+    "atip": {"version": "0.6"},
     "name": "mytool",
     "version": "1.0.0",
     "description": "Does something useful",
-    "trust": {"source": "native"},
+    "trust": {
+        "source": "native",
+        "verified": True,
+        "integrity": {
+            "checksum": "sha256:...",
+            "signature": {
+                "type": "cosign",
+                "identity": "...",
+                "issuer": "..."
+            }
+        }
+    },
     "commands": {
         "run": {
             "description": "Execute main function",
@@ -59,13 +70,22 @@ import (
 
 var atipMetadata = map[string]interface{}{
     "atip": map[string]interface{}{
-        "version": "0.4",
+        "version": "0.6",
     },
     "name":        "mytool",
     "version":     "1.0.0",
     "description": "Does something useful",
     "trust": map[string]interface{}{
         "source": "native",
+        "verified": true,
+        "integrity": map[string]interface{}{
+            "checksum": "sha256:...",
+            "signature": map[string]interface{}{
+                "type": "cosign",
+                "identity": "...",
+                "issuer": "...",
+            },
+        },
     },
     "commands": map[string]interface{}{
         "run": map[string]interface{}{
@@ -94,11 +114,22 @@ func main() {
 
 ```javascript
 const ATIP_METADATA = {
-  atip: { version: "0.4" },
+  atip: { version: "0.6" },
   name: "mytool",
   version: "1.0.0",
   description: "Does something useful",
-  trust: { source: "native" },
+  trust: {
+    source: "native",
+    verified: true,
+    integrity: {
+      checksum: "sha256:...",
+      signature: {
+        type: "cosign",
+        identity: "...",
+        issuer: "..."
+      }
+    }
+  },
   commands: {
     run: {
       description: "Execute main function",
@@ -124,11 +155,22 @@ use std::env;
 fn main() {
     if env::args().any(|arg| arg == "--agent") {
         let metadata = json!({
-            "atip": {"version": "0.4"},
+            "atip": {"version": "0.6"},
             "name": "mytool",
             "version": "1.0.0",
             "description": "Does something useful",
-            "trust": {"source": "native"},
+            "trust": {
+                "source": "native",
+                "verified": true,
+                "integrity": {
+                    "checksum": "sha256:...",
+                    "signature": {
+                        "type": "cosign",
+                        "identity": "...",
+                        "issuer": "..."
+                    }
+                }
+            },
             "commands": {
                 "run": {
                     "description": "Execute main function",
