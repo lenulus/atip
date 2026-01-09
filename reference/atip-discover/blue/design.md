@@ -713,6 +713,386 @@ Based on Go implementation (103 tests, similar architecture):
 
 ---
 
+## Trust Verification Module (Phase 4.4.5)
+
+### Trust Architecture Overview
+
+Per spec section 3.2.2, ATIP provides cryptographic verification mechanisms to establish tool trustworthiness. The trust module is an **enhancement** to the existing discovery system, integrated after the probe phase.
+
+```
+                          ┌─────────────────────────────────────────┐
+                          │           Trust Verification            │
+                          │         (NEW - Phase 4.4.5)            │
+                          └─────────────────────────────────────────┘
+                                              │
+           ┌──────────────────────────────────┼──────────────────────────────────┐
+           │                                  │                                  │
+           ▼                                  ▼                                  ▼
+┌────────────────────┐            ┌────────────────────┐            ┌────────────────────┐
+│  Hash Computation  │            │ Signature Verify   │            │ SLSA Provenance    │
+│  (src/trust/hash)  │            │ (src/trust/cosign) │            │ (src/trust/slsa)   │
+│                    │            │                    │            │                    │
+│  • SHA-256 binary  │            │  • Cosign verify   │            │  • Fetch attest.   │
+│  • Chunk reading   │            │  • Identity match  │            │  • Parse in-toto   │
+│  • Content-addr.   │            │  • Bundle support  │            │  • Level verify    │
+└─────────┬──────────┘            └─────────┬──────────┘            └─────────┬──────────┘
+          │                                 │                                 │
+          └──────────────────────┬──────────┴─────────────────────────────────┘
+                                 │
+                                 ▼
+                    ┌────────────────────────┐
+                    │   Trust Evaluator      │
+                    │ (src/trust/evaluator)  │
+                    │                        │
+                    │  • Combine results     │
+                    │  • Assign TrustLevel   │
+                    │  • Generate recommend. │
+                    └────────────────────────┘
+```
+
+### Trust Module File Structure
+
+```
+src/trust/
+├── index.ts           # Module exports
+├── types.ts           # Trust-specific type definitions
+├── hash.ts            # SHA-256 binary hash computation
+├── cosign.ts          # Sigstore/Cosign signature verification
+├── slsa.ts            # SLSA attestation verification
+├── evaluator.ts       # Trust level evaluation logic
+└── errors.ts          # Trust-specific error types
+```
+
+### Integration with Existing Discovery Flow
+
+The trust module integrates at two points in the existing discovery flow:
+
+#### 1. Post-Probe Verification (Recommended)
+
+After `probe()` returns ATIP metadata, optionally verify trust:
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────────┐
+│                                 Enhanced Scan Flow                                        │
+└──────────────────────────────────────────────────────────────────────────────────────────┘
+
+User runs: atip-discover scan [--verify-trust]
+           │
+           ▼
+┌──────────────────────┐
+│  Existing scan flow  │
+│  (enumerate, probe,  │
+│   validate, cache)   │
+└──────────┬───────────┘
+           │
+           ▼ [if --verify-trust or config.trustVerification.enabled]
+┌──────────────────────┐
+│  Trust Verification  │
+│                      │
+│  1. Compute hash     │──▶ Store in registry entry
+│  2. Check checksum   │──▶ COMPROMISED if mismatch
+│  3. Verify signature │──▶ UNSIGNED if missing/fail
+│  4. Check provenance │──▶ PROVENANCE_FAIL if fail
+│  5. Assign level     │──▶ VERIFIED if all pass
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│  Enhanced output     │
+│  (includes trust     │
+│   level per tool)    │
+└──────────────────────┘
+```
+
+#### 2. On-Demand Verification via `verifyTrust()`
+
+For explicit trust verification without a full scan:
+
+```typescript
+// After discovery
+const metadata = await get('gh');
+const trustResult = await verifyTrust('/usr/local/bin/gh', metadata);
+
+if (trustResult.level === TrustLevel.COMPROMISED) {
+  throw new SecurityError('Binary hash mismatch');
+}
+```
+
+### Component Details
+
+#### Hash Module (`src/trust/hash.ts`)
+
+**Responsibility**: Compute SHA-256 hash of binary files for content-addressable lookup and integrity verification.
+
+**Rationale**: Hash computation is the foundation of content-addressable storage (spec section 4.1) and integrity verification. Separating it allows reuse for both shim lookups and checksum verification.
+
+**Design decisions**:
+
+| Decision | Rationale |
+|----------|-----------|
+| Use Node.js `crypto` module | No external dependencies; available in all Node versions |
+| Stream-based reading (8KB chunks) | Memory-efficient for large binaries |
+| SHA-256 only | Industry standard; matches spec requirement |
+| Lowercase hex output | Consistent with content-addressable URLs |
+
+**Implementation approach**:
+```typescript
+import { createHash } from 'crypto';
+import { createReadStream } from 'fs';
+
+async function computeBinaryHash(binaryPath: string): Promise<HashResult> {
+  const hash = createHash('sha256');
+  const stream = createReadStream(binaryPath, { highWaterMark: 8192 });
+
+  for await (const chunk of stream) {
+    hash.update(chunk);
+  }
+
+  const hex = hash.digest('hex');
+  return {
+    algorithm: 'sha256',
+    hash: hex,
+    formatted: `sha256:${hex}`
+  };
+}
+```
+
+#### Cosign Module (`src/trust/cosign.ts`)
+
+**Responsibility**: Verify Sigstore/Cosign signatures using the cosign CLI.
+
+**Rationale**: Cosign is the recommended signature verification tool per spec section 3.2.2. Using the CLI avoids complex cryptographic dependencies while leveraging Sigstore's keyless signing infrastructure.
+
+**Design decisions**:
+
+| Decision | Rationale |
+|----------|-----------|
+| Shell out to `cosign` CLI | Avoids bundling cryptographic dependencies; uses established tooling |
+| Require explicit identity/issuer | Keyless verification needs identity binding |
+| Support signature bundles | Enables offline verification when bundle is cached |
+| 30-second default timeout | Network verification may be slow; avoid hanging |
+
+**Command invocation**:
+```bash
+cosign verify-blob \
+  --certificate-identity "https://github.com/cli/cli/.github/workflows/release.yml@refs/tags/v2.45.0" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  --bundle "/path/to/signature.bundle" \
+  /usr/local/bin/gh
+```
+
+**Error handling**:
+
+| Cosign exit code | Interpretation |
+|------------------|----------------|
+| 0 | Verification successful |
+| Non-zero | Verification failed (parse stderr for details) |
+| ENOENT | Cosign not installed |
+| Timeout | Network issues or Rekor unavailable |
+
+#### SLSA Module (`src/trust/slsa.ts`)
+
+**Responsibility**: Fetch and verify SLSA provenance attestations.
+
+**Rationale**: SLSA attestations prove build provenance (where and how the binary was built). This complements signature verification by establishing the build chain.
+
+**Design decisions**:
+
+| Decision | Rationale |
+|----------|-----------|
+| Fetch attestation over HTTPS | Attestations are published at known URLs |
+| Parse in-toto envelope format | Standard format for SLSA attestations |
+| Verify subject digest matches | Ensures attestation is for this specific binary |
+| Support minimum level threshold | Allows agents to require specific SLSA guarantees |
+
+**Attestation verification flow**:
+```
+1. Fetch attestation from provenance.url
+2. Parse as DSSE envelope (JSON)
+3. Verify signature on envelope (if certificate provided)
+4. Decode payload as in-toto statement
+5. Check statement.subject[].digest.sha256 matches binaryHash
+6. Extract SLSA level from predicate.buildType or custom fields
+7. Compare against minimum required level
+```
+
+**SLSA level interpretation** (per spec):
+
+| Level | Guarantees | Agent behavior |
+|-------|------------|----------------|
+| 0 | None | Treat as untrusted |
+| 1 | Build process documented | Low trust |
+| 2 | Signed provenance, hosted build | Medium trust |
+| 3 | Hardened build platform | High trust |
+| 4 | Two-party review, hermetic | Full trust |
+
+#### Evaluator Module (`src/trust/evaluator.ts`)
+
+**Responsibility**: Combine verification results into a single trust level with recommendations.
+
+**Rationale**: Agents need a single, actionable trust level rather than multiple separate verification results. The evaluator applies the decision logic from spec section 3.2.2.
+
+**Evaluation algorithm**:
+```python
+# Pseudocode for trust level evaluation
+def evaluate_trust(binary_path, trust_metadata, options):
+    # Step 1: Always compute binary hash
+    actual_hash = sha256(binary_path)
+
+    # Step 2: Integrity check (if checksum provided)
+    if trust.integrity?.checksum:
+        if actual_hash != trust.integrity.checksum:
+            return TrustLevel.COMPROMISED, "Hash mismatch"
+
+    # Step 3: Signature verification (if enabled and signature provided)
+    if options.verifySignatures and trust.integrity?.signature:
+        sig_result = verify_signature(binary_path, trust.integrity.signature)
+        if not sig_result.verified:
+            return TrustLevel.UNSIGNED, sig_result.error
+    elif not trust.integrity?.signature:
+        # No signature provided
+        if options.verifySignatures:
+            return TrustLevel.UNSIGNED, "No signature available"
+        else:
+            return TrustLevel.UNVERIFIED, "Signature verification skipped"
+
+    # Step 4: SLSA provenance (if enabled and provenance provided)
+    if options.verifyProvenance and trust.provenance:
+        prov_result = verify_provenance(binary_path, trust.provenance, options)
+        if not prov_result.verified:
+            return TrustLevel.PROVENANCE_FAIL, prov_result.error
+
+    # Step 5: All checks passed
+    return TrustLevel.VERIFIED, "Full verification passed"
+```
+
+**Recommendation mapping**:
+
+| Trust Level | Recommendation | Agent Action |
+|-------------|----------------|--------------|
+| COMPROMISED | `block` | Do not execute; alert user |
+| UNSIGNED | `confirm` | Require explicit user confirmation |
+| UNVERIFIED | `sandbox` | Execute in restricted environment |
+| PROVENANCE_FAIL | `confirm` | Warn user, require confirmation |
+| VERIFIED | `execute` | Safe to execute normally |
+
+### Security Considerations
+
+#### Trust Verification is Optional but Encouraged
+
+Per spec, trust verification is RECOMMENDED but not required. The module is designed to:
+
+1. **Degrade gracefully**: Missing cosign CLI results in UNVERIFIED, not failure
+2. **Support offline mode**: Skip network operations, mark as UNVERIFIED
+3. **Never block discovery**: Trust verification happens after successful probe
+
+#### Hash Verification is Implicit in Content-Addressable Lookup
+
+With content-addressable storage (spec section 4), the binary hash IS the lookup key:
+
+```
+Binary → sha256(binary) → lookup shim by hash → hash match is implicit
+```
+
+The `trust.integrity.checksum` field provides **explicit verification** for:
+- Native tools that include checksum in `--agent` output
+- Verifying binary hasn't changed since shim was created
+
+#### Signature Verification Requires `cosign` CLI
+
+The module depends on the external `cosign` CLI rather than implementing cryptographic verification directly:
+
+**Pros**:
+- Uses battle-tested Sigstore implementation
+- No cryptographic code to maintain
+- Automatic Rekor transparency log integration
+- Handles certificate chain validation
+
+**Cons**:
+- External dependency (must be installed separately)
+- CLI invocation overhead
+- Different behavior across cosign versions
+
+**Mitigation**: Check for cosign availability early; provide clear error messages if missing.
+
+### Performance Characteristics
+
+| Operation | Typical Time | Notes |
+|-----------|--------------|-------|
+| Hash computation (10MB binary) | ~50ms | I/O bound; uses streaming |
+| Hash computation (100MB binary) | ~500ms | Linear with file size |
+| Cosign verification | 1-3s | Network bound (Rekor lookup) |
+| Cosign verification (cached) | ~200ms | When using local bundle |
+| SLSA attestation fetch | 200-500ms | Network bound |
+| SLSA attestation verify | ~10ms | CPU bound (JSON parsing) |
+
+**Optimization strategies**:
+
+1. **Cache binary hashes** in registry entries; recompute only if mtime changes
+2. **Batch verification** during scan; parallelize cosign invocations
+3. **Download signature bundles** once; cache for offline verification
+4. **Skip verification for known-good hashes** (content-addressable property)
+
+### Configuration
+
+Trust verification is controlled via:
+
+#### Config file (`config.json`)
+
+```json
+{
+  "trustVerification": {
+    "enabled": true,
+    "verifySignatures": true,
+    "verifyProvenance": true,
+    "minimumSlsaLevel": 2,
+    "allowedSigners": [
+      "https://github.com/*/.github/workflows/*"
+    ],
+    "allowedIssuers": [
+      "https://token.actions.githubusercontent.com"
+    ],
+    "offlineMode": false,
+    "networkTimeoutMs": 30000
+  }
+}
+```
+
+#### CLI flags
+
+```bash
+# Enable trust verification during scan
+atip-discover scan --verify-trust
+
+# Skip trust verification (faster)
+atip-discover scan --no-verify-trust
+
+# Offline mode (skip network checks)
+atip-discover scan --verify-trust --offline
+
+# Set minimum SLSA level
+atip-discover scan --verify-trust --min-slsa=3
+```
+
+#### Environment variables
+
+```bash
+ATIP_VERIFY_TRUST=true
+ATIP_OFFLINE_MODE=true
+ATIP_MIN_SLSA_LEVEL=2
+```
+
+### Future Extensions
+
+1. **GPG signature support**: Extend cosign module to support GPG signatures
+2. **Minisign support**: Add minisign verification for tools using it
+3. **Certificate pinning**: Allow specifying expected certificates
+4. **Trust policy files**: Define complex trust rules in separate files
+5. **Revocation checking**: Check if signatures have been revoked
+6. **Local Rekor mirror**: Support enterprise Rekor deployments
+
+---
+
 ## Future Extensions
 
 ### Planned Features

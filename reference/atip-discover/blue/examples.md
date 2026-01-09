@@ -1278,3 +1278,523 @@ Skipping world-writable directory: /tmp/untrusted
 ```
 
 **Explanation**: The tool warns about disabled safety checks and skips truly dangerous paths even when safety is disabled.
+
+---
+
+## Trust Verification Examples (Phase 4.4.5)
+
+### Example 42: Compute Binary Hash
+
+```typescript
+import { computeBinaryHash } from 'atip-discover';
+
+// Compute SHA-256 hash of a binary
+const result = await computeBinaryHash('/usr/local/bin/gh');
+
+console.log(`Algorithm: ${result.algorithm}`);
+console.log(`Hash: ${result.hash}`);
+console.log(`Formatted: ${result.formatted}`);
+```
+
+**Expected Output**:
+```
+Algorithm: sha256
+Hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+Formatted: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+```
+
+**Explanation**: The hash can be used for content-addressable shim lookups and integrity verification.
+
+---
+
+### Example 43: Verify Trust After Discovery
+
+```typescript
+import { probe, verifyTrust, TrustLevel } from 'atip-discover';
+
+// Discover tool metadata
+const metadata = await probe('/usr/local/bin/gh', { timeoutMs: 2000 });
+
+if (metadata) {
+  // Verify trust with full verification enabled
+  const trustResult = await verifyTrust('/usr/local/bin/gh', metadata, {
+    verifySignatures: true,
+    verifyProvenance: true
+  });
+
+  console.log(`Trust Level: ${TrustLevel[trustResult.level]}`);
+  console.log(`Trusted: ${trustResult.trusted}`);
+  console.log(`Binary Hash: ${trustResult.binaryHash}`);
+  console.log(`Source: ${trustResult.source}`);
+  console.log(`Recommendation: ${trustResult.evaluation.recommendation}`);
+}
+```
+
+**Expected Output** (tool with full trust metadata):
+```
+Trust Level: VERIFIED
+Trusted: true
+Binary Hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+Source: native
+Recommendation: execute
+```
+
+**Expected Output** (tool without signatures):
+```
+Trust Level: UNSIGNED
+Trusted: false
+Binary Hash: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+Source: native
+Recommendation: confirm
+```
+
+**Explanation**: After discovering a tool, verify its trust level to make execution decisions.
+
+---
+
+### Example 44: Verify Cosign Signature
+
+```typescript
+import { verifyCosignSignature } from 'atip-discover';
+
+// Verify a signed binary using Sigstore/Cosign
+const result = await verifyCosignSignature('/usr/local/bin/gh', {
+  type: 'cosign',
+  identity: 'https://github.com/cli/cli/.github/workflows/release.yml@refs/tags/v2.45.0',
+  issuer: 'https://token.actions.githubusercontent.com'
+});
+
+if (result.verified) {
+  console.log(`Signature verified!`);
+  console.log(`Identity: ${result.identity}`);
+} else {
+  console.log(`Verification failed: ${result.error}`);
+}
+```
+
+**Expected Output** (signature valid):
+```
+Signature verified!
+Identity: https://github.com/cli/cli/.github/workflows/release.yml@refs/tags/v2.45.0
+```
+
+**Expected Output** (signature invalid):
+```
+Verification failed: signature verification failed: the provided identity did not match any in the certificate
+```
+
+**Explanation**: Uses the cosign CLI to verify Sigstore keyless signatures with OIDC identity matching.
+
+---
+
+### Example 45: Verify SLSA Provenance
+
+```typescript
+import { verifySLSAProvenance, computeBinaryHash } from 'atip-discover';
+
+// Verify SLSA attestation for a binary
+const result = await verifySLSAProvenance('/usr/local/bin/gh', {
+  url: 'https://github.com/cli/cli/attestations/sha256:e3b0c44...',
+  format: 'slsa-provenance-v1',
+  slsaLevel: 3,
+  builder: 'https://github.com/actions/runner'
+}, {
+  minimumLevel: 2,
+  allowedBuilders: ['https://github.com/actions/runner']
+});
+
+if (result.verified) {
+  console.log(`SLSA Level ${result.slsaLevel} verified`);
+  console.log(`Builder: ${result.builder}`);
+} else {
+  console.log(`Provenance verification failed: ${result.error}`);
+}
+```
+
+**Expected Output** (attestation valid):
+```
+SLSA Level 3 verified
+Builder: https://github.com/actions/runner
+```
+
+**Explanation**: Fetches and verifies SLSA attestations to prove build provenance.
+
+---
+
+### Example 46: Evaluate Trust Level
+
+```typescript
+import { evaluateTrustLevel, TrustLevel } from 'atip-discover';
+
+// Full trust metadata from a tool
+const trustMetadata = {
+  source: 'native',
+  verified: true,
+  integrity: {
+    checksum: 'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    signature: {
+      type: 'cosign' as const,
+      identity: 'https://github.com/cli/cli/.github/workflows/release.yml@refs/tags/v2.45.0',
+      issuer: 'https://token.actions.githubusercontent.com'
+    }
+  },
+  provenance: {
+    url: 'https://github.com/cli/cli/attestations/sha256:e3b0c44...',
+    format: 'slsa-provenance-v1' as const,
+    slsaLevel: 3,
+    builder: 'https://github.com/actions/runner'
+  }
+};
+
+const result = await evaluateTrustLevel('/usr/local/bin/gh', trustMetadata, {
+  verifySignatures: true,
+  verifyProvenance: true,
+  minimumSlsaLevel: 2
+});
+
+console.log(`Trust Level: ${TrustLevel[result.level]}`);
+console.log(`Reason: ${result.reason}`);
+console.log(`Recommendation: ${result.recommendation}`);
+
+// Check individual verification results
+if (result.checks.hash?.checked) {
+  console.log(`Hash Check: ${result.checks.hash.matches ? 'PASS' : 'FAIL'}`);
+}
+if (result.checks.signature) {
+  console.log(`Signature: ${result.checks.signature.verified ? 'VERIFIED' : 'FAILED'}`);
+}
+if (result.checks.provenance) {
+  console.log(`Provenance: SLSA Level ${result.checks.provenance.slsaLevel}`);
+}
+```
+
+**Expected Output**:
+```
+Trust Level: VERIFIED
+Reason: Full verification passed
+Recommendation: execute
+Hash Check: PASS
+Signature: VERIFIED
+Provenance: SLSA Level 3
+```
+
+---
+
+### Example 47: Handle Hash Mismatch (COMPROMISED)
+
+```typescript
+import { verifyTrust, TrustLevel, TrustError } from 'atip-discover';
+
+// Metadata with a checksum that won't match the actual binary
+const metadata = {
+  atip: { version: '0.6' },
+  name: 'gh',
+  version: '2.45.0',
+  description: 'GitHub CLI',
+  trust: {
+    source: 'native' as const,
+    verified: true,
+    integrity: {
+      // This checksum is intentionally wrong
+      checksum: 'sha256:0000000000000000000000000000000000000000000000000000000000000000'
+    }
+  }
+};
+
+const result = await verifyTrust('/usr/local/bin/gh', metadata);
+
+if (result.level === TrustLevel.COMPROMISED) {
+  console.log('WARNING: Binary hash mismatch detected!');
+  console.log(`Expected: ${result.evaluation.checks.hash?.expected}`);
+  console.log(`Actual: ${result.evaluation.checks.hash?.actual}`);
+  console.log('DO NOT EXECUTE - binary may have been tampered with');
+}
+```
+
+**Expected Output**:
+```
+WARNING: Binary hash mismatch detected!
+Expected: sha256:0000000000000000000000000000000000000000000000000000000000000000
+Actual: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+DO NOT EXECUTE - binary may have been tampered with
+```
+
+**Explanation**: Hash mismatch indicates potential tampering. Agent should refuse to execute.
+
+---
+
+### Example 48: Offline Mode Trust Verification
+
+```typescript
+import { verifyTrust, TrustLevel } from 'atip-discover';
+
+// Verify trust in offline mode (skip network operations)
+const result = await verifyTrust('/usr/local/bin/gh', metadata, {
+  offlineMode: true
+});
+
+if (result.level === TrustLevel.UNVERIFIED) {
+  console.log('Trust verification skipped (offline mode)');
+  console.log('Binary hash computed for reference:', result.binaryHash);
+}
+```
+
+**Expected Output**:
+```
+Trust verification skipped (offline mode)
+Binary hash computed for reference: sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+```
+
+**Explanation**: Offline mode skips signature and provenance verification but still computes hash. Returns UNVERIFIED.
+
+---
+
+### Example 49: Trust-Based Execution Policy
+
+```typescript
+import { get, verifyTrust, TrustLevel } from 'atip-discover';
+
+async function executeWithTrustPolicy(
+  toolName: string,
+  command: string[],
+  policy: { requireVerified: boolean; blockDestructive: boolean }
+) {
+  // Get tool metadata
+  const metadata = await get(toolName);
+
+  // Verify trust
+  const trust = await verifyTrust(metadata.path, metadata);
+
+  // Apply policy based on trust level
+  if (trust.level === TrustLevel.COMPROMISED) {
+    throw new Error(`BLOCKED: ${toolName} binary hash mismatch - possible tampering`);
+  }
+
+  if (policy.requireVerified && trust.level < TrustLevel.VERIFIED) {
+    throw new Error(`BLOCKED: ${toolName} is not fully verified (level: ${TrustLevel[trust.level]})`);
+  }
+
+  // Check destructive operations
+  if (policy.blockDestructive && metadata.effects?.destructive) {
+    if (trust.level < TrustLevel.VERIFIED) {
+      throw new Error(
+        `BLOCKED: Destructive operation from unverified tool ${toolName}`
+      );
+    }
+  }
+
+  // Execute based on recommendation
+  switch (trust.evaluation.recommendation) {
+    case 'block':
+      throw new Error('Execution blocked due to trust failure');
+    case 'confirm':
+      // Would prompt user for confirmation
+      console.log(`Proceeding with unverified tool ${toolName}...`);
+      break;
+    case 'sandbox':
+      // Would execute in restricted environment
+      console.log(`Executing ${toolName} in sandbox...`);
+      break;
+    case 'execute':
+      console.log(`Executing verified tool ${toolName}...`);
+      break;
+  }
+
+  // Execute command
+  // exec(toolName, command);
+}
+
+// Usage
+await executeWithTrustPolicy('gh', ['pr', 'list'], {
+  requireVerified: false,
+  blockDestructive: true
+});
+```
+
+**Expected Output** (verified tool):
+```
+Executing verified tool gh...
+```
+
+**Expected Output** (unverified tool):
+```
+Proceeding with unverified tool gh...
+```
+
+---
+
+### Example 50: Scan with Trust Verification
+
+```bash
+atip-discover scan --verify-trust
+```
+
+**Expected Output (JSON)**:
+```json
+{
+  "discovered": 3,
+  "updated": 0,
+  "failed": 0,
+  "skipped": 45,
+  "duration_ms": 8234,
+  "tools": [
+    {
+      "name": "gh",
+      "version": "2.45.0",
+      "path": "/usr/local/bin/gh",
+      "source": "native",
+      "discovered_at": "2026-01-09T10:30:00.000Z",
+      "trust": {
+        "level": "VERIFIED",
+        "binaryHash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "source": "native"
+      }
+    },
+    {
+      "name": "kubectl",
+      "version": "1.28.0",
+      "path": "/usr/local/bin/kubectl",
+      "source": "native",
+      "discovered_at": "2026-01-09T10:30:00.000Z",
+      "trust": {
+        "level": "UNSIGNED",
+        "binaryHash": "sha256:a1b2c3d4e5f6...",
+        "source": "native"
+      }
+    },
+    {
+      "name": "curl",
+      "version": "8.4.0",
+      "path": "/usr/bin/curl",
+      "source": "shim",
+      "discovered_at": "2026-01-09T10:30:00.000Z",
+      "trust": {
+        "level": "UNVERIFIED",
+        "binaryHash": "sha256:b2c3d4e5f6g7...",
+        "source": "community"
+      }
+    }
+  ],
+  "errors": []
+}
+```
+
+**Explanation**: When `--verify-trust` is enabled, each discovered tool includes trust level and binary hash.
+
+---
+
+### Example 51: Handle Missing Cosign CLI
+
+```typescript
+import { verifyCosignSignature, TrustError } from 'atip-discover';
+
+try {
+  const result = await verifyCosignSignature('/usr/local/bin/gh', {
+    type: 'cosign',
+    identity: 'https://github.com/cli/cli/.github/workflows/release.yml@refs/tags/v2.45.0',
+    issuer: 'https://token.actions.githubusercontent.com'
+  });
+} catch (error) {
+  if (error instanceof TrustError && error.trustCode === 'COSIGN_NOT_INSTALLED') {
+    console.log('Cosign is not installed. Install it from https://docs.sigstore.dev/cosign/');
+    console.log('Falling back to UNVERIFIED trust level');
+  }
+}
+```
+
+**Expected Output** (cosign not installed):
+```
+Cosign is not installed. Install it from https://docs.sigstore.dev/cosign/
+Falling back to UNVERIFIED trust level
+```
+
+---
+
+### Example 52: Trust Verification with Custom Policy
+
+```typescript
+import { evaluateTrustLevel, TrustLevel } from 'atip-discover';
+
+// Corporate policy: only trust tools from approved signers
+const corporatePolicy = {
+  verifySignatures: true,
+  verifyProvenance: true,
+  minimumSlsaLevel: 3,
+  allowedSignerIdentities: [
+    'https://github.com/cli/cli/.github/workflows/*',
+    'https://github.com/kubernetes/kubernetes/.github/workflows/*',
+    'https://github.com/hashicorp/terraform/.github/workflows/*'
+  ],
+  allowedIssuers: ['https://token.actions.githubusercontent.com'],
+  allowedBuilders: [
+    'https://github.com/actions/runner',
+    'https://github.com/slsa-framework/slsa-github-generator'
+  ]
+};
+
+const result = await evaluateTrustLevel(binaryPath, trustMetadata, corporatePolicy);
+
+if (result.level < TrustLevel.VERIFIED) {
+  console.log(`Tool does not meet corporate trust requirements`);
+  console.log(`Required: VERIFIED, Got: ${TrustLevel[result.level]}`);
+  console.log(`Reason: ${result.reason}`);
+}
+```
+
+**Expected Output** (policy violation):
+```
+Tool does not meet corporate trust requirements
+Required: VERIFIED, Got: UNSIGNED
+Reason: No signature available
+```
+
+---
+
+### Example 53: Full Trust Metadata Example
+
+```json
+{
+  "atip": {
+    "version": "0.6",
+    "features": ["trust-v1", "trust-integrity", "trust-provenance"]
+  },
+  "name": "gh",
+  "version": "2.45.0",
+  "description": "GitHub CLI",
+  "trust": {
+    "source": "native",
+    "verified": true,
+    "integrity": {
+      "checksum": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "signature": {
+        "type": "cosign",
+        "identity": "https://github.com/cli/cli/.github/workflows/release.yml@refs/tags/v2.45.0",
+        "issuer": "https://token.actions.githubusercontent.com",
+        "bundle": "https://github.com/cli/cli/releases/download/v2.45.0/gh_2.45.0.sig"
+      }
+    },
+    "provenance": {
+      "url": "https://github.com/cli/cli/attestations/sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "format": "slsa-provenance-v1",
+      "slsaLevel": 3,
+      "builder": "https://github.com/actions/runner"
+    }
+  },
+  "commands": {
+    "pr": {
+      "description": "Manage pull requests",
+      "commands": {
+        "list": {
+          "description": "List pull requests",
+          "effects": {"network": true, "idempotent": true}
+        }
+      }
+    }
+  }
+}
+```
+
+**Explanation**: This shows the complete trust metadata structure per spec section 3.2.2, including:
+- `integrity.checksum` for binary hash verification
+- `integrity.signature` for Sigstore/Cosign signature verification
+- `provenance` for SLSA attestation verification
