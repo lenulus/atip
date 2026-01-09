@@ -1,0 +1,20 @@
+{
+  "atip": { "version": "0.4" },
+  "name": "bad-effects",
+  "version": "1.0.0",
+  "description": "This file has effects with wrong value types",
+  "commands": {
+    "test": {
+      "description": "Test command with invalid effects",
+      "effects": {
+        "destructive": "yes",
+        "network": 1,
+        "idempotent": null,
+        "cost": {
+          "billable": "true",
+          "estimate": "expensive"
+        }
+      }
+    }
+  }
+}

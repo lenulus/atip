@@ -1,0 +1,27 @@
+{
+  "atip": { "version": "0.4" },
+  "name": "naming-issues",
+  "version": "1.0.0",
+  "description": "This file has inconsistent naming conventions",
+  "commands": {
+    "listItems": {
+      "description": "List all items (camelCase)",
+      "effects": {
+        "network": false
+      }
+    },
+    "delete-item": {
+      "description": "Delete an item (kebab-case)",
+      "effects": {
+        "destructive": true,
+        "reversible": false
+      }
+    },
+    "create_item": {
+      "description": "Create an item (snake_case)",
+      "effects": {
+        "network": false
+      }
+    }
+  }
+}

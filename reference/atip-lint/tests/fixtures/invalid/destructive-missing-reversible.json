@@ -1,0 +1,21 @@
+{
+  "atip": { "version": "0.4" },
+  "name": "destructive-tool",
+  "version": "1.0.0",
+  "description": "This file has destructive operations without reversible declared",
+  "commands": {
+    "delete": {
+      "description": "Delete a resource permanently",
+      "effects": {
+        "destructive": true,
+        "network": true
+      }
+    },
+    "purge": {
+      "description": "Purge all data from the system",
+      "effects": {
+        "destructive": true
+      }
+    }
+  }
+}

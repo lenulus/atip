@@ -1,0 +1,15 @@
+{
+  "atip": { "version": "0.4" },
+  "name": "test-tool",
+  "version": "1.0.0",
+  "description": "A minimal valid ATIP metadata file for testing purposes",
+  "commands": {
+    "hello": {
+      "description": "Say hello to someone special",
+      "effects": {
+        "network": false,
+        "idempotent": true
+      }
+    }
+  }
+}

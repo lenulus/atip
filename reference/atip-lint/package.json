@@ -1,0 +1,64 @@
+{
+  "name": "atip-lint",
+  "version": "0.1.0",
+  "description": "Lint ATIP metadata for quality issues beyond schema validation",
+  "type": "module",
+  "bin": {
+    "atip-lint": "./dist/cli.js"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:unit": "vitest run --dir tests/unit",
+    "test:integration": "vitest run --dir tests/integration",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src tests",
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\""
+  },
+  "keywords": [
+    "atip",
+    "agent",
+    "lint",
+    "linter",
+    "quality",
+    "validation",
+    "cli-tools"
+  ],
+  "author": "ATIP Contributors",
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "cosmiconfig": "^9.0.0",
+    "glob": "^10.5.0",
+    "jsonc-parser": "^3.2.0",
+    "minimatch": "^9.0.3"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/node": "^20.11.0",
+    "@vitest/coverage-v8": "^1.2.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

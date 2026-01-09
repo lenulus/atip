@@ -1,0 +1,33 @@
+{
+  "atip": { "version": "0.4" },
+  "name": "missing-fields",
+  "version": "1.0.0",
+  "description": "This file has arguments and options missing required fields",
+  "commands": {
+    "test": {
+      "description": "Test command with incomplete arguments",
+      "arguments": [
+        {
+          "name": "input",
+          "description": "Input file"
+        }
+      ],
+      "options": [
+        {
+          "name": "output",
+          "flags": ["-o", "--output"],
+          "description": "Output file"
+        },
+        {
+          "name": "format",
+          "flags": ["-f"],
+          "type": "enum",
+          "description": "Output format"
+        }
+      ],
+      "effects": {
+        "network": false
+      }
+    }
+  }
+}

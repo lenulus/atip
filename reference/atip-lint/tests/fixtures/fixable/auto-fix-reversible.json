@@ -1,0 +1,15 @@
+{
+  "atip": { "version": "0.4" },
+  "name": "fixable-tool",
+  "version": "1.0.0",
+  "description": "This file has fixable issues like missing reversible",
+  "commands": {
+    "delete": {
+      "description": "Delete a resource permanently",
+      "effects": {
+        "destructive": true,
+        "network": true
+      }
+    }
+  }
+}

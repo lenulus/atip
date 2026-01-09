@@ -1,0 +1,15 @@
+{
+  "atip": { "version": "0.4" },
+  "name": "no-effects",
+  "version": "1.0.0",
+  "description": "This file has commands without effects that can be auto-added",
+  "commands": {
+    "list": {
+      "description": "List all resources",
+      "effects": {
+  "network": false,
+  "idempotent": true
+}
+    }
+  }
+}

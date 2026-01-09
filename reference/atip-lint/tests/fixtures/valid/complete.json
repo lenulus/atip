@@ -1,0 +1,53 @@
+{
+  "atip": { "version": "0.4" },
+  "name": "complete-tool",
+  "version": "2.0.0",
+  "description": "A complete ATIP file with all recommended metadata fields populated correctly",
+  "homepage": "https://example.com/complete-tool",
+  "trust": {
+    "source": "native",
+    "verified": true
+  },
+  "commands": {
+    "create": {
+      "description": "Create a new resource in the system",
+      "arguments": [
+        {
+          "name": "resource-name",
+          "type": "string",
+          "description": "Name of the resource to create",
+          "required": true
+        }
+      ],
+      "effects": {
+        "network": true,
+        "idempotent": false,
+        "destructive": false
+      }
+    },
+    "delete": {
+      "description": "Delete an existing resource permanently",
+      "arguments": [
+        {
+          "name": "resource-id",
+          "type": "string",
+          "description": "Unique identifier of the resource",
+          "required": true
+        }
+      ],
+      "effects": {
+        "network": true,
+        "destructive": true,
+        "reversible": false,
+        "idempotent": true
+      }
+    },
+    "list": {
+      "description": "List all available resources",
+      "effects": {
+        "network": true,
+        "idempotent": true
+      }
+    }
+  }
+}

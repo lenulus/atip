@@ -1,0 +1,14 @@
+{
+  "atip": { "version": "0.4" },
+  "name": "missing-effects",
+  "version": "1.0.0",
+  "description": "This file has commands without effects declarations",
+  "commands": {
+    "delete": {
+      "description": "Delete a resource"
+    },
+    "create": {
+      "description": "Create a resource"
+    }
+  }
+}

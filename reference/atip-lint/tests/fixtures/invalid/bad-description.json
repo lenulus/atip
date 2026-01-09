@@ -1,0 +1,26 @@
+{
+  "atip": { "version": "0.4" },
+  "name": "bad-desc",
+  "version": "1.0.0",
+  "description": "TODO",
+  "commands": {
+    "test": {
+      "description": "Short",
+      "effects": {
+        "network": false
+      }
+    },
+    "another": {
+      "description": "  Whitespace problems  ",
+      "effects": {
+        "network": false
+      }
+    },
+    "placeholder": {
+      "description": "FIXME: add real description later",
+      "effects": {
+        "network": false
+      }
+    }
+  }
+}

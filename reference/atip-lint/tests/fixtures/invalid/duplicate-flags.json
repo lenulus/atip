@@ -1,0 +1,28 @@
+{
+  "atip": { "version": "0.4" },
+  "name": "dup-flags",
+  "version": "1.0.0",
+  "description": "This file has duplicate flag definitions",
+  "commands": {
+    "test": {
+      "description": "Test command with duplicate flags",
+      "options": [
+        {
+          "name": "output",
+          "flags": ["-o", "--output"],
+          "type": "string",
+          "description": "Output file path"
+        },
+        {
+          "name": "open",
+          "flags": ["-o", "--open"],
+          "type": "boolean",
+          "description": "Open after completion"
+        }
+      ],
+      "effects": {
+        "network": false
+      }
+    }
+  }
+}

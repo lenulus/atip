@@ -44,7 +44,7 @@
 - [x] reference/atip-discover-go/ - CLI tool for discovery (Go, alternative)
 - [x] reference/atip-registry/ - Content-addressable registry server (Go)
 - [x] reference/atip-execute/ - Safe tool execution from LLM calls (TypeScript)
-- [ ] reference/atip-lint/ - Metadata quality linter (TypeScript)
+- [x] reference/atip-lint/ - Metadata quality linter (TypeScript)
 - [ ] reference/atip-diff/ - Version comparison tool (TypeScript)
 - [ ] reference/atip-mcp/ - MCP adapter for ATIP tools (Future)
 
@@ -284,34 +284,35 @@ Make all ATIP reference tools implement the `--agent` flag themselves:
       - [x] Integration examples with atip-bridge
       - [ ] Implements `--agent` flag (future - dogfooding!)
 
-### Phase 4.8: atip-lint (TypeScript) - Metadata Quality Checks
+### Phase 4.8: atip-lint (TypeScript) - Metadata Quality Checks ✅ COMPLETE
 
 20. reference/atip-lint/ - Quality linting beyond schema validation
-    - [ ] 4.8.1: Project setup and Blue phase
-      - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
-      - [ ] Initialize npm package with TypeScript
-      - [ ] Set up test framework (vitest)
-    - [ ] 4.8.2: Quality rules (BRGR cycle)
-      - [ ] Blue: Document lint rules and severity levels
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for rule tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
-      - [ ] Rules:
-        - [ ] Missing effects declarations (warn if command has no effects)
-        - [ ] Description quality (min length, no placeholder text)
-        - [ ] Consistent naming conventions
-        - [ ] Required fields for specific trust levels
-    - [ ] 4.8.3: Executable validation (BRGR cycle)
-      - [ ] Blue: Document executable checks
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for executable tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
-      - [ ] Features:
-        - [ ] Verify tool binary exists at expected path
-        - [ ] Test that `--agent` flag works (for native tools)
-        - [ ] Validate examples actually execute
-    - [ ] 4.8.4: Packaging
-      - [ ] CLI with configurable rules (`.atiplintrc`)
-      - [ ] CI/CD integration (exit codes, JSON output)
-      - [ ] Implements `--agent` flag (dogfooding!)
+    - [x] 4.8.1: Project setup and Blue phase ✅
+      - [x] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
+      - [x] Initialize npm package with TypeScript
+      - [x] Set up test framework (vitest)
+    - [x] 4.8.2: Quality rules (BRGR cycle) ✅
+      - [x] Blue: Document lint rules and severity levels
+      - [x] Red: **Use `brgr-red-test-writer` agent** for rule tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement
+      - [x] Refactor: **Use `brgr-refactor` agent** to improve code quality
+      - [x] Rules:
+        - [x] Missing effects declarations (warn if command has no effects)
+        - [x] Description quality (min length, no placeholder text)
+        - [x] Consistent naming conventions
+        - [x] Required fields for specific trust levels
+    - [x] 4.8.3: Executable validation (BRGR cycle) ✅
+      - [x] Blue: Document executable checks
+      - [x] Red: **Use `brgr-red-test-writer` agent** for executable tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement
+      - [x] Features:
+        - [x] Verify tool binary exists at expected path
+        - [x] Test that `--agent` flag works (for native tools)
+        - [x] Validate examples actually execute
+    - [x] 4.8.4: Packaging ✅
+      - [x] CLI with configurable rules (`.atiplintrc`)
+      - [x] CI/CD integration (exit codes, JSON output)
+      - [x] Implements `--agent` flag (dogfooding!)
 
 ### Phase 4.9: atip-diff (TypeScript) - Version Comparison
 
