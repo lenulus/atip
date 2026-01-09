@@ -43,7 +43,7 @@
 - [x] reference/atip-discover/ - CLI tool for discovery (TypeScript, canonical)
 - [x] reference/atip-discover-go/ - CLI tool for discovery (Go, alternative)
 - [x] reference/atip-registry/ - Content-addressable registry server (Go)
-- [ ] reference/atip-execute/ - Safe tool execution from LLM calls (TypeScript)
+- [x] reference/atip-execute/ - Safe tool execution from LLM calls (TypeScript)
 - [ ] reference/atip-lint/ - Metadata quality linter (TypeScript)
 - [ ] reference/atip-diff/ - Version comparison tool (TypeScript)
 - [ ] reference/atip-mcp/ - MCP adapter for ATIP tools (Future)
@@ -246,42 +246,43 @@ Make all ATIP reference tools implement the `--agent` flag themselves:
       - [x] README with deployment guide
       - [x] Implements `--agent` flag (dogfooding!)
 
-### Phase 4.7: atip-execute (TypeScript) - Safe Tool Execution
+### Phase 4.7: atip-execute (TypeScript) - Safe Tool Execution ✅ COMPLETE
 
 19. reference/atip-execute/ - Execute LLM tool calls safely
-    - [ ] 4.7.1: Project setup and Blue phase
-      - [ ] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
-      - [ ] Initialize npm package with TypeScript
-      - [ ] Set up test framework (vitest)
-    - [ ] 4.7.2: Tool call parsing (BRGR cycle)
-      - [ ] Blue: Document parsing for OpenAI/Gemini/Anthropic tool call formats
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for parser tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
-      - [ ] Features:
-        - [ ] Parse tool calls from all three provider response formats
-        - [ ] Map flattened names back to CLI commands (e.g., `gh_pr_create` → `gh pr create`)
-    - [ ] 4.7.3: Validation and safety (BRGR cycle)
-      - [ ] Blue: Document validation against ATIP metadata
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for validation tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
-      - [ ] Features:
-        - [ ] Validate arguments against ATIP schema
-        - [ ] Check effects metadata (warn/prompt for destructive operations)
-        - [ ] Timeout configuration
-    - [ ] 4.7.4: Subprocess execution (BRGR cycle)
-      - [ ] Blue: Document safe subprocess execution model
-      - [ ] Red: **Use `brgr-red-test-writer` agent** for execution tests
-      - [ ] Green: **Use `brgr-green-implementer` agent** to implement
-      - [ ] Features:
-        - [ ] Execute CLI with proper argument escaping
-        - [ ] Capture stdout/stderr
-        - [ ] Handle timeouts and errors
-        - [ ] Format result for LLM consumption
-    - [ ] 4.7.5: Packaging
-      - [ ] Library API for programmatic use
-      - [ ] CLI wrapper for standalone use
-      - [ ] Integration examples with atip-bridge
-      - [ ] Implements `--agent` flag (dogfooding!)
+    - [x] 4.7.1: Project setup and Blue phase ✅
+      - [x] **Use `brgr-blue-spec-writer` agent** to create `blue/` design docs
+      - [x] Initialize npm package with TypeScript
+      - [x] Set up test framework (vitest)
+    - [x] 4.7.2: Tool call parsing (BRGR cycle) ✅
+      - [x] Blue: Document parsing for OpenAI/Gemini/Anthropic tool call formats
+      - [x] Red: **Use `brgr-red-test-writer` agent** for parser tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement
+      - [x] Refactor: **Use `brgr-refactor` agent** to improve code quality
+      - [x] Features:
+        - [x] Parse tool calls from all three provider response formats
+        - [x] Map flattened names back to CLI commands (e.g., `gh_pr_create` → `gh pr create`)
+    - [x] 4.7.3: Validation and safety (BRGR cycle) ✅
+      - [x] Blue: Document validation against ATIP metadata
+      - [x] Red: **Use `brgr-red-test-writer` agent** for validation tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement
+      - [x] Features:
+        - [x] Validate arguments against ATIP schema
+        - [x] Check effects metadata (warn/prompt for destructive operations)
+        - [x] Timeout configuration
+    - [x] 4.7.4: Subprocess execution (BRGR cycle) ✅
+      - [x] Blue: Document safe subprocess execution model
+      - [x] Red: **Use `brgr-red-test-writer` agent** for execution tests
+      - [x] Green: **Use `brgr-green-implementer` agent** to implement
+      - [x] Features:
+        - [x] Execute CLI with proper argument escaping
+        - [x] Capture stdout/stderr
+        - [x] Handle timeouts and errors
+        - [x] Format result for LLM consumption
+    - [x] 4.7.5: Packaging ✅
+      - [x] Library API for programmatic use
+      - [ ] CLI wrapper for standalone use (future)
+      - [x] Integration examples with atip-bridge
+      - [ ] Implements `--agent` flag (future - dogfooding!)
 
 ### Phase 4.8: atip-lint (TypeScript) - Metadata Quality Checks
 
