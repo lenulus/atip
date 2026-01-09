@@ -170,7 +170,7 @@ Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`
       - [ ] Package for PyPI distribution
       - [ ] Complete API documentation (Sphinx/mkdocs)
 
-### Phase 4.4: atip-discover (TypeScript) - Canonical Implementation ✅ COMPLETE
+### Phase 4.4: atip-discover (TypeScript) - Canonical Implementation (Trust Enhancement Pending)
 
 15. reference/atip-discover/ - Canonical TypeScript CLI tool for discovery
     - [x] 4.4.1: Project setup and Blue phase ✅
@@ -192,6 +192,24 @@ Each BRGR phase uses a dedicated Claude Code agent (defined in `.claude/agents/`
       - [x] CLI binary via npm link / npx
       - [x] README with installation and usage guide
       - [x] Implements `--agent` flag (dogfooding!)
+    - [ ] 4.4.5: Trust verification enhancement (BRGR cycle)
+      - [ ] Blue: Update `blue/design.md` with trust architecture per spec §3.2.2
+      - [ ] Red: **Use `brgr-red-test-writer` agent** for trust verification tests (~50 tests)
+      - [ ] Green: **Use `brgr-green-implementer` agent** to implement trust module
+      - [ ] Refactor: **Use `brgr-refactor` agent** to integrate with existing code
+      - [ ] Features:
+        - [ ] Update `AtipTrust` interface with `integrity`, `provenance` objects
+        - [ ] SHA-256 hash computation for binary verification
+        - [ ] Cosign signature verification (Sigstore)
+        - [ ] SLSA attestation verification
+        - [ ] Trust level evaluation (COMPROMISED → VERIFIED)
+        - [ ] Integration with prober (verify after discovery)
+      - [ ] New module structure:
+        - [ ] `src/trust/types.ts` - Full trust types per spec
+        - [ ] `src/trust/hash.ts` - SHA-256 computation
+        - [ ] `src/trust/cosign.ts` - Sigstore verification
+        - [ ] `src/trust/slsa.ts` - SLSA attestation checking
+        - [ ] `src/trust/evaluator.ts` - Trust level evaluation
 
 ### Phase 4.5: Dogfooding - ATIP Tools Implement --agent ✅ COMPLETE
 
